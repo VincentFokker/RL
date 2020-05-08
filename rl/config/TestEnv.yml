@@ -19,7 +19,7 @@ main:
     policy: CustomMlpPolicy
     normalize: false
     n_workers: 8 # Parallel environments
-    n_steps: 150000 # Steps to train
+    n_steps: 200000 # Steps to train
     save_every: 50000 # Save a checkpoint of the model every n steps
 
     # Tensorboard logs for environment attributes e.g. self.steps
