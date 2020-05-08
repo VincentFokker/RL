@@ -1,0 +1,11 @@
+Metadata-Version: 1.1
+Name: rl
+Version: 0.2
+Summary: RL training library.
+Home-page: none
+Author: Andrius Bernatavicius
+Author-email: andrius.bernatavicius@vanderlande.com
+License: UNKNOWN
+Download-URL: none
+Description: GUI for OpenAI Gym, scripts, configurations
+Platform: UNKNOWN

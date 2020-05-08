@@ -1,4 +1,4 @@
-# @author Andrius Bernatavicius, 2019
+ # @author Andrius Bernatavicius, 2019
 import gym
 import numpy as np
 import cv2, random

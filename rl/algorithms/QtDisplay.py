@@ -1,4 +1,6 @@
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtGui
+from PyQt5 import QtGuiQtCore
+from PyQt5 import QtWidgets
 import pyqtgraph as pg
 import numpy as np
 import sys, time, ast

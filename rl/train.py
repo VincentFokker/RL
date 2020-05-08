@@ -1,5 +1,5 @@
-import rl.environments
-from rl.baselines import Trainer, get_parameters
+import environments
+from baselines import Trainer, get_parameters
 import os, argparse
 """
 A script for training a RL model in a specified environment
