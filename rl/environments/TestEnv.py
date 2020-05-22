@@ -175,17 +175,19 @@ class TestEnv(gym.Env):
         cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(self.window_name, 300, 300)
                 
-if __name__ == "__main__":
-    from rl.baselines import get_parameters, Trainer
-    import rl.environments
-    env = TestEnv(get_parameters('TestEnv'))
+# if __name__ == "__main__":
+#     from rl.baselines import get_parameters, Trainer
+#     import rl.environments
+#     env = TestEnv(get_parameters('TestEnv'))
+#
+#     model = Trainer('TestEnv', 'models').create_model()
+#     model._tensorboard()
+#     model.train()
+#     print('Training done')
+#     input('Run trained model (Enter)')
+#     env.create_window()
+#     env.run(model)
+from rl.baselines import get_parameters
 
-    model = Trainer('TestEnv', 'models').create_model()
-    model._tensorboard()
-    model.train()
-    print('Training done') 
-    input('Run trained model (Enter)')
-    env.create_window()
-    env.run(model)
-
+env = TestEnv(get_parameters('TestEnv'))
    
