@@ -13,7 +13,7 @@ class TestEnv(gym.Env):
         self.config = config['environment']
 
         # Grid, positions
-        self.grid_size = self.config['grid_size']
+        self.grid_size = self.config['grid_size'] # 10
         self.grid = np.zeros([self.grid_size, self.grid_size])
         self.agent_start_location = [self.grid_size//2, self.grid_size//2] # Start at the middle of the grid
         self.position = self.agent_start_location
