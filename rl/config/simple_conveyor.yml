@@ -36,10 +36,10 @@ main:
     #         CnnPolicy - CNN as described in 2014 Atari paper
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
-    model: DQN
+    model: PPO2
     policy: CustomMlpPolicy
     n_workers: 5      # Parallel environments
-    n_steps: 300000    # Steps to train
+    n_steps: 1000000    # Steps to train
     save_every: 25000  # Save a checkpoint of the model every n steps
 
 
