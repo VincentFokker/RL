@@ -2,7 +2,7 @@
 # Version: 1.0                                                               #
 # log: First version to run in the wrapper                                   #
 # Includes a reward function and state obs                                   #
-# run with > python train.py -e simple_conveyor -s conv_test -n test1        #
+# run with > python train.py -e simple_conveyor -s PPO2 -n 1M5Worker         #
 
 import numpy as np
 import matplotlib.pyplot as plt
