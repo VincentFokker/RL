@@ -3,6 +3,7 @@
 environment:
     amount_gtp: 3
     amount_output: 3
+    gtp_buffer_size: 10
     exception_occurence: 0.0 #how often an exception occurs
     process_time_at_GTP: 6 #time to process one product in sec
     max_time_in_system: 200
@@ -35,21 +36,24 @@ main:
     #         CnnPolicy - CNN as described in 2014 Atari paper
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
-    model: PPO2
+    model: DQN
     policy: CustomMlpPolicy
-    n_workers: 10      # Parallel environments
-    n_steps: 3000000    # Steps to train
-    save_every: 250000  # Save a checkpoint of the model every n steps
+    n_workers: 5      # Parallel environments
+    n_steps: 300000    # Steps to train
+    save_every: 25000  # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
     logs:
-        - choose_blocked_node
+        - steps
+        - reward
+        - terminate
+        - gtp_buffer_size
 models:
     PPO2:
-        gamma: 0.99          # Discount factor for future rewards
-        n_steps: 256         # Batch size (n_steps * n_workers)
-        ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
+        gamma: 0.96          # Discount factor for future rewards
+        n_steps: 4000         # Batch size (n_steps * n_workers)
+        ent_coef: 0.05       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR
         vf_coef: 0.5         # The contribution of value function loss to the total loss of the network
         max_grad_norm: 0.5   # Max range of the gradient clipping

@@ -27,3 +27,5 @@ if __name__ == "__main__":
     trainer.create_model(name=args.name, config_file=config)
     trainer._tensorboard()
     trainer.train()
+    #trainer.run(1000)
+    trainer._save()

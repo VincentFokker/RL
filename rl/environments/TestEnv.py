@@ -93,6 +93,7 @@ class TestEnv(gym.Env):
             done (bool): whether the episode has ended, in which case further step() calls will return undefined results
             info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)
         """
+        print('current action == {}'.format(action))
         reward = -0.1  # Base reward
         self.steps += 1
 
