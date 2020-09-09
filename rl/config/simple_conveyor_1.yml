@@ -46,8 +46,8 @@ main:
     model: PPO2
     policy: CustomMlpPolicy
     n_workers: 1      # Parallel environments
-    n_steps: 100000    # Steps to train
-    save_every: 25000  # Save a checkpoint of the model every n steps
+    n_steps: 10000000    # Steps to train
+    save_every: 100000  # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
@@ -58,7 +58,7 @@ main:
         - gtp_buffer_size
 models:
     PPO2:
-        gamma: 0.96          # Discount factor for future rewards
+        gamma: 0.94          # Discount factor for future rewards
         n_steps: 4000         # Batch size (n_steps * n_workers)
         ent_coef: 0.05       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR
