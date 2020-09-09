@@ -214,10 +214,10 @@ class simple_conveyor(gym.Env):
         # row 0 and -1 (top and bottom)
         conv_top_bottom = np.append(type_map_obs[0], type_map_obs[-1])
         logging.debug('topbottom lenght = {}'.format(len(conv_top_bottom)))
-        conv_top_bottom1 = np.append(type_map_obs1[0], type_map_obs1[-1])
+        # conv_top_bottom1 = np.append(type_map_obs1[0], type_map_obs1[-1])
         # left and right lane
         conv_left_right = np.append(type_map_obs[1:-1][:, 0], type_map_obs[1:-1][:, -1])
-        conv_left_right1 = np.append(type_map_obs1[1:-1][:, 0], type_map_obs1[1:-1][:, -1])
+        # conv_left_right1 = np.append(type_map_obs1[1:-1][:, 0], type_map_obs1[1:-1][:, -1])
         logging.debug('leftright lenght = {}'.format(len(conv_left_right)))
         # together
         # carrier_type_map_obs = np.append(conv_top_bottom, conv_left_right)

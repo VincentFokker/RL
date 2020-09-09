@@ -1,12 +1,19 @@
 # Arguments that get passed to the constructor of your class instance
 # as config={} keyword
 environment:
-    amount_gtp: 3
+    amount_gtp: 4
     amount_output: 3
     gtp_buffer_size: 10
     exception_occurence: 0.0 #how often an exception occurs
     process_time_at_GTP: 6 #time to process one product in sec
     max_time_in_system: 200
+
+    #carrier distribution
+    percentage_small_carriers: 0.15
+    percentage_medium_carriers: 0.55
+    percentage_large_carriers: 0.35
+
+
     
 
     # Rewards
@@ -39,7 +46,7 @@ main:
     model: PPO2
     policy: CustomMlpPolicy
     n_workers: 1      # Parallel environments
-    n_steps: 300000    # Steps to train
+    n_steps: 100000    # Steps to train
     save_every: 25000  # Save a checkpoint of the model every n steps
 
 
@@ -48,10 +55,11 @@ main:
         - steps
         - reward
         - terminate
+        - gtp_buffer_size
 models:
     PPO2:
         gamma: 0.96          # Discount factor for future rewards
-        n_steps: 256         # Batch size (n_steps * n_workers)
+        n_steps: 4000         # Batch size (n_steps * n_workers)
         ent_coef: 0.05       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR
         vf_coef: 0.5         # The contribution of value function loss to the total loss of the network
