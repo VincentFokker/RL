@@ -20,7 +20,7 @@ import gym
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements
 logging.basicConfig(level=logging.INFO)
 
-class simple_conveyor_1(gym.Env):
+class simple_conveyor_2(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
     def __init__(self, config, **kwargs):
@@ -62,6 +62,8 @@ class simple_conveyor_1(gym.Env):
         #rewards
         self.negative_reward_per_step = self.config['negative_reward_per_step']
         self.travelpath_to_gtp_reward = self.config['travelpath_to_gtp_reward']
+        self.negative_reward_for_cycle = self.config['negative_reward_for_cycle']
+        self.negative_reward_for_flooding = self.config['negative_reward_for_flooding']
 
         #gym related part
         self.reward = 0
@@ -408,7 +410,7 @@ class simple_conveyor_1(gym.Env):
             item[2] += 1/200                                                       #increase the time in the system
 
         # give a negative reward for each step, for all the items that are taking are taking a loop
-        self.reward += len([item for item in self.items_on_conv if item[0][1] < 7]) * self.negative_reward_per_step
+        # self.reward += len([item for item in self.items_on_conv if item[0][1] < 7]) * self.negative_reward_per_step
 
 #### Process the orders at GTP > For simulation: do incidental transfer of order carrier
         self.process_at_GTP()
@@ -545,7 +547,16 @@ class simple_conveyor_1(gym.Env):
         logging.debug('--------------------------------------------------------------------------------------------------------------------')
 
         next_state = self.make_observation()
-        reward = self.reward
+
+        ### calculate conditional reward ##############################################################################
+        if len([item for item in self.items_on_conv if item[0] ==[1,7]]) == 1:              # in case that negative reward is calculated with cycles
+            self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle
+
+        if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
+            self.reward += self.negative_reward_for_flooding
+
+
+            ### Determine Termination cases ###############################################################################
         try:
             if max([item[2] for item in self.items_on_conv]) >= 1:
                 self.terminate = True
@@ -555,9 +566,10 @@ class simple_conveyor_1(gym.Env):
         #terminate if the demand queues are empty (means all is processed)
         if self.demand_queues == [[] * i for i in range(self.amount_of_gtps)] :
             self.terminate= True
-        
+
+        ### Summarized return for step function ####################################################################
+        reward = self.reward
         terminate = self.terminate
-        info = ''
         logging.debug('Reward is: {}'.format(self.reward))
         return next_state, reward, terminate, {}
 
@@ -732,4 +744,4 @@ class simple_conveyor_1(gym.Env):
 
 from rl.baselines import get_parameters
 
-env = simple_conveyor_1(get_parameters('simple_conveyor_1'))
+env = simple_conveyor_2(get_parameters('simple_conveyor_2'))

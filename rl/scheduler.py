@@ -10,7 +10,9 @@ Takes a folder containing .yml parameter files as input
 Trains a model for each separate parameter file and saves them in a corresponding experiment result folder
 
 Usage:
+    python scheduler.py -e ENVIRONMENT_NAME -p CONFIG_FOLDER -r TYPEOFMODELS
     python scheduler.py -e TestEnv -p experiment1 -r experiment1_models
+    python scheduler.py -e simple_conveyor_2 -p multiple_configurations -r DifferentGamma
 
     CTRL+C to stop training and save the model.
 """
