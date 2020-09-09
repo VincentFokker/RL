@@ -38,8 +38,8 @@ main:
 
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 1      # Parallel environments
-    n_steps: 300000    # Steps to train
+    n_workers: 5      # Parallel environments
+    n_steps: 1000000    # Steps to train
     save_every: 25000  # Save a checkpoint of the model every n steps
 
 
@@ -48,10 +48,11 @@ main:
         - steps
         - reward
         - terminate
+        - gtp_buffer_size
 models:
     PPO2:
         gamma: 0.96          # Discount factor for future rewards
-        n_steps: 256         # Batch size (n_steps * n_workers)
+        n_steps: 4000         # Batch size (n_steps * n_workers)
         ent_coef: 0.05       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR
         vf_coef: 0.5         # The contribution of value function loss to the total loss of the network
