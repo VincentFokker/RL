@@ -3,6 +3,7 @@
 
 
 GUI.md
+venv/*
 venv/th/Lib/site-packages/_distutils_hack/__init__.py
 venv/th/Lib/site-packages/_distutils_hack/override.py
 venv/th/Lib/site-packages/_yaml.cp36-win_amd64.pyd
