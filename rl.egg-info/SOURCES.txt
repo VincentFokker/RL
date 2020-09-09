@@ -1,5 +1,7 @@
 README.md
 setup.py
+rl/__init__.py
+rl/check_env.py
 rl/retrain.py
 rl/scheduler.py
 rl/settings.py
