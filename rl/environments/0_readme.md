@@ -1,5 +1,12 @@
 # Setup logbook
 Overview of the different versions of the Simple_conveyor environment. 
+General syntax for training on an environment: \
+<code>python train.py -e <ENVIRONMENT_NAME> -s <SUB_DIR> -n <NAME_GIVEN> </code> \
+<code>python train.py -e simple_conveyor -s PPO2 -n 1M5Worker</code> 
+
+TEST a trained model: \
+<code> python test.py -e <ENVIRONMENT_NAME> -s <SUB_DIR> -n 0 --render</code> \
+<code> python test.py -e simple_conveyor -s PPO2 -n 0 --render</code>
 ## Version overview
 
 ### V.1
@@ -25,7 +32,11 @@ Overview of the different versions of the Simple_conveyor environment.
     - <code>negative_reward_per_step</code>
     
 ### V.2
-<b>Description</b>            : Version without exception handling 
+<b>Description</b>            : Version without exception handling . \
+<b>New features</b> :  
+- Added automatic scaling of the observation space based on the amount of GtP used. 
+- included the full observation of the conveyor
+- changed negative reward to only obtain negative reward for cycling items.
 
 <b>File(names)</b>         : 
 - environment: <pre> /environments/Simple_conveyor_1.py  </pre>

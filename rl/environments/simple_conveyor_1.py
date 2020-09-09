@@ -1,8 +1,8 @@
 ##############################################################################
-# Version: 1.0                                                               #
-# log: First version to run in the wrapper                                   #
-# Includes a reward function and state obs                                   #
-# run with > python train.py -e simple_conveyor -s PPO2 -n 1M5Worker         #
+# Version: 2.0                                                               #
+# log: second version to run in the wrapper                                   #
+# Includes an adjusted reward function and state obs                          #
+# run with > python train.py -e simple_conveyor_1 -s Test -n test123         #
 # TEST with > python test.py -e simple_conveyor -s PPO2 -n 0 --render
 
 import numpy as np
@@ -20,7 +20,7 @@ import gym
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements
 logging.basicConfig(level=logging.INFO)
 
-class simple_conveyor(gym.Env):
+class simple_conveyor_1(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
     def __init__(self, config, **kwargs):
@@ -36,16 +36,24 @@ class simple_conveyor(gym.Env):
         self.process_time_at_GTP = self.config['process_time_at_GTP']  # takes 30 timesteps
         self.max_time_in_system = self.config['max_time_in_system']
         self.window_name = 'Conveyor render'
+        self.percentage_small_carriers = self.config['percentage_small_carriers']
+        self.percentage_medium_carriers = self.config['percentage_medium_carriers']
+        self.percentage_large_carriers = self.config['percentage_large_carriers']
 
         # Action and observation spaces
         self.action_space = gym.spaces.Discrete(4)
-        #self.observation_space = gym.spaces.Discrete(207)
-        self.observation_space = gym.spaces.Box(shape=(207, ),
-                                                high=200, low=0,
+
+        #determination of observation_space:
+        # (2*width+width+2*height+height) * 2 + (10*amount_of_gtp*2(binary)*2(for init and queue) = shapesize
+        # (2*(self.amount_of_gtps *4 + 13) + (self.amount_of_gtps *4 + 13) + 2*4 + 4) * 2 + (10 * (self.amount_of_gtps *4 + 13) * 2 * 2)
+        # (50+25+8+4)                     * 2 + (10*3*2*2) = 174 + 120 = 294 shapesize
+        self.shape = 2*((2*((self.amount_of_gtps*4) + 13)) + ((self.amount_of_gtps *4) + 13) + ((2*4 + 4))) + (10 * self.amount_of_gtps * 2 * 2)
+        self.observation_space = gym.spaces.Box(shape=(self.shape, ),
+                                                high=self.max_time_in_system, low=0,
                                                 dtype=np.uint8)
 
         #init queues
-        self.queues = [random.choices(np.arange(1,self.amount_of_outputs+1), [0.15, 0.55, 0.30], k=self.gtp_buffer_size) for item in range(self.amount_of_gtps)] # generate random queues
+        self.queues = [random.choices(np.arange(1,self.amount_of_outputs+1), [self.percentage_small_carriers, self.percentage_medium_carriers, self.percentage_large_carriers], k=self.gtp_buffer_size) for item in range(self.amount_of_gtps)] # generate random queues
         logging.info("queues that are initialized: {}".format(self.queues))
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
@@ -196,52 +204,66 @@ class simple_conveyor(gym.Env):
 #
     def make_observation(self):
         '''Builds the observation from the available variables'''
+
+        ### For the obeservation of the conveyor ########################################################################
+        self.carrier_type_map_obs = np.zeros((self.empty_env.shape[0], self.empty_env.shape[1], 1)).astype(float)
+        self.carrier_type_map_obs1 = np.zeros((self.empty_env.shape[0], self.empty_env.shape[1], 1)).astype(float)
+
+        for item in self.items_on_conv:
+            self.carrier_type_map_obs[item[0][1]][item[0][0]] = item[1]
+            self.carrier_type_map_obs1[item[0][1]][item[0][0]] = item[2]
+        # cut padding
+        type_map_obs = self.carrier_type_map_obs[2:8, 1:-1]                     #for the carrier type
+        type_map_obs1 = self.carrier_type_map_obs1[2:8, 1:-1]                   #for the time in the system
+        # row 0 and -1 (top and bottom)
+        conv_top_bottom = np.append(type_map_obs[0], type_map_obs[-1])          #top and bottom lane for the carrier type
+        logging.debug('topbottom lenght = {}'.format(len(conv_top_bottom)))
+        conv_top_bottom1 = np.append(type_map_obs1[0], type_map_obs1[-1])       #top and bottom lane for the time in the system
+        # left and right lane
+        conv_left_right = np.append(type_map_obs[1:-1][:, 0], type_map_obs[1:-1][:, -1])        #left and right lane for carrier type
+        conv_left_right1 = np.append(type_map_obs1[1:-1][:, 0], type_map_obs1[1:-1][:, -1])     #left and right for the time in system
+        logging.debug('leftright lenght = {}'.format(len(conv_left_right)))
+        # together
+        carrier_type_map_obs = np.append(conv_top_bottom, conv_left_right)                      #full circle for the carrier type
+        # type_map_obs = np.append(type_map_obs[-1], type_map_obs[1:-1][:, -1])            #for half observation
+        type_map_obs = np.array([self.encode(item) for item in list(carrier_type_map_obs)]).flatten()   #binary encoded memory for the type
+        logging.debug('typemap lenght = {}'.format(len(type_map_obs)))
+
+        type_map_obs1 = np.append(conv_top_bottom1, conv_left_right1)                   #full circle for the time in system
+        # type_map_obs1 = np.append(type_map_obs1[-1], type_map_obs1[1:-1][:, -1])          #for half observation
+        logging.debug('time in system lenght = {}'.format(len(type_map_obs1)))
+
+        #combine the type and the time in system
+        type_map_obs = np.append(type_map_obs, type_map_obs1)
+        logging.debug('size conveyor obs = {}'.format(len(type_map_obs)))
+
+        ### For the observation of the items in queue ##################################################################
         in_queue = []
         for item in self.in_queue:
             in_queue.append(item + [0] * (10 - len(item)))
         in_queue = np.array(in_queue).flatten()
+        # binary encoding of the categorical variables
         in_queue = np.array([self.encode(item) for item in list(in_queue)]).flatten()
-        demand_que = np.array([item[:10] for item in self.demand_queues]).flatten()
-        self.carrier_type_map_obs = np.zeros((self.empty_env.shape[0], self.empty_env.shape[1], 1)).astype(float)
-        self.carrier_type_map_obs1 = np.zeros((self.empty_env.shape[0], self.empty_env.shape[1], 1)).astype(float)
-        for item in self.items_on_conv:
-            self.carrier_type_map_obs[item[0][1]][item[0][0]] = item[1]
-            self.carrier_type_map_obs1[item[0][1]][item[0][0]] = item[2]
+        logging.debug('in_queue lenght = {}'.format(len(in_queue)))
 
-        # cut padding
-        type_map_obs = self.carrier_type_map_obs[2:8, 1:-1]
-        type_map_obs1 = self.carrier_type_map_obs1[2:8, 1:-1]
-        # row 0 and -1 (top and bottom)
-        conv_top_bottom = np.append(type_map_obs[0], type_map_obs[-1])
-        logging.debug('topbottom lenght = {}'.format(len(conv_top_bottom)))
-        conv_top_bottom1 = np.append(type_map_obs1[0], type_map_obs1[-1])
-        # left and right lane
-        conv_left_right = np.append(type_map_obs[1:-1][:, 0], type_map_obs[1:-1][:, -1])
-        conv_left_right1 = np.append(type_map_obs1[1:-1][:, 0], type_map_obs1[1:-1][:, -1])
-        logging.debug('leftright lenght = {}'.format(len(conv_left_right)))
-        # together
-        # carrier_type_map_obs = np.append(conv_top_bottom, conv_left_right)
-        type_map_obs = np.append(type_map_obs[-1], type_map_obs[1:-1][:, -1])
-        type_map_obs = np.array([self.encode(item) for item in list(type_map_obs)]).flatten()
-        logging.debug(type_map_obs)
-        type_map_obs1 = np.append(type_map_obs1[-1], type_map_obs1[1:-1][:, -1])
-        logging.debug('typemap lenght = {}'.format(len(type_map_obs)))
-        logging.debug('typemap1 lenght = {}'.format(len(type_map_obs1)))
-        type_map_obs = np.append(type_map_obs, type_map_obs1)
+        ### For the observation of the demand of the GtP Queue #########################################################
+        #make the init list
         init = []
         for item in self.init_queues:
             init1 = item[:10]
             init.append(init1 + [0] * (10 - len(init1)))
         init = list(np.array(init).flatten())
         # binary encoding of the categorical variables
-        init = np.array(
-            [[0, 0] if item == 0 else [0, 1] if item == 1 else [1, 0] if item == 2 else [1, 1] for item in init]).flatten()
+        init = np.array([self.encode(item) for item in init]).flatten()
         logging.debug('init lenght = {}'.format(len(init)))
-        logging.debug('typemap lenght = {}'.format(len(type_map_obs)))
-        obs_queues = np.append(in_queue, demand_que)
-        obs = np.append(np.array(init).flatten(), type_map_obs)  # can also add: obs_queues
-        obs = np.append(in_queue, obs)
+
+        ### Combine All to one array ###################################################################################
+
+        obs = np.append(np.array(init).flatten(), type_map_obs)         #combine GTP queue with the conveyor memory
+        obs = np.append(in_queue, obs)                                  #add the information about what is in queue
+        logging.debug('size of observation is: {}'.format(len(obs)))
         return obs
+
  ########################################################################################################################################################
  ## RESET FUNCTION 
  #            
@@ -349,7 +371,7 @@ class simple_conveyor(gym.Env):
 
                     #set new timestep for the next order
                     try: 
-                        next_type = [item[1] for item in env.items_on_conv if item[0] == [Transition_point[0], Transition_point[1]-1]][0]
+                        next_type = [item[1] for item in self.items_on_conv if item[0] == [Transition_point[0], Transition_point[1]-1]][0]
 
                     except:
                         next_type = 99
@@ -383,9 +405,10 @@ class simple_conveyor(gym.Env):
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1)).astype(float)
         for item in self.items_on_conv:
             self.carrier_type_map[item[0][1]][item[0][0]] = item[1]
-            item[2] += 1/(self.max_time_in_system)                                                         #increase the time in the system
-        
-        self.reward += len(self.items_on_conv) * self.negative_reward_per_step
+            item[2] += 1/200                                                       #increase the time in the system
+
+        # give a negative reward for each step, for all the items that are taking are taking a loop
+        self.reward += len([item for item in self.items_on_conv if item[0][1] < 7]) * self.negative_reward_per_step
 
 #### Process the orders at GTP > For simulation: do incidental transfer of order carrier
         self.process_at_GTP()
@@ -709,4 +732,4 @@ class simple_conveyor(gym.Env):
 
 from rl.baselines import get_parameters
 
-env = simple_conveyor(get_parameters('simple_conveyor'))
+env = simple_conveyor_1(get_parameters('simple_conveyor_1'))
