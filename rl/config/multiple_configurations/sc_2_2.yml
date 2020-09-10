@@ -48,16 +48,16 @@ main:
     model: PPO2
     policy: CustomMlpPolicy
     n_workers: 1      # Parallel environments
-    n_steps:    5000000    # Steps to train
+    n_steps:    7500000    # Steps to train
     save_every: 2500000  # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
     logs:
         - steps
-        - reward
-        - terminate
-        - gtp_buffer_size
+        - amount_of_items_on_conv
+        - amount_of_items_in_sys
+        - remaining_demand
 models:
     PPO2:
         gamma: 0.97          # Discount factor for future rewards

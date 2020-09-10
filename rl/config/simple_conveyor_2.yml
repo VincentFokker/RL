@@ -21,6 +21,7 @@ environment:
     travelpath_to_gtp_reward: 1 #factor for the weight of reward for the length of the travelpath
     negative_reward_for_cycle: -40
     negative_reward_for_flooding: -10
+    negative_reward_for_empty_queue: -1     #negative reward for empty queue, otherwise queues are empty
 
     # FOR THE RENDER PART - NOT USED YET!!
     resize_factor_render: 36
@@ -55,12 +56,15 @@ main:
     # Tensorboard logs for environment attributes e.g. self.steps
     logs:
         - steps
-        - reward
-        - terminate
-        - gtp_buffer_size
+        - amount_of_items_on_conv
+        - amount_of_items_in_sys
+        - remaining_demand
+        - amount_of_orders_processed
+        - positive_reward
+
 models:
     PPO2:
-        gamma: 0.96          # Discount factor for future rewards
+        gamma: 0.97          # Discount factor for future rewards
         n_steps: 128         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.001 # LR
