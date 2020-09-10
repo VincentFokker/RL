@@ -771,4 +771,4 @@ class simple_conveyor_2(gym.Env):
 
 from rl.baselines import get_parameters
 
-env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
+#env = simple_conveyor_2(get_parameters('simple_conveyor_2'))

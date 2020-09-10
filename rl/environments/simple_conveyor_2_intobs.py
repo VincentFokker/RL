@@ -720,7 +720,7 @@ class simple_conveyor_2(gym.Env):
         #resize with PIL
         #img = img.resize((1200,480), resample=Image.BOX)
         cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
-        cv2.waitKey(1)
+        cv2.waitKey(0)
 
     def create_window(self):
         cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
@@ -765,4 +765,4 @@ class simple_conveyor_2(gym.Env):
 
 from rl.baselines import get_parameters
 
-env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
+#env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
