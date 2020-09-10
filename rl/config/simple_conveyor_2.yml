@@ -47,9 +47,9 @@ main:
 
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 1      # Parallel environments
+    n_workers: 10      # Parallel environments
     n_steps: 1000000    # Steps to train
-    save_every: 25000  # Save a checkpoint of the model every n steps
+    save_every: 500000  # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
@@ -61,9 +61,9 @@ main:
 models:
     PPO2:
         gamma: 0.96          # Discount factor for future rewards
-        n_steps: 4000         # Batch size (n_steps * n_workers)
-        ent_coef: 0.05       # Entropy loss coefficient (higher values encourage more exploration)
-        learning_rate: 0.00025 # LR
+        n_steps: 128         # Batch size (n_steps * n_workers)
+        ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
+        learning_rate: 0.001 # LR
         vf_coef: 0.5         # The contribution of value function loss to the total loss of the network
         max_grad_norm: 0.5   # Max range of the gradient clipping
         lam: 0.95            # Generalized advantage estimation, for controlling variance/bias tradeoff
