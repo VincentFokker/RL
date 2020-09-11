@@ -20,7 +20,7 @@ import gym
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements
 logging.basicConfig(level=logging.INFO)
 
-class simple_conveyor_2(gym.Env):
+class simple_conveyor_2_intobs(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
     def __init__(self, config, **kwargs):
@@ -575,7 +575,7 @@ class simple_conveyor_2(gym.Env):
         ### Define some tracers     ##################################################################################
         self.amount_of_items_on_conv = len([item for item in self.items_on_conv if item[0][1] < 8])
         self.amount_of_items_in_sys = len(self.items_on_conv)
-        self.remaining_demand = len([item for sublist in env.demand_queues for item in sublist])
+        self.remaining_demand = len([item for sublist in self.demand_queues for item in sublist])
 
         ### Determine Termination cases ###############################################################################
         try:
@@ -719,12 +719,13 @@ class simple_conveyor_2(gym.Env):
 
         #resize with PIL
         #img = img.resize((1200,480), resample=Image.BOX)
-        cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
-        cv2.waitKey(0)
+        cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))                                  #comment these lines for faster training
+        cv2.waitKey(1)                                                                                                #comment these lines for faster training
 
     def create_window(self):
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.window_name, 1200, 480)
+        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)                                                          #comment these lines for faster training
+        cv2.resizeWindow(self.window_name, 1200, 480)                                                                 #comment these lines for faster training
+        pass
 
 
     def run(self, model, episodes=1000):

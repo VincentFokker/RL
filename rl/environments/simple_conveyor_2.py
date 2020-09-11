@@ -325,6 +325,10 @@ class simple_conveyor_2(gym.Env):
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
 
+        self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
+                                      [self.percentage_small_carriers, self.percentage_medium_carriers,
+                                       self.percentage_large_carriers], k=self.gtp_buffer_size) for item in
+                       range(self.amount_of_gtps)]  # generate random queues
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
         self.in_queue = [[] for item in range(len(self.queues))]
@@ -581,7 +585,7 @@ class simple_conveyor_2(gym.Env):
         ### Define some tracers     ##################################################################################
         self.amount_of_items_on_conv = len([item for item in self.items_on_conv if item[0][1] < 8])
         self.amount_of_items_in_sys = len(self.items_on_conv)
-        self.remaining_demand = len([item for sublist in env.demand_queues for item in sublist])
+        self.remaining_demand = len([item for sublist in self.demand_queues for item in sublist])
 
         ### Determine Termination cases ###############################################################################
         try:
