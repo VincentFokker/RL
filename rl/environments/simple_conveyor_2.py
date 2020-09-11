@@ -39,7 +39,8 @@ class simple_conveyor_2(gym.Env):
         self.percentage_small_carriers = self.config['percentage_small_carriers']
         self.percentage_medium_carriers = self.config['percentage_medium_carriers']
         self.percentage_large_carriers = self.config['percentage_large_carriers']
-
+        # self.positive_reward_for_divert = self.config['positive_reward_for_divert']
+        self.positive_reward_for_divert = 0
 
         # Action and observation spaces
         self.action_space = gym.spaces.Discrete(4)
@@ -491,6 +492,7 @@ class simple_conveyor_2(gym.Env):
                 try:
                     if self.D_states[self.diverter_locations.index(item[0])+1] == True and self.carrier_type_map[item[0][1]+1][item[0][0]] ==0:
                         item[0][1] +=1
+                        self.reward += self.positive_reward_for_divert
                         logging.debug("moved order carrier into GTP lane {}".format(self.diverter_locations.index(loc1)+1))
                     else:
                         item[0][0] -=1 

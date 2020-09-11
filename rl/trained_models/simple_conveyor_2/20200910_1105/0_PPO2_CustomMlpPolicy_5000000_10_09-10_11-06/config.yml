@@ -12,6 +12,8 @@ environment:
     travelpath_to_gtp_reward: 1
     negative_reward_for_cycle: -40
     negative_reward_for_flooding: -10
+    negative_reward_for_empty_queue: -1
+    positive_reward_for_divert: 10
     resize_factor_render: 36
     box_diameter_render: 30
 main:
