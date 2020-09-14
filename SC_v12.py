@@ -15,6 +15,7 @@ import seaborn as sns
 import random
 import logging
 import gym
+import time
 
 
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements
@@ -23,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 class simple_conveyor_2(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
-    def __init__(self, config, **kwargs):
+    def __init__(self, config, queues, **kwargs):
         """initialize states of the variables, the lists used"""
 
         # init config
@@ -55,7 +56,7 @@ class simple_conveyor_2(gym.Env):
                                                 dtype=np.uint8)
 
         #init queues
-        self.queues = [random.choices(np.arange(1,self.amount_of_outputs+1), [self.percentage_small_carriers, self.percentage_medium_carriers, self.percentage_large_carriers], k=self.gtp_buffer_size) for item in range(self.amount_of_gtps)] # generate random queues
+        self.queues = queues
         logging.info("queues that are initialized: {}".format(self.queues))
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
@@ -328,10 +329,10 @@ class simple_conveyor_2(gym.Env):
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
 
-        self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
-                                      [self.percentage_small_carriers, self.percentage_medium_carriers,
-                                       self.percentage_large_carriers], k=self.gtp_buffer_size) for item in
-                       range(self.amount_of_gtps)]  # generate random queues
+        # self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
+        #                               [self.percentage_small_carriers, self.percentage_medium_carriers,
+        #                                self.percentage_large_carriers], k=self.gtp_buffer_size) for item in
+        #                range(self.amount_of_gtps)]  # generate random queues
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
         self.in_queue = [[] for item in range(len(self.queues))]
@@ -785,6 +786,37 @@ class simple_conveyor_2(gym.Env):
                 self.render()
         cv2.destroyAllWindows()
 
-from rl.baselines import get_parameters
+# from rl.baselines import get_parameters
+#
+# env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
 
-#env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
+############### MAIN ##############################################################################################################################################
+
+# env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
+# env.reset()
+# print(env.queues)
+#
+# #Build action list according to FIFO and Round-Robin Policy
+# order_list = []
+# for index in range(len(env.queues[0])):
+#     order_list.append([item[index] for item in env.queues])
+#
+# #flat_list = [item for sublist in l for item in sublist]
+# order_list = [item for sublist in order_list for item in sublist]
+# logging.debug("Resulting in sequence of actions: {}".format(order_list))
+#
+# start = time.time()
+#
+# # Use order list based on Round_robin
+# for item in order_list:
+#     env.step(item)
+#     #env.render()
+#
+# while env.demand_queues != [[] * i for i in range(env.amount_of_gtps)]:
+#     env.step(0)
+#     #env.render()
+#
+#
+# stop = time.time()
+# print('running time: {}'.format(stop-start))
+# print('reward: ', env.reward)

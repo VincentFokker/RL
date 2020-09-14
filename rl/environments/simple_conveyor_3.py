@@ -1,8 +1,8 @@
 ##############################################################################
 # Version: 2.0                                                               #
 # log: second version to run in the wrapper                                   #
-# Includes an adjusted reward function and state obs                          #
-# run with > python train.py -e simple_conveyor_1 -s Test -n test123         #
+# Includes WARM START!                        #
+# run with > python train.py -e simple_conveyor_3 -s WarmStart -n WarmStartTest         #
 # TEST with > python test.py -e simple_conveyor -s PPO2 -n 0 --render
 
 import numpy as np
@@ -20,7 +20,7 @@ import gym
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements
 logging.basicConfig(level=logging.INFO)
 
-class simple_conveyor_2(gym.Env):
+class simple_conveyor_3(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
     def __init__(self, config, **kwargs):
@@ -146,6 +146,20 @@ class simple_conveyor_2(gym.Env):
         self.items_on_conv = []        
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1))
 
+        ######## Do a warm_start
+        self.warm_start()
+
+
+    def warm_start(self):
+        # add items to queues
+        for _ in self.operator_locations:
+            self.in_queue[self.operator_locations.index(_)].append(self.init_queues[self.operator_locations.index(_)][0])
+
+            # add to items_on_conv
+            self.items_on_conv.append([_, self.init_queues[self.operator_locations.index(_)][0], 45/self.max_time_in_system])
+
+        # remove from init
+        self.init_queues = [item[1:] for item in self.init_queues]
 
 #### Generate the visual conveyor ##########################################################################################################
 
@@ -174,21 +188,7 @@ class simple_conveyor_2(gym.Env):
 
         return empty
 
-###### HELPER FUNCTIONS ############################################################################################################################
-    def get_candidate_lists(self, list_lists, x):
-        """Returns all lists, starting with x in list of lists"""
-        return [nestedlist for nestedlist in list_lists if nestedlist[0] == x]
-
-    def len_longest_sublist(self, listoflists):
-        """returns length of the longest list in the sublists"""
-        try:
-            return max([len(sublist) for sublist in listoflists]) 
-        except:
-            return 0
-
-    def len_shortest_sublist(self, listoflists):
-        """returns length of the shortest list in the sublists"""
-        return min([len(sublist) for sublist in listoflists])
+###### HELPER FUNCTIONS ###########################################################################################################################
         
     def update_queues(self, quenr, variable):
         'For a given queue 1-3, add a variable (1,2,3)'
@@ -205,15 +205,11 @@ class simple_conveyor_2(gym.Env):
     def add_to_in_que(self, que_nr, to_add):
         'for a given queue, add item to the queue'
         self.in_queue[que_nr].append(to_add)
-
-    
-    def simulate_operator_action(self):
-        'processes an item at all the GTP stations, currently just accepts the item allways'
-        self.items_on_conv = [sublist for sublist in self.items_on_conv if sublist[0] not in self.operator_locations]
         
     def encode(self, var):
         """encodes categorical variables 0-3 to binary"""
         return (0,0) if var == 0 else (0,1) if var == 1 else (1,0) if var == 2 else (1,1) if var ==3 else var
+
 #####################################################################################
 ## Make Observation
 #
@@ -337,6 +333,8 @@ class simple_conveyor_2(gym.Env):
         self.in_queue = [[] for item in range(len(self.queues))]
         self.empty_env = self.generate_env(self.amount_of_gtps, self.amount_of_outputs)
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1))
+
+        self.warm_start()
 
         return self.make_observation()
 
@@ -558,6 +556,7 @@ class simple_conveyor_2(gym.Env):
             logging.debug("- - action 3 executed")
         else:
             self.reward -=20                                                                                            #tag:punishment
+            print('Terminate because of invalid action handling!')
             self.terminate = True
 
         logging.debug("states of O: {}".format(self.O_states))
@@ -744,8 +743,8 @@ class simple_conveyor_2(gym.Env):
         cv2.waitKey(1)
 
     def create_window(self):
-        # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        # cv2.resizeWindow(self.window_name, 1200, 480)
+        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(self.window_name, 1200, 480)
         pass
 
 

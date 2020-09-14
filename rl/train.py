@@ -1,6 +1,7 @@
 import environments
 from baselines import Trainer, get_parameters
 import os, argparse
+import time
 """
 A script for training a RL model in a specified environment
 A configuration file from ../config/* that corresponds to the name of your environment or the 
@@ -26,6 +27,9 @@ if __name__ == "__main__":
         config['main']['model'] = args.model
     trainer.create_model(name=args.name, config_file=config)
     trainer._tensorboard()
+    t0 = time.time()
     trainer.train()
+    ts = time.time()
+    print('Running time for training: {} minutes.'.format((ts-t0)/60))
     #trainer.run(1000)
     trainer._save()
