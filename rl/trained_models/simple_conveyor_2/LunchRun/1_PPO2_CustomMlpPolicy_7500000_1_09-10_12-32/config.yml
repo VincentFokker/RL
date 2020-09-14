@@ -20,16 +20,16 @@ main:
     model: PPO2
     policy: CustomMlpPolicy
     n_workers: 1
-    n_steps: 5000000
-    save_every: 1000000
+    n_steps: 7500000
+    save_every: 2500000
     logs:
     - steps
-    - reward
-    - terminate
-    - gtp_buffer_size
+    - amount_of_items_on_conv
+    - amount_of_items_in_sys
+    - remaining_demand
 models:
     PPO2:
-        gamma: 0.99
+        gamma: 0.97
         n_steps: 128
         ent_coef: 0.01
         learning_rate: 0.001

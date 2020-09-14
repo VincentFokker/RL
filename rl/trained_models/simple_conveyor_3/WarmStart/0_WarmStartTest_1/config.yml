@@ -11,23 +11,27 @@ environment:
     negative_reward_per_step: -1
     travelpath_to_gtp_reward: 1
     negative_reward_for_cycle: -40
-    negative_reward_for_flooding: -10
+    negative_reward_for_flooding: -5
+    negative_reward_for_empty_queue: -1
+    positive_reward_for_divert: 1
     resize_factor_render: 36
     box_diameter_render: 30
 main:
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 1
-    n_steps: 7500000
-    save_every: 2500000
+    n_workers: 10
+    n_steps: 5000000
+    save_every: 1000000
     logs:
     - steps
     - amount_of_items_on_conv
     - amount_of_items_in_sys
     - remaining_demand
+    - amount_of_orders_processed
+    - positive_reward
 models:
     PPO2:
-        gamma: 0.97
+        gamma: 0.99
         n_steps: 128
         ent_coef: 0.01
         learning_rate: 0.001

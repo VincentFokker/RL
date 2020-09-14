@@ -20,8 +20,8 @@ main:
     model: PPO2
     policy: CustomMlpPolicy
     n_workers: 1
-    n_steps: 5000000
-    save_every: 1000000
+    n_steps: 10000
+    save_every: 10000
     logs:
     - steps
     - reward
@@ -30,7 +30,7 @@ main:
 models:
     PPO2:
         gamma: 0.99
-        n_steps: 128
+        n_steps: 256
         ent_coef: 0.01
         learning_rate: 0.001
         vf_coef: 0.5

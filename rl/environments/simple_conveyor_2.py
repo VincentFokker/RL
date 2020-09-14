@@ -41,6 +41,7 @@ class simple_conveyor_2(gym.Env):
         self.percentage_large_carriers = self.config['percentage_large_carriers']
 
 
+
         # Action and observation spaces
         self.action_space = gym.spaces.Discrete(4)
 
@@ -67,6 +68,7 @@ class simple_conveyor_2(gym.Env):
         self.negative_reward_for_cycle = self.config['negative_reward_for_cycle']
         self.negative_reward_for_flooding = self.config['negative_reward_for_flooding']
         self.negative_reward_for_empty_queue = self.config['negative_reward_for_empty_queue']
+        self.positive_reward_for_divert = self.config['positive_reward_for_divert']
 
         #tracers
         self.amount_of_items_on_conv = 0
@@ -143,6 +145,7 @@ class simple_conveyor_2(gym.Env):
         #initialize conveyor memory
         self.items_on_conv = []        
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1))
+
 
 #### Generate the visual conveyor ##########################################################################################################
 
@@ -325,6 +328,10 @@ class simple_conveyor_2(gym.Env):
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
 
+        self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
+                                      [self.percentage_small_carriers, self.percentage_medium_carriers,
+                                       self.percentage_large_carriers], k=self.gtp_buffer_size) for item in
+                       range(self.amount_of_gtps)]  # generate random queues
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
         self.in_queue = [[] for item in range(len(self.queues))]
@@ -426,7 +433,7 @@ class simple_conveyor_2(gym.Env):
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1)).astype(float)
         for item in self.items_on_conv:
             self.carrier_type_map[item[0][1]][item[0][0]] = item[1]
-            item[2] += 1/200                                                       #increase the time in the system
+            item[2] += 1/self.max_time_in_system                                                       #increase the time in the system
 
         # give a negative reward for each step, for all the items that are taking are taking a loop
         # self.reward += len([item for item in self.items_on_conv if item[0][1] < 7]) * self.negative_reward_per_step       #tag:punishment
@@ -487,6 +494,7 @@ class simple_conveyor_2(gym.Env):
                 try:
                     if self.D_states[self.diverter_locations.index(item[0])+1] == True and self.carrier_type_map[item[0][1]+1][item[0][0]] ==0:
                         item[0][1] +=1
+                        self.reward += self.positive_reward_for_divert
                         logging.debug("moved order carrier into GTP lane {}".format(self.diverter_locations.index(loc1)+1))
                     else:
                         item[0][0] -=1 
@@ -571,8 +579,15 @@ class simple_conveyor_2(gym.Env):
         if len([item for item in self.items_on_conv if item[0] ==[1,7]]) == 1:              # in case that negative reward is calculated with cycles
             self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle #tag:punishment
 
-        if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
-            self.reward += self.negative_reward_for_flooding                                                            #tag:punishment
+        # if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
+        #     self.reward += self.negative_reward_for_flooding                                                            #tag:punishment
+        for i in range(1, self.amount_of_outputs + 1):
+            if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == i]) > len(
+                    [item for sublist in self.init_queues for item in sublist if item == i]):
+                logging.debug('Too many items of type {} on conv! - punished!'.format(i))
+                self.reward += self.negative_reward_for_flooding
+            else:
+                logging.debug('Not too many items of type {} on conv!'.format(i))
 
         for queue in self.in_queue:
             if len(queue) ==0:
@@ -581,7 +596,7 @@ class simple_conveyor_2(gym.Env):
         ### Define some tracers     ##################################################################################
         self.amount_of_items_on_conv = len([item for item in self.items_on_conv if item[0][1] < 8])
         self.amount_of_items_in_sys = len(self.items_on_conv)
-        self.remaining_demand = len([item for sublist in env.demand_queues for item in sublist])
+        self.remaining_demand = len([item for sublist in self.demand_queues for item in sublist])
 
         ### Determine Termination cases ###############################################################################
         try:
@@ -729,8 +744,9 @@ class simple_conveyor_2(gym.Env):
         cv2.waitKey(1)
 
     def create_window(self):
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.window_name, 1200, 480)
+        # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow(self.window_name, 1200, 480)
+        pass
 
 
     def run(self, model, episodes=1000):
@@ -771,4 +787,4 @@ class simple_conveyor_2(gym.Env):
 
 from rl.baselines import get_parameters
 
-env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
+#env = simple_conveyor_2(get_parameters('simple_conveyor_2'))

@@ -15,15 +15,16 @@ import seaborn as sns
 import random
 import logging
 import gym
+import time
 
 
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements
 logging.basicConfig(level=logging.INFO)
 
-class simple_conveyor_2_intobs(gym.Env):
+class simple_conveyor_2(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
-    def __init__(self, config, **kwargs):
+    def __init__(self, config, queues, **kwargs):
         """initialize states of the variables, the lists used"""
 
         # init config
@@ -41,6 +42,7 @@ class simple_conveyor_2_intobs(gym.Env):
         self.percentage_large_carriers = self.config['percentage_large_carriers']
 
 
+
         # Action and observation spaces
         self.action_space = gym.spaces.Discrete(4)
 
@@ -48,23 +50,26 @@ class simple_conveyor_2_intobs(gym.Env):
         # (2*width+width+2*height+height) * 2 + (10*amount_of_gtp*2(binary)*2(for init and queue) = shapesize
         # (2*(self.amount_of_gtps *4 + 13) + (self.amount_of_gtps *4 + 13) + 2*4 + 4) * 2 + (10 * (self.amount_of_gtps *4 + 13) * 2 * 2)
         # (50+25+8+4)                     * 2 + (10*3*2*2) = 174 + 120 = 294 shapesize
-        self.shape = 2*((((self.amount_of_gtps*4) + 13)) + ((self.amount_of_gtps *4) + 13) + ((4 + 4))) + (10 * self.amount_of_gtps * 2)
+        self.shape = 2*((2*((self.amount_of_gtps*4) + 13)) + ((self.amount_of_gtps *4) + 13) + ((2*4 + 4))) + (10 * self.amount_of_gtps * 2 * 2)
         self.observation_space = gym.spaces.Box(shape=(self.shape, ),
                                                 high=self.max_time_in_system, low=0,
                                                 dtype=np.uint8)
 
         #init queues
-        self.queues = [random.choices(np.arange(1,self.amount_of_outputs+1), [self.percentage_small_carriers, self.percentage_medium_carriers, self.percentage_large_carriers], k=self.gtp_buffer_size) for item in range(self.amount_of_gtps)] # generate random queues
+        self.queues = queues
         logging.info("queues that are initialized: {}".format(self.queues))
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
         self.in_queue = [[] for item in range(len(self.queues))]
 
-        #rewards
+        ## rewards
+        # All punishments found by: tag:punishment
         self.negative_reward_per_step = self.config['negative_reward_per_step']
         self.travelpath_to_gtp_reward = self.config['travelpath_to_gtp_reward']
         self.negative_reward_for_cycle = self.config['negative_reward_for_cycle']
         self.negative_reward_for_flooding = self.config['negative_reward_for_flooding']
+        self.negative_reward_for_empty_queue = self.config['negative_reward_for_empty_queue']
+        self.positive_reward_for_divert = self.config['positive_reward_for_divert']
 
         #tracers
         self.amount_of_items_on_conv = 0
@@ -141,6 +146,7 @@ class simple_conveyor_2_intobs(gym.Env):
         #initialize conveyor memory
         self.items_on_conv = []        
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1))
+
 
 #### Generate the visual conveyor ##########################################################################################################
 
@@ -234,9 +240,9 @@ class simple_conveyor_2_intobs(gym.Env):
         conv_left_right1 = np.append(type_map_obs1[1:-1][:, 0], type_map_obs1[1:-1][:, -1])     #left and right for the time in system
         logging.debug('leftright lenght = {}'.format(len(conv_left_right)))
         # together
-        type_map_obs = np.append(conv_top_bottom, conv_left_right)                      #full circle for the carrier type
+        carrier_type_map_obs = np.append(conv_top_bottom, conv_left_right)                      #full circle for the carrier type
         # type_map_obs = np.append(type_map_obs[-1], type_map_obs[1:-1][:, -1])            #for half observation
-        #type_map_obs = np.array([self.encode(item) for item in list(carrier_type_map_obs)]).flatten()   #binary encoded memory for the type
+        type_map_obs = np.array([self.encode(item) for item in list(carrier_type_map_obs)]).flatten()   #binary encoded memory for the type
         logging.debug('typemap lenght = {}'.format(len(type_map_obs)))
 
         type_map_obs1 = np.append(conv_top_bottom1, conv_left_right1)                   #full circle for the time in system
@@ -253,7 +259,7 @@ class simple_conveyor_2_intobs(gym.Env):
             in_queue.append(item + [0] * (10 - len(item)))
         in_queue = np.array(in_queue).flatten()
         # binary encoding of the categorical variables
-        #in_queue = np.array([self.encode(item) for item in list(in_queue)]).flatten()
+        in_queue = np.array([self.encode(item) for item in list(in_queue)]).flatten()
         logging.debug('in_queue lenght = {}'.format(len(in_queue)))
 
         ### For the observation of the demand of the GtP Queue #########################################################
@@ -264,7 +270,7 @@ class simple_conveyor_2_intobs(gym.Env):
             init.append(init1 + [0] * (10 - len(init1)))
         init = list(np.array(init).flatten())
         # binary encoding of the categorical variables
-        #init = np.array([self.encode(item) for item in init]).flatten()
+        init = np.array([self.encode(item) for item in init]).flatten()
         logging.debug('init lenght = {}'.format(len(init)))
 
         ### Combine All to one array ###################################################################################
@@ -323,6 +329,10 @@ class simple_conveyor_2_intobs(gym.Env):
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
 
+        # self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
+        #                               [self.percentage_small_carriers, self.percentage_medium_carriers,
+        #                                self.percentage_large_carriers], k=self.gtp_buffer_size) for item in
+        #                range(self.amount_of_gtps)]  # generate random queues
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
         self.in_queue = [[] for item in range(len(self.queues))]
@@ -424,10 +434,10 @@ class simple_conveyor_2_intobs(gym.Env):
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1)).astype(float)
         for item in self.items_on_conv:
             self.carrier_type_map[item[0][1]][item[0][0]] = item[1]
-            item[2] += 1                                                       #increase the time in the system
+            item[2] += 1/self.max_time_in_system                                                       #increase the time in the system
 
         # give a negative reward for each step, for all the items that are taking are taking a loop
-        # self.reward += len([item for item in self.items_on_conv if item[0][1] < 7]) * self.negative_reward_per_step
+        # self.reward += len([item for item in self.items_on_conv if item[0][1] < 7]) * self.negative_reward_per_step       #tag:punishment
 
 #### Process the orders at GTP > For simulation: do incidental transfer of order carrier
         self.process_at_GTP()
@@ -485,6 +495,7 @@ class simple_conveyor_2_intobs(gym.Env):
                 try:
                     if self.D_states[self.diverter_locations.index(item[0])+1] == True and self.carrier_type_map[item[0][1]+1][item[0][0]] ==0:
                         item[0][1] +=1
+                        self.reward += self.positive_reward_for_divert
                         logging.debug("moved order carrier into GTP lane {}".format(self.diverter_locations.index(loc1)+1))
                     else:
                         item[0][0] -=1 
@@ -547,7 +558,7 @@ class simple_conveyor_2_intobs(gym.Env):
             self.step_env()
             logging.debug("- - action 3 executed")
         else:
-            self.reward -=20
+            self.reward -=20                                                                                            #tag:punishment
             self.terminate = True
 
         logging.debug("states of O: {}".format(self.O_states))
@@ -567,10 +578,21 @@ class simple_conveyor_2_intobs(gym.Env):
 
         ### calculate conditional reward ##############################################################################
         if len([item for item in self.items_on_conv if item[0] ==[1,7]]) == 1:              # in case that negative reward is calculated with cycles
-            self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle
+            self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle #tag:punishment
 
-        if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
-            self.reward += self.negative_reward_for_flooding
+        # if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
+        #     self.reward += self.negative_reward_for_flooding                                                            #tag:punishment
+        for i in range(1, self.amount_of_outputs + 1):
+            if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == i]) > len(
+                    [item for sublist in self.init_queues for item in sublist if item == i]):
+                logging.debug('Too many items of type {} on conv! - punished!'.format(i))
+                self.reward += self.negative_reward_for_flooding
+            else:
+                logging.debug('Not too many items of type {} on conv!'.format(i))
+
+        for queue in self.in_queue:
+            if len(queue) ==0:
+                self.reward += self.negative_reward_for_empty_queue                                                     #tag:punishment
 
         ### Define some tracers     ##################################################################################
         self.amount_of_items_on_conv = len([item for item in self.items_on_conv if item[0][1] < 8])
@@ -579,7 +601,7 @@ class simple_conveyor_2_intobs(gym.Env):
 
         ### Determine Termination cases ###############################################################################
         try:
-            if max([item[2] for item in self.items_on_conv]) >= 200:
+            if max([item[2] for item in self.items_on_conv]) >= 1:
                 self.terminate = True
         except:
             self.terminate = False
@@ -719,12 +741,12 @@ class simple_conveyor_2_intobs(gym.Env):
 
         #resize with PIL
         #img = img.resize((1200,480), resample=Image.BOX)
-        cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))                                  #comment these lines for faster training
-        cv2.waitKey(1)                                                                                                #comment these lines for faster training
+        cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
+        cv2.waitKey(1)
 
     def create_window(self):
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)                                                          #comment these lines for faster training
-        cv2.resizeWindow(self.window_name, 1200, 480)                                                                 #comment these lines for faster training
+        # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow(self.window_name, 1200, 480)
         pass
 
 
@@ -764,6 +786,37 @@ class simple_conveyor_2_intobs(gym.Env):
                 self.render()
         cv2.destroyAllWindows()
 
-from rl.baselines import get_parameters
+# from rl.baselines import get_parameters
+#
+# env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
 
-#env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
+############### MAIN ##############################################################################################################################################
+
+# env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
+# env.reset()
+# print(env.queues)
+#
+# #Build action list according to FIFO and Round-Robin Policy
+# order_list = []
+# for index in range(len(env.queues[0])):
+#     order_list.append([item[index] for item in env.queues])
+#
+# #flat_list = [item for sublist in l for item in sublist]
+# order_list = [item for sublist in order_list for item in sublist]
+# logging.debug("Resulting in sequence of actions: {}".format(order_list))
+#
+# start = time.time()
+#
+# # Use order list based on Round_robin
+# for item in order_list:
+#     env.step(item)
+#     #env.render()
+#
+# while env.demand_queues != [[] * i for i in range(env.amount_of_gtps)]:
+#     env.step(0)
+#     #env.render()
+#
+#
+# stop = time.time()
+# print('running time: {}'.format(stop-start))
+# print('reward: ', env.reward)
