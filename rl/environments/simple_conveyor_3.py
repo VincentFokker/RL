@@ -1,5 +1,5 @@
 ##############################################################################
-# Version: 2.0                                                               #
+# Version: 3.0                                                               #
 # log: second version to run in the wrapper                                   #
 # Includes WARM START!                        #
 # run with > python train.py -e simple_conveyor_3 -s WarmStart -n WarmStartTest         #
@@ -743,8 +743,8 @@ class simple_conveyor_3(gym.Env):
         cv2.waitKey(1)
 
     def create_window(self):
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.window_name, 1200, 480)
+        # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow(self.window_name, 1200, 480)
         pass
 
 

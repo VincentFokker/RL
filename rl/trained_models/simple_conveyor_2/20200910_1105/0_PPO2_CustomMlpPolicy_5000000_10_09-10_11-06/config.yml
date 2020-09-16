@@ -19,14 +19,16 @@ environment:
 main:
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 1
+    n_workers: 10
     n_steps: 5000000
     save_every: 1000000
     logs:
     - steps
-    - reward
-    - terminate
-    - gtp_buffer_size
+    - amount_of_items_on_conv
+    - amount_of_items_in_sys
+    - remaining_demand
+    - amount_of_orders_processed
+    - positive_reward
 models:
     PPO2:
         gamma: 0.99

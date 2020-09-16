@@ -43,7 +43,9 @@ TEST a trained model: \
 - config: <pre> /config/Simple_conveyor_1.yml </pre>
 
 <b>Best model </b> \
-<code>python test.py -e simple_conveyor_2 -s 20200910_1105 -n 0 --render</code> 
+<code>
+python test.py -e simple_conveyor_2 -s 20200910_1105 -n 0 --render \
+python retrain.py -e simple_conveyor_2 -s 20200910_1105 -n 0 -t</code> 
 - shows behavior off more preference for step 0
 - now leaves queues empty, should add punishment for this.
 
