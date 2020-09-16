@@ -10,8 +10,8 @@ environment:
     percentage_large_carriers: 0.35
     negative_reward_per_step: -1
     travelpath_to_gtp_reward: 1
-    negative_reward_for_cycle: -20
-    negative_reward_for_flooding: -5
+    negative_reward_for_cycle: -40
+    negative_reward_for_flooding: -10
     negative_reward_for_empty_queue: -1
     positive_reward_for_divert: 1
     resize_factor_render: 36
@@ -19,7 +19,7 @@ environment:
 main:
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 10
+    n_workers: 1
     n_steps: 5000000
     save_every: 1000000
     logs:
@@ -31,7 +31,7 @@ main:
     - positive_reward
 models:
     PPO2:
-        gamma: 0.97
+        gamma: 0.99
         n_steps: 128
         ent_coef: 0.01
         learning_rate: 0.001

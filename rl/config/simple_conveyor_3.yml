@@ -6,7 +6,7 @@ environment:
     gtp_buffer_size: 10
     exception_occurence: 0.0 #how often an exception occurs
     process_time_at_GTP: 6 #time to process one product in sec
-    max_time_in_system: 2000
+    max_time_in_system: 200
 
     #carrier distribution
     percentage_small_carriers: 0.15
@@ -20,9 +20,9 @@ environment:
     negative_reward_per_step: -1 #times all items in the system.
     travelpath_to_gtp_reward: 1 #factor for the weight of reward for the length of the travelpath
     negative_reward_for_cycle: -40
-    negative_reward_for_flooding: -20
+    negative_reward_for_flooding: -5
     negative_reward_for_empty_queue: -1     #negative reward for empty queue, otherwise queues are empty
-    positive_reward_for_divert: 5
+    positive_reward_for_divert: 1
 
     # FOR THE RENDER PART - NOT USED YET!!
     resize_factor_render: 36
@@ -50,8 +50,8 @@ main:
     model: PPO2
     policy: CustomMlpPolicy
     n_workers: 10      # Parallel environments
-    n_steps: 10000000    # Steps to train
-    save_every: 2500000  # Save a checkpoint of the model every n steps
+    n_steps: 5000000    # Steps to train
+    save_every: 1000000  # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
