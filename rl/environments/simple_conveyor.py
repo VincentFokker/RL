@@ -708,6 +708,6 @@ class simple_conveyor(gym.Env):
                 self.render()
         cv2.destroyAllWindows()
 
-f#rom rl.baselines import get_parameters
+#from rl.baselines import get_parameters
 
 #env = simple_conveyor(get_parameters('simple_conveyor'))
