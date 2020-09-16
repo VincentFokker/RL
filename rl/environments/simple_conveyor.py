@@ -667,8 +667,9 @@ class simple_conveyor(gym.Env):
         cv2.waitKey(1)
 
     def create_window(self):
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.window_name, 1200, 480)
+        # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow(self.window_name, 1200, 480)
+        pass
 
 
     def run(self, model, episodes=1000):
@@ -707,6 +708,6 @@ class simple_conveyor(gym.Env):
                 self.render()
         cv2.destroyAllWindows()
 
-from rl.baselines import get_parameters
+f#rom rl.baselines import get_parameters
 
-env = simple_conveyor(get_parameters('simple_conveyor'))
+#env = simple_conveyor(get_parameters('simple_conveyor'))

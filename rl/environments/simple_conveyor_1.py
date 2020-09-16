@@ -35,7 +35,7 @@ class simple_conveyor_1(gym.Env):
         self.exception_occurence = self.config['exception_occurence']  # % of the times, an exception occurs
         self.process_time_at_GTP = self.config['process_time_at_GTP']  # takes 30 timesteps
         self.max_time_in_system = self.config['max_time_in_system']
-        self.window_name = 'Conveyor render'
+        self.window_name = 'Conveyor 1 render'
         self.percentage_small_carriers = self.config['percentage_small_carriers']
         self.percentage_medium_carriers = self.config['percentage_medium_carriers']
         self.percentage_large_carriers = self.config['percentage_large_carriers']
@@ -690,9 +690,9 @@ class simple_conveyor_1(gym.Env):
         cv2.waitKey(1)
 
     def create_window(self):
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.window_name, 1200, 480)
-
+        # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow(self.window_name, 1200, 480)
+        pass
 
     def run(self, model, episodes=1000):
         """
@@ -730,6 +730,6 @@ class simple_conveyor_1(gym.Env):
                 self.render()
         cv2.destroyAllWindows()
 
-from rl.baselines import get_parameters
-
-env = simple_conveyor_1(get_parameters('simple_conveyor_1'))
+# from rl.baselines import get_parameters
+#
+# env = simple_conveyor_1(get_parameters('simple_conveyor_1'))
