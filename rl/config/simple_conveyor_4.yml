@@ -23,6 +23,7 @@ environment:
     negative_reward_for_flooding: -20
     negative_reward_for_empty_queue: -1     #negative reward for empty queue, otherwise queues are empty
     positive_reward_for_divert: 5
+    negative_reward_for_invalid: -20
 
     # FOR THE RENDER PART - NOT USED YET!!
     resize_factor_render: 36

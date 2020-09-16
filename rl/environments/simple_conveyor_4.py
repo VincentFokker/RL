@@ -69,6 +69,7 @@ class simple_conveyor_4(gym.Env):
         self.negative_reward_for_flooding = self.config['negative_reward_for_flooding']
         self.negative_reward_for_empty_queue = self.config['negative_reward_for_empty_queue']
         self.positive_reward_for_divert = self.config['positive_reward_for_divert']
+        self.negative_reward_for_invalid = self.config['negative_reward_for_invalid']
 
         #tracers
         self.amount_of_items_on_conv = 0
@@ -530,8 +531,11 @@ class simple_conveyor_4(gym.Env):
                 logging.debug("Order carrier outputted at {}".format(loc))
                 logging.debug("Items on conveyor: {}".format(self.items_on_conv))
             else:
-                logging.debug('No order carrier output on output {} .'.format(loc))
-
+                logging.debug('Not able to output on output {} .'.format(loc))
+                #because not able to output, set the output state back to 0
+                self.O_states[self.output_locations.index(loc) + 1] ==0
+                #give a negative reward for trying this action
+                self.reward += self.negative_reward_for_invalid
 
     def step(self, action):
         logging.debug("Executed action: {}".format(action))
