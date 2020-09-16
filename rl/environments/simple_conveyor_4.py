@@ -80,6 +80,8 @@ class simple_conveyor_4(gym.Env):
 
         #gym related part
         self.reward = 0
+        self.step_reward_p = 0
+        self.step_reward_n = 0
         self.total_travel = 0
         self.terminate = False
         self.episode= 0
@@ -317,6 +319,8 @@ class simple_conveyor_4(gym.Env):
         self.total_travel = 0
         self.steps = 0
         self.terminate = False
+        self.step_reward_p = 0
+        self.step_reward_n = 0
 
         #reset tracers
         self.amount_of_items_on_conv = 0
@@ -383,8 +387,9 @@ class simple_conveyor_4(gym.Env):
                     logging.debug('conveyor memory before processing: {}'.format(self.items_on_conv))
                     self.items_on_conv = [item for item in self.items_on_conv if item[0] !=Transition_point]
                     self.reward += 10 + 10 + (O_locs.index(Transition_point)+1 * 4) * self.travelpath_to_gtp_reward
-                    self.total_travel += 10 + 10 + (O_locs.index(Transition_point)+1 * 4)
+                    self.step_reward_p += 10 + 10 + (O_locs.index(Transition_point)+1 * 4)
                     self.positive_reward += 10 + 10 + (O_locs.index(Transition_point)+1 * 4) * self.travelpath_to_gtp_reward
+
                     self.amount_of_orders_processed +=1
                     logging.debug('order at GTP {} processed'.format(O_locs.index(Transition_point)+1))
                     logging.debug('conveyor memory after processing: {}'.format(self.items_on_conv))
@@ -494,6 +499,7 @@ class simple_conveyor_4(gym.Env):
                     if self.D_states[self.diverter_locations.index(item[0])+1] == True and self.carrier_type_map[item[0][1]+1][item[0][0]] ==0:
                         item[0][1] +=1
                         self.reward += self.positive_reward_for_divert
+                        self.step_reward_p += self.positive_reward_for_divert
                         logging.debug("moved order carrier into GTP lane {}".format(self.diverter_locations.index(loc1)+1))
                     else:
                         item[0][0] -=1 
@@ -530,14 +536,18 @@ class simple_conveyor_4(gym.Env):
                 self.O_states[self.output_locations.index(loc)+1] -=1
                 logging.debug("Order carrier outputted at {}".format(loc))
                 logging.debug("Items on conveyor: {}".format(self.items_on_conv))
-            else:
+            elif self.O_states[self.output_locations.index(loc)+1] !=0 and self.carrier_type_map[cord2[1]][cord2[0]+1] !=0:
                 logging.debug('Not able to output on output {} .'.format(loc))
                 #because not able to output, set the output state back to 0
-                self.O_states[self.output_locations.index(loc) + 1] ==0
+                self.O_states[self.output_locations.index(loc) + 1] =0
                 #give a negative reward for trying this action
                 self.reward += self.negative_reward_for_invalid
+                self.step_reward_n += self.negative_reward_for_invalid
+
 
     def step(self, action):
+        self.step_reward_p = 0
+        self.step_reward_n = 0
         logging.debug("Executed action: {}".format(action))
         logging.debug("Demand queue: {}".format(self.demand_queues))
         self.steps +=1
@@ -560,6 +570,7 @@ class simple_conveyor_4(gym.Env):
             logging.debug("- - action 3 executed")
         else:
             self.reward -=20                                                                                            #tag:punishment
+            self.step_reward_n -=20
             print('Terminate because of invalid action handling!')
             self.terminate = True
 
@@ -581,6 +592,7 @@ class simple_conveyor_4(gym.Env):
         ### calculate conditional reward ##############################################################################
         if len([item for item in self.items_on_conv if item[0] ==[1,7]]) == 1:              # in case that negative reward is calculated with cycles
             self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle #tag:punishment
+            self.step_reward_n += self.negative_reward_for_cycle
 
         # if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
         #     self.reward += self.negative_reward_for_flooding                                                            #tag:punishment
@@ -589,12 +601,14 @@ class simple_conveyor_4(gym.Env):
                     [item for sublist in self.init_queues for item in sublist if item == i]):
                 logging.debug('Too many items of type {} on conv! - punished!'.format(i))
                 self.reward += self.negative_reward_for_flooding
+                self.step_reward_n += self.negative_reward_for_flooding
             else:
                 logging.debug('Not too many items of type {} on conv!'.format(i))
 
         for queue in self.in_queue:
             if len(queue) ==0:
                 self.reward += self.negative_reward_for_empty_queue                                                     #tag:punishment
+                self.step_reward_n += self.negative_reward_for_empty_queue
 
         ### Define some tracers     ##################################################################################
         self.amount_of_items_on_conv = len([item for item in self.items_on_conv if item[0][1] < 8])
@@ -723,6 +737,26 @@ class simple_conveyor_4(gym.Env):
             x7, y7 = x0, y0 + 95
             draw.text((x7, y7), 'In queue', fill= 'white', font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
             draw.text((x7, y7+ 15), '{}'.format(self.in_queue[self.diverter_locations.index(item)][:5]), fill= 'white', font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
+
+##### TURN OFF FOR FASTER RENDERING #############################################################################################
+        #values of the O_states
+        for item in copy(self.output_locations):
+                x0 = item[0] * resize_factor + 40
+                y0 = item[1] * resize_factor + 40
+                draw.text((x0, y0), '{}'.format(self.O_states[self.output_locations.index(item)+1]), fill='white',
+                          font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
+
+        #draw reward
+        x0, y0 = self.diverter_locations[0][0] * resize_factor + 130, self.diverter_locations[0][1] * resize_factor + 150
+        y1 = y0 + 25
+        y2 = y1 + 25
+        draw.text((x0, y0), ' Total Reward: {}'.format(self.reward), fill='white',
+                      font=ImageFont.truetype(font='arial', size=15, index=0, encoding='unic', layout_engine=None))
+        draw.text((x0, y1), ' Positive Reward: {}'.format(self.step_reward_p), fill='green',
+                      font=ImageFont.truetype(font='arial', size=15, index=0, encoding='unic', layout_engine=None))
+        draw.text((x0, y2), ' Negative Reward: {}'.format(self.step_reward_n), fill='red',
+                      font=ImageFont.truetype(font='arial', size=15, index=0, encoding='unic', layout_engine=None))
+###################################################################################################################################
 
         #Draw GTP demands
         for item in copy(self.operator_locations):
