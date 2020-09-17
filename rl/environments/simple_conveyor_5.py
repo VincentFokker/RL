@@ -566,8 +566,8 @@ class simple_conveyor_5(gym.Env):
             self.step_env()
             logging.debug("- - action 1 executed")
         elif action ==2:
-            if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 1]) == len(
-                    [item for sublist in self.init_queues for item in sublist if item == 1]):
+            if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 2]) == len(
+                    [item for sublist in self.init_queues for item in sublist if item == 2]):
                 self.reward +=self.negative_reward_for_flooding
                 self.step_reward_n += self.negative_reward_for_flooding
             else:
@@ -575,8 +575,8 @@ class simple_conveyor_5(gym.Env):
             self.step_env()
             logging.debug("- - action 2 executed")
         elif action ==3:
-            if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 1]) == len(
-                    [item for sublist in self.init_queues for item in sublist if item == 1]):
+            if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 3]) == len(
+                    [item for sublist in self.init_queues for item in sublist if item == 3]):
                 self.reward +=self.negative_reward_for_flooding
                 self.step_reward_n += self.negative_reward_for_flooding
             else:
