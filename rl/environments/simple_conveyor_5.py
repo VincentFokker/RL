@@ -563,7 +563,7 @@ class simple_conveyor_5(gym.Env):
                 self.step_reward_n += self.negative_reward_for_flooding
             else:
                 self.O_states[1] +=1
-                self.step_env()
+            self.step_env()
             logging.debug("- - action 1 executed")
         elif action ==2:
             if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 1]) == len(
@@ -572,7 +572,7 @@ class simple_conveyor_5(gym.Env):
                 self.step_reward_n += self.negative_reward_for_flooding
             else:
                 self.O_states[2] +=1
-                self.step_env()
+            self.step_env()
             logging.debug("- - action 2 executed")
         elif action ==3:
             if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 1]) == len(
@@ -581,7 +581,7 @@ class simple_conveyor_5(gym.Env):
                 self.step_reward_n += self.negative_reward_for_flooding
             else:
                 self.O_states[3] +=1
-                self.step_env()
+            self.step_env()
             logging.debug("- - action 3 executed")
         else:
             self.reward -=20                                                                                            #tag:punishment
