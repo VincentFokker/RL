@@ -20,7 +20,7 @@ import gym
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements
 logging.basicConfig(level=logging.INFO)
 
-class simple_conveyor_5(gym.Env):
+class simple_conveyor_7(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
     def __init__(self, config, **kwargs):
@@ -49,9 +49,9 @@ class simple_conveyor_5(gym.Env):
         # (2*width+width+2*height+height) * 2 + (10*amount_of_gtp*2(binary)*2(for init and queue) = shapesize
         # (2*(self.amount_of_gtps *4 + 13) + (self.amount_of_gtps *4 + 13) + 2*4 + 4) * 2 + (10 * (self.amount_of_gtps *4 + 13) * 2 * 2)
         # (50+25+8+4)                     * 2 + (10*3*2*2) = 174 + 120 = 294 shapesize
-        self.shape = 2*((2*((self.amount_of_gtps*4) + 13)) + ((self.amount_of_gtps *4) + 13) + ((2*4 + 4))) + (10 * self.amount_of_gtps * 2 * 2)
+        self.shape = 2*((self.amount_of_gtps *4) + 13) + (3 * self.amount_of_gtps)
         self.observation_space = gym.spaces.Box(shape=(self.shape, ),
-                                                high=self.max_time_in_system, low=0,
+                                                high=3, low=0,
                                                 dtype=np.uint8)
 
         #init queues
@@ -217,6 +217,27 @@ class simple_conveyor_5(gym.Env):
 ## Make Observation
 #
     def make_observation(self):
+        ### For the obeservation of the conveyor ########################################################################
+        self.carrier_type_map_obs = np.zeros((self.empty_env.shape[0], self.empty_env.shape[1], 1)).astype(float)
+        self.carrier_type_map_obs1 = np.zeros((self.empty_env.shape[0], self.empty_env.shape[1], 1)).astype(float)
+
+        for item in self.items_on_conv:
+            self.carrier_type_map_obs[item[0][1]][item[0][0]] = item[1]
+            self.carrier_type_map_obs1[item[0][1]][item[0][0]] = item[2]
+        # cut padding
+        type_map_obs = self.carrier_type_map_obs[2:8, 1:-1]  # for the carrier type
+        type_map_obs1 = self.carrier_type_map_obs1[2:8, 1:-1]  # for the time in the system
+        conv_bottom_info = np.append(type_map_obs[-1], type_map_obs1[-1])
+
+        init = []
+        for item in self.init_queues:
+            init1 = item[:3]
+            init.append(init1 + [0] * (3 - len(init1)))
+        init = np.array(init).flatten()
+        obs = np.append(init, conv_bottom_info)
+        return obs
+
+    def make_observation2(self):
         '''Builds the observation from the available variables'''
 
         ### For the obeservation of the conveyor ########################################################################
