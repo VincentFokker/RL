@@ -20,9 +20,9 @@ environment:
 main:
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 1
-    n_steps: 1000000
-    save_every: 200000
+    n_workers: 10
+    n_steps: 10000000
+    save_every: 2000000
     logs:
     - steps
     - amount_of_items_on_conv
