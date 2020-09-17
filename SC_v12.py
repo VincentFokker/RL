@@ -77,6 +77,7 @@ class simple_conveyor_2(gym.Env):
         self.remaining_demand = 0
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
+        self.negative_reward = 0
 
         #gym related part
         self.reward = 0
@@ -137,7 +138,7 @@ class simple_conveyor_2(gym.Env):
 ####### FOR SIMULATION ONLY 
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
-            self.W_times[i] = self.process_time_at_GTP +8*self.amount_of_gtps + randint(-10, 10)
+            self.W_times[i] = self.process_time_at_GTP +8*self.amount_of_gtps -5
         logging.debug("Process times at operator are:{}".format(self.W_times))
 ####### FOR SIMULATION ONLY
         self.condition_to_transfer = False
@@ -328,6 +329,7 @@ class simple_conveyor_2(gym.Env):
         self.remaining_demand = 0
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
+        self.negative_reward = 0
 
         # self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
         #                               [self.percentage_small_carriers, self.percentage_medium_carriers,
@@ -496,6 +498,7 @@ class simple_conveyor_2(gym.Env):
                     if self.D_states[self.diverter_locations.index(item[0])+1] == True and self.carrier_type_map[item[0][1]+1][item[0][0]] ==0:
                         item[0][1] +=1
                         self.reward += self.positive_reward_for_divert
+                        self.positive_reward += self.positive_reward_for_divert
                         logging.debug("moved order carrier into GTP lane {}".format(self.diverter_locations.index(loc1)+1))
                     else:
                         item[0][0] -=1 
@@ -558,7 +561,7 @@ class simple_conveyor_2(gym.Env):
             self.step_env()
             logging.debug("- - action 3 executed")
         else:
-            self.reward -=20                                                                                            #tag:punishment
+            #self.reward -=20                                                                                            #tag:punishment
             self.terminate = True
 
         logging.debug("states of O: {}".format(self.O_states))
@@ -577,8 +580,10 @@ class simple_conveyor_2(gym.Env):
         next_state = self.make_observation()
 
         ### calculate conditional reward ##############################################################################
+        logging.info(len([item for item in self.items_on_conv if item[0] ==[1,7]]))
         if len([item for item in self.items_on_conv if item[0] ==[1,7]]) == 1:              # in case that negative reward is calculated with cycles
             self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle #tag:punishment
+            #self.negative_reward += self.negative_reward_for_cycle
 
         # if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
         #     self.reward += self.negative_reward_for_flooding                                                            #tag:punishment
@@ -587,12 +592,14 @@ class simple_conveyor_2(gym.Env):
                     [item for sublist in self.init_queues for item in sublist if item == i]):
                 logging.debug('Too many items of type {} on conv! - punished!'.format(i))
                 self.reward += self.negative_reward_for_flooding
+                #self.negative_reward += self.negative_reward_for_flooding
             else:
                 logging.debug('Not too many items of type {} on conv!'.format(i))
 
         for queue in self.in_queue:
             if len(queue) ==0:
                 self.reward += self.negative_reward_for_empty_queue                                                     #tag:punishment
+                #self.negative_reward += self.negative_reward_for_empty_queue
 
         ### Define some tracers     ##################################################################################
         self.amount_of_items_on_conv = len([item for item in self.items_on_conv if item[0][1] < 8])
@@ -742,7 +749,7 @@ class simple_conveyor_2(gym.Env):
         #resize with PIL
         #img = img.resize((1200,480), resample=Image.BOX)
         cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
-        cv2.waitKey(1)
+        cv2.waitKey(0)
 
     def create_window(self):
         # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
