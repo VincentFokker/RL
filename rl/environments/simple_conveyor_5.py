@@ -631,11 +631,11 @@ class simple_conveyor_5(gym.Env):
         self.remaining_demand = len([item for sublist in self.demand_queues for item in sublist])
 
         ### Determine Termination cases ###############################################################################
-        try:
-            if max([item[2] for item in self.items_on_conv]) >= 1:
-                self.terminate = True
-        except:
-            self.terminate = False
+        # try:
+        #     if max([item[2] for item in self.items_on_conv]) >= 1:
+        #         self.terminate = True
+        # except:
+        #     self.terminate = False
         
         #terminate if the demand queues are empty (means all is processed)
         if self.demand_queues == [[] * i for i in range(self.amount_of_gtps)] :

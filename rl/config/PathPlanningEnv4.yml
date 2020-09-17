@@ -1,3 +1,4 @@
+
 # Arguments that get passed to the constructor of your class instance
 # as config={} keyword
 environment:
@@ -37,8 +38,8 @@ main:
     model: PPO2
     policy: CustomMlpPolicy
     n_workers: 10      # Parallel environments
-    n_steps: 3000000    # Steps to train
-    save_every: 250000  # Save a checkpoint of the model every n steps
+    n_steps: 1000000    # Steps to train
+    save_every: 200000  # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
