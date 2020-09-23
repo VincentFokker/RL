@@ -77,6 +77,7 @@ class simple_conveyor_5(gym.Env):
         self.remaining_demand = 0
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
+        self.negative_reward = 0
 
         #gym related part
         self.reward = 0
@@ -139,7 +140,7 @@ class simple_conveyor_5(gym.Env):
 ####### FOR SIMULATION ONLY 
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
-            self.W_times[i] = self.process_time_at_GTP +8*self.amount_of_gtps + randint(-10, 10)
+            self.W_times[i] = self.process_time_at_GTP +8*self.amount_of_gtps -5
         logging.debug("Process times at operator are:{}".format(self.W_times))
 ####### FOR SIMULATION ONLY
         self.condition_to_transfer = False
@@ -309,7 +310,7 @@ class simple_conveyor_5(gym.Env):
 ####### FOR SIMULATION ONLY 
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
-            self.W_times[i] = self.process_time_at_GTP + 8*self.amount_of_gtps  + randint(-10, 10)
+            self.W_times[i] = self.process_time_at_GTP + 8*self.amount_of_gtps  -5
         logging.debug("Process times at operator are: {}".format(self.W_times))
 ####### FOR SIMULATION ONLY
 
@@ -328,6 +329,7 @@ class simple_conveyor_5(gym.Env):
         self.remaining_demand = 0
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
+        self.negative_reward = 0
 
         self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
                                       [self.percentage_small_carriers, self.percentage_medium_carriers,
@@ -458,7 +460,21 @@ class simple_conveyor_5(gym.Env):
                 else:
                     self.D_condition_1[d_locs.index(loc2)+1] = False
                 #condition 2 = if the lenght of the in_queue is <= smallest queue that also demands order carrier of the same type
-                condition_2 = len(self.in_queue[d_locs.index(loc2)])-1 <= min(map(len, self.in_queue))
+                #condition_2 = len(self.in_queue[d_locs.index(loc2)])-1 <= min(map(len, self.in_queue))
+                if carrier_map[loc2[1]][loc2[0]] != 0:
+                    logging.debug('Left condition at lane {} = {}'.format(d_locs.index(loc2) + 1,
+                                                                          len(self.in_queue[d_locs.index(loc2)])))
+                    logging.debug('Right condition at lane {} = {}'.format(d_locs.index(loc2) + 1, min(map(len, [
+                        self.in_queue[self.init_queues.index(i)] for i in
+                        [item for item in [item for item in self.init_queues if item != []] if
+                         item[0] == self.init_queues[d_locs.index(loc2)][0]]]))))
+                    condition_2 = len(self.in_queue[d_locs.index(loc2)]) <= min(map(len, [
+                        self.in_queue[self.init_queues.index(i)] for i in
+                        [item for item in [item for item in self.init_queues if item != []] if
+                         item[0] == self.init_queues[d_locs.index(loc2)][0]]]))
+                else:
+                    condition_2 = False
+                logging.debug('Condition 2 == {}'.format(condition_2))
                 if condition_2 == True:
                     self.D_condition_2[d_locs.index(loc2)+1] = True
                 else:

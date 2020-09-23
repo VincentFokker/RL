@@ -1,0 +1,60 @@
+step()==>
+------------------------------------------------------------------------------------------------------------------------
+|	steps + 1
+|	++ Negative_reward_for_flooding
+|	O_states + 1
+|	step_env() ==>
+|	--------------------------------------------------------------------------------------------------------------------
+|	|		Make Carrier type map
+|	|		++ 1/max_time_in_system
+|	|		process_at_GTP()=======>
+|	|		------------------------------------------------------------------------------------------------------------
+|	|		|			Check condition to transfer, set state
+|	|		|			Check condition to processs, set state
+|	|		|			IF time is over:
+|	|		|				IF Simulate exception
+|	|		|				ELIF transfer if condition to transfer == True
+|	|		|					Update W_times
+|	|		|					Update in_queue
+|	|		|				ELIF process if condition to process == True
+|	|		|				Process item (remove from conv)
+|	|		|				++ reward travelpath_to_gtp_reward
+|	|		|				amount_of_orders_processed + 1
+|	|		|				try to remove item from demand queue
+|	|		|				Set new timestep for the next order
+|	|		|				Remove from In_queue
+|	|		|
+|	|		------------------------------------------------------------------------------------------------------------
+|	|		Condition 1: item on carrier type map at D_loc is equal to init_queue index 0
+|	|		set D_condition_1
+|	|		Condition 2: length of queue nr[x] - 1 <= minimum van map(len, self.inqueue) ????????????
+|	|		set D_condition_2
+|	|		Condition 3: Diverter location queue spot 1 == 0 (is empty)
+|	|		IF Condition 1, 2 and 3:
+|	|			D_state set to true
+|	|			Remove from demand queue
+|	|			Add to in_queue
+|	|		OR move into lane if D_states== TRUE
+|	|			Give positive reward
+|	|		OR Move item on conveyor
+|	|		IF O_states != 0: Put item on conveyor
+|	|		++ negative_reward_for_invalid
+|	|
+|	--------------------------------------------------------------------------------------------------------------------
+|
+|	make_observation()==>
+|	--------------------------------------------------------------------------------------------------------------------
+|	|			Make Carrier type map for Type and time
+|	|			Cut and shape
+|	|			Add In_queue
+|	|			Add Init_queue
+|	|			combine in one array
+|	|			return observation (array)
+|	|
+|	--------------------------------------------------------------------------------------------------------------------
+|	++ negative_reward_for_cycle
+|	++ negative_reward_for_flooding
+|	++ negative_reward_for_empty_queue
+|	Terminate if condition
+|	return state, reward, terminate, {}
+------------------------------------------------------------------------------------------------------------------------

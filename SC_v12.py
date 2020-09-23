@@ -57,7 +57,7 @@ class simple_conveyor_2(gym.Env):
 
         #init queues
         self.queues = queues
-        logging.info("queues that are initialized: {}".format(self.queues))
+        logging.debug("queues that are initialized: {}".format(self.queues))
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
         self.in_queue = [[] for item in range(len(self.queues))]
@@ -312,7 +312,7 @@ class simple_conveyor_2(gym.Env):
 ####### FOR SIMULATION ONLY 
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
-            self.W_times[i] = self.process_time_at_GTP + 8*self.amount_of_gtps  + randint(-10, 10)
+            self.W_times[i] = self.process_time_at_GTP + 8*self.amount_of_gtps  -5
         logging.debug("Process times at operator are: {}".format(self.W_times))
 ####### FOR SIMULATION ONLY
 
@@ -337,6 +337,7 @@ class simple_conveyor_2(gym.Env):
         #                range(self.amount_of_gtps)]  # generate random queues
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
+        logging.debug('setup used: {}'.format(self.init_queues))
         self.in_queue = [[] for item in range(len(self.queues))]
         self.empty_env = self.generate_env(self.amount_of_gtps, self.amount_of_outputs)
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1))
@@ -365,7 +366,7 @@ class simple_conveyor_2(gym.Env):
                 if random.random() < self.exception_occurence: #if the random occurence is below exception occurence (set in config) do:
                     #remove an order carrier (broken)
                     logging.debug('With a change percentage an order carrier is removed')
-                    logging.info('trasition point is: {}'.format(Transition_point))
+                    logging.debug('transition point is: {}'.format(Transition_point))
                     #self.update_queues(O_locs.index(Transition_point)+1, [item[1] for item in self.items_on_conv if item[0] == Transition_point][0])
                     self.W_times[O_locs.index(Transition_point)+1] = 1
                     #self.O_states[[item[1] for item in self.items_on_conv if item[0] == Transition_point][0]] +=1
@@ -457,7 +458,14 @@ class simple_conveyor_2(gym.Env):
                 else:
                     self.D_condition_1[d_locs.index(loc2)+1] = False
                 #condition 2 = if the lenght of the in_queue is <= smallest queue that also demands order carrier of the same type
-                condition_2 = len(self.in_queue[d_locs.index(loc2)])-1 <= min(map(len, self.in_queue))
+                #condition_2 = len(self.in_queue[d_locs.index(loc2)])-1 <= min(map(len, self.in_queue))
+                if carrier_map[loc2[1]][loc2[0]] != 0:
+                    logging.debug('Left condition at lane {} = {}'.format(d_locs.index(loc2)+1, len(self.in_queue[d_locs.index(loc2)])))
+                    logging.debug('Right condition at lane {} = {}'.format(d_locs.index(loc2)+1, min(map(len, [self.in_queue[self.init_queues.index(i)] for i in [item for item in [item for item in self.init_queues if item != []] if item[0] == self.init_queues[d_locs.index(loc2)][0]]]))))
+                    condition_2 = len(self.in_queue[d_locs.index(loc2)]) <= min(map(len, [self.in_queue[self.init_queues.index(i)] for i in [item for item in [item for item in self.init_queues if item != []] if item[0] == self.init_queues[d_locs.index(loc2)][0]]]))
+                else:
+                    condition_2 = False
+                logging.debug('Condition 2 == {}'.format(condition_2))
                 if condition_2 == True:
                     self.D_condition_2[d_locs.index(loc2)+1] = True
                 else:
@@ -580,10 +588,10 @@ class simple_conveyor_2(gym.Env):
         next_state = self.make_observation()
 
         ### calculate conditional reward ##############################################################################
-        logging.info(len([item for item in self.items_on_conv if item[0] ==[1,7]]))
+        logging.debug(len([item for item in self.items_on_conv if item[0] ==[1,7]]))
         if len([item for item in self.items_on_conv if item[0] ==[1,7]]) == 1:              # in case that negative reward is calculated with cycles
             self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle #tag:punishment
-            #self.negative_reward += self.negative_reward_for_cycle
+            self.negative_reward += self.negative_reward_for_cycle
 
         # if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
         #     self.reward += self.negative_reward_for_flooding                                                            #tag:punishment
@@ -592,14 +600,14 @@ class simple_conveyor_2(gym.Env):
                     [item for sublist in self.init_queues for item in sublist if item == i]):
                 logging.debug('Too many items of type {} on conv! - punished!'.format(i))
                 self.reward += self.negative_reward_for_flooding
-                #self.negative_reward += self.negative_reward_for_flooding
+                self.negative_reward += self.negative_reward_for_flooding
             else:
                 logging.debug('Not too many items of type {} on conv!'.format(i))
 
         for queue in self.in_queue:
             if len(queue) ==0:
                 self.reward += self.negative_reward_for_empty_queue                                                     #tag:punishment
-                #self.negative_reward += self.negative_reward_for_empty_queue
+                self.negative_reward += self.negative_reward_for_empty_queue
 
         ### Define some tracers     ##################################################################################
         self.amount_of_items_on_conv = len([item for item in self.items_on_conv if item[0][1] < 8])
@@ -749,7 +757,7 @@ class simple_conveyor_2(gym.Env):
         #resize with PIL
         #img = img.resize((1200,480), resample=Image.BOX)
         cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
-        cv2.waitKey(0)
+        cv2.waitKey(1)
 
     def create_window(self):
         # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
