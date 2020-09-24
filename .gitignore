@@ -15553,3 +15553,12 @@ rl/trained_models/simple_conveyor_5/20200923_1515/0_UpdatedDiverterPolicy_4/even
 rl/trained_models/simple_conveyor_5/20200923_1515/0_UpdatedDiverterPolicy_3/events.out.tfevents.1600867704.VI210713
 rl/trained_models/simple_conveyor_5/20200923_1515/0_UpdatedDiverterPolicy_2/events.out.tfevents.1600867360.VI210713
 rl/trained_models/simple_conveyor_5/20200923_1515/0_UpdatedDiverterPolicy_1/events.out.tfevents.1600867020.VI210713
+rl/trained_models/simple_conveyor_5/20200923_1515/1_Version2_2/events.out.tfevents.1600870195.VI210713
+rl/trained_models/simple_conveyor_5/20200923_1515/1_Version2_3/events.out.tfevents.1600870276.VI210713
+rl/trained_models/simple_conveyor_5/20200923_1515/1_Version2_4/events.out.tfevents.1600870346.VI210713
+rl/trained_models/simple_conveyor_5/20200923_1515/1_Version2_5/events.out.tfevents.1600870420.VI210713
+rl/trained_models/simple_conveyor_5/20200923_1515/2_LSTMPolicy_1/events.out.tfevents.1600871741.VI210713
+rl/trained_models/simple_conveyor_5/20200923_1515/2_LSTMPolicy_2/events.out.tfevents.1600871927.VI210713
+rl/trained_models/simple_conveyor_5/20200923_1515/2_LSTMPolicy_3/events.out.tfevents.1600872083.VI210713
+rl/trained_models/simple_conveyor_5/20200923_1515/2_LSTMPolicy_4/events.out.tfevents.1600872246.VI210713
+rl/trained_models/simple_conveyor_5/20200923_1515/2_LSTMPolicy_5/events.out.tfevents.1600872407.VI210713
