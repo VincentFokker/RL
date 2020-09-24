@@ -1,0 +1,13 @@
+.gitignore
+debug.log
+Dockerfile
+Env thinkering.ipynb
+GUI.md
+instructions.md
+README.md
+SC_v12.py
+__pycache__/*
+.idea/*
+.ipynb_checkpoints/*
+venv/*
+rl/trained_models/simple_conveyor*
