@@ -78,6 +78,7 @@ class simple_conveyor_5(gym.Env):
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
         self.negative_reward = 0
+        self.cycle_count = 0
 
         #gym related part
         self.reward = 0
@@ -330,6 +331,7 @@ class simple_conveyor_5(gym.Env):
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
         self.negative_reward = 0
+        self.cycle_count = 0
 
         self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
                                       [self.percentage_small_carriers, self.percentage_medium_carriers,
@@ -624,6 +626,7 @@ class simple_conveyor_5(gym.Env):
         if len([item for item in self.items_on_conv if item[0] ==[1,7]]) == 1:              # in case that negative reward is calculated with cycles
             self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle #tag:punishment
             self.step_reward_n += self.negative_reward_for_cycle
+            self.cycle_count +=1
 
         # if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
         #     self.reward += self.negative_reward_for_flooding                                                            #tag:punishment

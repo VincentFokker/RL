@@ -49,7 +49,7 @@ main:
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
     model: PPO2
-    policy: CustomMlpPolicy
+    policy: CustomLSTMPolicy
     n_workers: 10      # Parallel environments
     n_steps: 1000000    # Steps to train
     save_every: 200000  # Save a checkpoint of the model every n steps
@@ -63,6 +63,7 @@ main:
         - remaining_demand
         - amount_of_orders_processed
         - positive_reward
+        - cycle_count
 
 models:
     PPO2:
@@ -73,7 +74,7 @@ models:
         vf_coef: 0.5         # The contribution of value function loss to the total loss of the network
         max_grad_norm: 0.5   # Max range of the gradient clipping
         lam: 0.95            # Generalized advantage estimation, for controlling variance/bias tradeoff
-        nminibatches: 4      # Number of minibatches for SGD/Adam updates
+        nminibatches: 2      # Number of minibatches for SGD/Adam updates
         noptepochs: 4        # Number of iterations for SGD/Adam
         cliprange: 0.2       # Clip factor for PPO (the action probability distribution of the updated policy cannot differ from the old one by this fraction [measured by KL divergence])
         full_tensorboard_log: False
