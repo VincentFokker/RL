@@ -13,13 +13,14 @@ environment:
     percentage_medium_carriers: 0.55
     percentage_large_carriers: 0.35
 
-
+    # TERMINATION CONDITIONS
+    termination_condition: 1    #1 for terminate when all items processed, #2 for terminate when all GtP queues provided.
     
 
     # Rewards
     negative_reward_per_step: -1 #times all items in the system.
-    travelpath_to_gtp_reward: 1  #factor for the weight of reward for the length of the travelpath
-    negative_reward_for_cycle: -40
+    travelpath_to_gtp_reward: 0  #factor for the weight of reward for the length of the travelpath
+    negative_reward_for_cycle: -20
     negative_reward_for_flooding: -10
     negative_reward_for_empty_queue: -1     #negative reward for empty queue, otherwise queues are empty
     positive_reward_for_divert: 5
@@ -50,7 +51,7 @@ main:
 
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 10      # Parallel environments
+    n_workers: 8      # Parallel environments
     n_steps: 5000000    # Steps to train
     save_every: 1000000  # Save a checkpoint of the model every n steps
 
@@ -68,7 +69,7 @@ main:
 
 models:
     PPO2:
-        gamma: 0.99          # Discount factor for future rewards
+        gamma: 0.999          # Discount factor for future rewards
         n_steps: 512         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.001 # LR
