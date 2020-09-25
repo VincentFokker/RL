@@ -252,8 +252,8 @@ class simple_conveyor_6(gym.Env):
         #make the init list
         init = []
         for item in self.init_queues:
-            init1 = item[:5]
-            init.append(init1 + [0] * (5 - len(init1)))
+            init1 = item[:1]
+            init.append(init1 + [0] * (1 - len(init1)))
         init = list(np.array(init).flatten())
         # binary encoding of the categorical variables
         init = np.array([self.encode(item) for item in init]).flatten()
