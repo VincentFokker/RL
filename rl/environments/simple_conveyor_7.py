@@ -51,7 +51,7 @@ class simple_conveyor_7(gym.Env):
         # (2*width+width+2*height+height) * 2 + (10*amount_of_gtp*2(binary)*2(for init and queue) = shapesize
         # (2*(self.amount_of_gtps *4 + 13) + (self.amount_of_gtps *4 + 13) + 2*4 + 4) * 2 + (10 * (self.amount_of_gtps *4 + 13) * 2 * 2)
         # (50+25+8+4)                     * 2 + (10*3*2*2) = 174 + 120 = 294 shapesize
-        self.shape = 2*((env.amount_of_gtps*4) + 13) + (self.in_que_observed * env.amount_of_gtps * 2) + (2 * env.amount_of_gtps)
+        self.shape = 2*((self.amount_of_gtps*4) + 13) + (self.in_que_observed * self.amount_of_gtps * 2) + (2 * self.amount_of_gtps)
         self.observation_space = gym.spaces.Box(shape=(self.shape, ),
                                                 high=1, low=0,
                                                 dtype=np.uint8)
