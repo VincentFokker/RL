@@ -15674,3 +15674,16 @@ rl/trained_models/simple_conveyor_5/20200924_1445/0_CheckRuns_2/events.out.tfeve
 rl/trained_models/simple_conveyor_5/20200924_1445/0_CheckRuns_3/events.out.tfevents.1600952255.VI210713
 rl/trained_models/simple_conveyor_5/20200924_1445/0_CheckRuns_4/events.out.tfevents.1600952624.VI210713
 rl/trained_models/simple_conveyor_5/20200924_1445/0_CheckRuns_5/events.out.tfevents.1600953039.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1215/0_8workers_1/events.out.tfevents.1601029080.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1215/0_8workers_2/events.out.tfevents.1601029419.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1215/0_8workers_3/events.out.tfevents.1601029743.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1215/0_8workers_4/events.out.tfevents.1601030066.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1215/0_8workers_5/events.out.tfevents.1601030400.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1315/0_TerminationConditionChanged_1/events.out.tfevents.1601032651.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1315/0_TerminationConditionChanged_2/events.out.tfevents.1601033046.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1315/0_TerminationConditionChanged_3/events.out.tfevents.1601033435.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1315/0_TerminationConditionChanged_4/events.out.tfevents.1601033851.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1315/0_TerminationConditionChanged_5/events.out.tfevents.1601034242.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1315/1_PossibleCandidate_1/events.out.tfevents.1601035012.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1315/1_PossibleCandidate_2/events.out.tfevents.1601035455.VI210713
+rl/trained_models/simple_conveyor_6/20200925_1315/1_PossibleCandidate_3/events.out.tfevents.1601035979.VI210713
