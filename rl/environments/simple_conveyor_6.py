@@ -39,6 +39,7 @@ class simple_conveyor_6(gym.Env):
         self.percentage_small_carriers = self.config['percentage_small_carriers']
         self.percentage_medium_carriers = self.config['percentage_medium_carriers']
         self.percentage_large_carriers = self.config['percentage_large_carriers']
+        self.termination_condition = self.config['termination_condition']
 
 
 
@@ -49,7 +50,7 @@ class simple_conveyor_6(gym.Env):
         # (2*width+width+2*height+height) * 2 + (10*amount_of_gtp*2(binary)*2(for init and queue) = shapesize
         # (2*(self.amount_of_gtps *4 + 13) + (self.amount_of_gtps *4 + 13) + 2*4 + 4) * 2 + (10 * (self.amount_of_gtps *4 + 13) * 2 * 2)
         # (50+25+8+4)                     * 2 + (10*3*2*2) = 174 + 120 = 294 shapesize
-        self.shape = 2*((2*((self.amount_of_gtps*4) + 13)) + ((self.amount_of_gtps *4) + 13) + ((2*4 + 4))) + (10 * self.amount_of_gtps * 2 * 2)
+        self.shape = 2*((2*((self.amount_of_gtps*4) + 13)) + ((2*4))) + (5 * self.amount_of_gtps * 2) + (2 * self.amount_of_gtps)
         self.observation_space = gym.spaces.Box(shape=(self.shape, ),
                                                 high=self.max_time_in_system, low=0,
                                                 dtype=np.uint8)
@@ -643,8 +644,12 @@ class simple_conveyor_6(gym.Env):
         #     self.terminate = False
         
         #terminate if the demand queues are empty (means all is processed)
-        if self.demand_queues == [[] * i for i in range(self.amount_of_gtps)] :
-            self.terminate= True
+        if self.termination_condition ==1:
+            if self.demand_queues == [[] * i for i in range(self.amount_of_gtps)] :
+                self.terminate= True
+        elif self.termination_condition==2:
+            if self.init_queues == [[] * i for i in range(self.amount_of_gtps)]:
+                self.terminate=True
 
         ### Summarized return for step function ####################################################################
         reward = self.reward
