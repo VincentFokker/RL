@@ -15669,3 +15669,8 @@ rl/trained_models/simple_conveyor/20200924_0930/0_HigherBatchSize_11/events.out.
 rl/trained_models/simple_conveyor/20200924_0930/0_HigherBatchSize_10/events.out.tfevents.1600933100.VI210713
 rl/trained_models/simple_conveyor/20200924_0930/0_HigherBatchSize_1/events.out.tfevents.1600932811.VI210713
 
+rl/trained_models/simple_conveyor_5/20200924_1445/0_CheckRuns_1/events.out.tfevents.1600951485.VI210713
+rl/trained_models/simple_conveyor_5/20200924_1445/0_CheckRuns_2/events.out.tfevents.1600951889.VI210713
+rl/trained_models/simple_conveyor_5/20200924_1445/0_CheckRuns_3/events.out.tfevents.1600952255.VI210713
+rl/trained_models/simple_conveyor_5/20200924_1445/0_CheckRuns_4/events.out.tfevents.1600952624.VI210713
+rl/trained_models/simple_conveyor_5/20200924_1445/0_CheckRuns_5/events.out.tfevents.1600953039.VI210713

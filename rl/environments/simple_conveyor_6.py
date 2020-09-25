@@ -1,7 +1,7 @@
 ########################################################################################
-# Version: 6.0                                                                         #
+# Version: 4.0                                                                         #
 #                                           #
-# Includes WARM START! based on V4 includes another state observation             #
+# Includes WARM START! based on V3 includes different introduction policy              #
 # run with > python train.py -e simple_conveyor_4 -s Test -n Test123        #
 # TEST with > python test.py -e simple_conveyor_4 -s Test -n 0 --render
 
@@ -50,13 +50,13 @@ class simple_conveyor_6(gym.Env):
         # (2*(self.amount_of_gtps *4 + 13) + (self.amount_of_gtps *4 + 13) + 2*4 + 4) * 2 + (10 * (self.amount_of_gtps *4 + 13) * 2 * 2)
         # (50+25+8+4)                     * 2 + (10*3*2*2) = 174 + 120 = 294 shapesize
         self.shape = 2*((2*((self.amount_of_gtps*4) + 13)) + ((self.amount_of_gtps *4) + 13) + ((2*4 + 4))) + (10 * self.amount_of_gtps * 2 * 2)
-        self.observation_space = gym.spaces.Box(shape=(9, ),
-                                                high=3, low=0,
+        self.observation_space = gym.spaces.Box(shape=(self.shape, ),
+                                                high=self.max_time_in_system, low=0,
                                                 dtype=np.uint8)
 
         #init queues
         self.queues = [random.choices(np.arange(1,self.amount_of_outputs+1), [self.percentage_small_carriers, self.percentage_medium_carriers, self.percentage_large_carriers], k=self.gtp_buffer_size) for item in range(self.amount_of_gtps)] # generate random queues
-        logging.debug("queues that are initialized: {}".format(self.queues))
+        logging.info("queues that are initialized: {}".format(self.queues))
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
         self.in_queue = [[] for item in range(len(self.queues))]
@@ -77,6 +77,9 @@ class simple_conveyor_6(gym.Env):
         self.remaining_demand = 0
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
+        self.negative_reward = 0
+        self.cycle_count = 0
+        self.run_count = 0
 
         #gym related part
         self.reward = 0
@@ -139,7 +142,7 @@ class simple_conveyor_6(gym.Env):
 ####### FOR SIMULATION ONLY 
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
-            self.W_times[i] = self.process_time_at_GTP +8*self.amount_of_gtps + randint(-10, 10)
+            self.W_times[i] = self.process_time_at_GTP +8*self.amount_of_gtps -5
         logging.debug("Process times at operator are:{}".format(self.W_times))
 ####### FOR SIMULATION ONLY
         self.condition_to_transfer = False
@@ -215,34 +218,22 @@ class simple_conveyor_6(gym.Env):
 
 #####################################################################################
 ## Make Observation
+#
     def make_observation(self):
-        init = []
-        for item in self.init_queues:
-            init1 = item[:3]
-            init.append(init1 + [0] * (3 - len(init1)))
-        init = np.array(init).flatten()
-        return init
-
-    def make_observation2(self):
         '''Builds the observation from the available variables'''
 
         ### For the obeservation of the conveyor ########################################################################
         self.carrier_type_map_obs = np.zeros((self.empty_env.shape[0], self.empty_env.shape[1], 1)).astype(float)
-        self.carrier_type_map_obs1 = np.zeros((self.empty_env.shape[0], self.empty_env.shape[1], 1)).astype(float)
 
         for item in self.items_on_conv:
             self.carrier_type_map_obs[item[0][1]][item[0][0]] = item[1]
-            self.carrier_type_map_obs1[item[0][1]][item[0][0]] = item[2]
         # cut padding
         type_map_obs = self.carrier_type_map_obs[2:8, 1:-1]                     #for the carrier type
-        type_map_obs1 = self.carrier_type_map_obs1[2:8, 1:-1]                   #for the time in the system
         # row 0 and -1 (top and bottom)
         conv_top_bottom = np.append(type_map_obs[0], type_map_obs[-1])          #top and bottom lane for the carrier type
         logging.debug('topbottom lenght = {}'.format(len(conv_top_bottom)))
-        conv_top_bottom1 = np.append(type_map_obs1[0], type_map_obs1[-1])       #top and bottom lane for the time in the system
         # left and right lane
         conv_left_right = np.append(type_map_obs[1:-1][:, 0], type_map_obs[1:-1][:, -1])        #left and right lane for carrier type
-        conv_left_right1 = np.append(type_map_obs1[1:-1][:, 0], type_map_obs1[1:-1][:, -1])     #left and right for the time in system
         logging.debug('leftright lenght = {}'.format(len(conv_left_right)))
         # together
         carrier_type_map_obs = np.append(conv_top_bottom, conv_left_right)                      #full circle for the carrier type
@@ -250,29 +241,19 @@ class simple_conveyor_6(gym.Env):
         type_map_obs = np.array([self.encode(item) for item in list(carrier_type_map_obs)]).flatten()   #binary encoded memory for the type
         logging.debug('typemap lenght = {}'.format(len(type_map_obs)))
 
-        type_map_obs1 = np.append(conv_top_bottom1, conv_left_right1)                   #full circle for the time in system
         # type_map_obs1 = np.append(type_map_obs1[-1], type_map_obs1[1:-1][:, -1])          #for half observation
-        logging.debug('time in system lenght = {}'.format(len(type_map_obs1)))
-
-        #combine the type and the time in system
-        type_map_obs = np.append(type_map_obs, type_map_obs1)
         logging.debug('size conveyor obs = {}'.format(len(type_map_obs)))
 
         ### For the observation of the items in queue ##################################################################
-        in_queue = []
-        for item in self.in_queue:
-            in_queue.append(item + [0] * (10 - len(item)))
-        in_queue = np.array(in_queue).flatten()
-        # binary encoding of the categorical variables
-        in_queue = np.array([self.encode(item) for item in list(in_queue)]).flatten()
-        logging.debug('in_queue lenght = {}'.format(len(in_queue)))
+                    #length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
+        in_queue = [len(item)* 1/7 for item in self.in_queue] + [sum(item)* 1/21 for item in self.in_queue]
 
         ### For the observation of the demand of the GtP Queue #########################################################
         #make the init list
         init = []
         for item in self.init_queues:
-            init1 = item[:10]
-            init.append(init1 + [0] * (10 - len(init1)))
+            init1 = item[:5]
+            init.append(init1 + [0] * (5 - len(init1)))
         init = list(np.array(init).flatten())
         # binary encoding of the categorical variables
         init = np.array([self.encode(item) for item in init]).flatten()
@@ -291,7 +272,7 @@ class simple_conveyor_6(gym.Env):
     def reset(self):
         """reset all the variables to zero, empty queues
         must return the current state of the environment"""
-
+        self.run_count +=1
         self.episode +=1
         print('Ep: {:5}, steps: {:3}, R: {:3.3f}'.format(self.episode, self.steps, self.reward), end='\r')
         self.D_states = {}
@@ -316,7 +297,7 @@ class simple_conveyor_6(gym.Env):
 ####### FOR SIMULATION ONLY 
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
-            self.W_times[i] = self.process_time_at_GTP + 8*self.amount_of_gtps  + randint(-10, 10)
+            self.W_times[i] = self.process_time_at_GTP + 8*self.amount_of_gtps  -5
         logging.debug("Process times at operator are: {}".format(self.W_times))
 ####### FOR SIMULATION ONLY
 
@@ -335,6 +316,8 @@ class simple_conveyor_6(gym.Env):
         self.remaining_demand = 0
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
+        self.negative_reward = 0
+        self.cycle_count = 0
 
         self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
                                       [self.percentage_small_carriers, self.percentage_medium_carriers,
@@ -465,7 +448,21 @@ class simple_conveyor_6(gym.Env):
                 else:
                     self.D_condition_1[d_locs.index(loc2)+1] = False
                 #condition 2 = if the lenght of the in_queue is <= smallest queue that also demands order carrier of the same type
-                condition_2 = len(self.in_queue[d_locs.index(loc2)])-1 <= min(map(len, self.in_queue))
+                #condition_2 = len(self.in_queue[d_locs.index(loc2)])-1 <= min(map(len, self.in_queue))
+                if carrier_map[loc2[1]][loc2[0]] != 0:
+                    logging.debug('Left condition at lane {} = {}'.format(d_locs.index(loc2) + 1,
+                                                                          len(self.in_queue[d_locs.index(loc2)])))
+                    logging.debug('Right condition at lane {} = {}'.format(d_locs.index(loc2) + 1, min(map(len, [
+                        self.in_queue[self.init_queues.index(i)] for i in
+                        [item for item in [item for item in self.init_queues if item != []] if
+                         item[0] == self.init_queues[d_locs.index(loc2)][0]]]))))
+                    condition_2 = len(self.in_queue[d_locs.index(loc2)]) <= min(map(len, [
+                        self.in_queue[self.init_queues.index(i)] for i in
+                        [item for item in [item for item in self.init_queues if item != []] if
+                         item[0] == self.init_queues[d_locs.index(loc2)][0]]]))
+                else:
+                    condition_2 = False
+                logging.debug('Condition 2 == {}'.format(condition_2))
                 if condition_2 == True:
                     self.D_condition_2[d_locs.index(loc2)+1] = True
                 else:
@@ -563,16 +560,31 @@ class simple_conveyor_6(gym.Env):
             logging.debug("- - action 0 executed")
             logging.debug("Divert locations :{}".format(self.diverter_locations))
             logging.debug('states of Divert points = {}'.format(self.D_states))
-        elif action ==1: 
-            self.O_states[1] +=1
+        elif action ==1:
+            if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 1]) == len(
+                    [item for sublist in self.init_queues for item in sublist if item == 1]):
+                self.reward +=self.negative_reward_for_flooding
+                self.step_reward_n += self.negative_reward_for_flooding
+            else:
+                self.O_states[1] +=1
             self.step_env()
             logging.debug("- - action 1 executed")
         elif action ==2:
-            self.O_states[2] +=1
+            if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 2]) == len(
+                    [item for sublist in self.init_queues for item in sublist if item == 2]):
+                self.reward +=self.negative_reward_for_flooding
+                self.step_reward_n += self.negative_reward_for_flooding
+            else:
+                self.O_states[2] +=1
             self.step_env()
             logging.debug("- - action 2 executed")
         elif action ==3:
-            self.O_states[3] +=1
+            if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 3]) == len(
+                    [item for sublist in self.init_queues for item in sublist if item == 3]):
+                self.reward +=self.negative_reward_for_flooding
+                self.step_reward_n += self.negative_reward_for_flooding
+            else:
+                self.O_states[3] +=1
             self.step_env()
             logging.debug("- - action 3 executed")
         else:
@@ -600,6 +612,7 @@ class simple_conveyor_6(gym.Env):
         if len([item for item in self.items_on_conv if item[0] ==[1,7]]) == 1:              # in case that negative reward is calculated with cycles
             self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle #tag:punishment
             self.step_reward_n += self.negative_reward_for_cycle
+            self.cycle_count +=1
 
         # if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
         #     self.reward += self.negative_reward_for_flooding                                                            #tag:punishment
@@ -623,11 +636,11 @@ class simple_conveyor_6(gym.Env):
         self.remaining_demand = len([item for sublist in self.demand_queues for item in sublist])
 
         ### Determine Termination cases ###############################################################################
-        try:
-            if max([item[2] for item in self.items_on_conv]) >= 1:
-                self.terminate = True
-        except:
-            self.terminate = False
+        # try:
+        #     if max([item[2] for item in self.items_on_conv]) >= 1:
+        #         self.terminate = True
+        # except:
+        #     self.terminate = False
         
         #terminate if the demand queues are empty (means all is processed)
         if self.demand_queues == [[] * i for i in range(self.amount_of_gtps)] :

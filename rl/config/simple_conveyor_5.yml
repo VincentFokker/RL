@@ -18,7 +18,7 @@ environment:
 
     # Rewards
     negative_reward_per_step: -1 #times all items in the system.
-    travelpath_to_gtp_reward: 1 #factor for the weight of reward for the length of the travelpath
+    travelpath_to_gtp_reward: 1  #factor for the weight of reward for the length of the travelpath
     negative_reward_for_cycle: -40
     negative_reward_for_flooding: -10
     negative_reward_for_empty_queue: -1     #negative reward for empty queue, otherwise queues are empty
@@ -69,7 +69,7 @@ main:
 models:
     PPO2:
         gamma: 0.99          # Discount factor for future rewards
-        n_steps: 256         # Batch size (n_steps * n_workers)
+        n_steps: 512         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.001 # LR
         vf_coef: 0.5         # The contribution of value function loss to the total loss of the network
