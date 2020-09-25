@@ -7,6 +7,8 @@ environment:
     exception_occurence: 0.0 #how often an exception occurs
     process_time_at_GTP: 6 #time to process one product in sec
     max_time_in_system: 400
+    in_que_observed: 3
+    termination_condition: 1
 
     #carrier distribution
     percentage_small_carriers: 0.15

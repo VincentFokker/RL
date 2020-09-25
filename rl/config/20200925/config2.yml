@@ -7,6 +7,8 @@ environment:
     exception_occurence: 0.0 #how often an exception occurs
     process_time_at_GTP: 6 #time to process one product in sec
     max_time_in_system: 400
+    in_que_observed: 3
+    termination_condition: 1
 
     #carrier distribution
     percentage_small_carriers: 0.15
@@ -18,8 +20,8 @@ environment:
 
     # Rewards
     negative_reward_per_step: -1 #times all items in the system.
-    travelpath_to_gtp_reward: 1  #factor for the weight of reward for the length of the travelpath
-    negative_reward_for_cycle: -40
+    travelpath_to_gtp_reward: 0  #factor for the weight of reward for the length of the travelpath
+    negative_reward_for_cycle: -20
     negative_reward_for_flooding: -10
     negative_reward_for_empty_queue: -1     #negative reward for empty queue, otherwise queues are empty
     positive_reward_for_divert: 5
@@ -68,7 +70,7 @@ main:
 
 models:
     PPO2:
-        gamma: 0.999          # Discount factor for future rewards
+        gamma: 0.99          # Discount factor for future rewards
         n_steps: 512         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.001 # LR

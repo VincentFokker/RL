@@ -20,7 +20,7 @@ import gym
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements
 logging.basicConfig(level=logging.INFO)
 
-class simple_conveyor_6(gym.Env):
+class simple_conveyor_7(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
     def __init__(self, config, **kwargs):
@@ -39,6 +39,8 @@ class simple_conveyor_6(gym.Env):
         self.percentage_small_carriers = self.config['percentage_small_carriers']
         self.percentage_medium_carriers = self.config['percentage_medium_carriers']
         self.percentage_large_carriers = self.config['percentage_large_carriers']
+        self.in_que_observed = self.config['in_que_observed']
+        self.termination_condition = self.config['termination_condition']
 
 
 
@@ -49,9 +51,9 @@ class simple_conveyor_6(gym.Env):
         # (2*width+width+2*height+height) * 2 + (10*amount_of_gtp*2(binary)*2(for init and queue) = shapesize
         # (2*(self.amount_of_gtps *4 + 13) + (self.amount_of_gtps *4 + 13) + 2*4 + 4) * 2 + (10 * (self.amount_of_gtps *4 + 13) * 2 * 2)
         # (50+25+8+4)                     * 2 + (10*3*2*2) = 174 + 120 = 294 shapesize
-        self.shape = 2*((2*((self.amount_of_gtps*4) + 13)) + ((self.amount_of_gtps *4) + 13) + ((2*4 + 4))) + (10 * self.amount_of_gtps * 2 * 2)
-        self.observation_space = gym.spaces.Box(shape=(152, ),
-                                                high=self.max_time_in_system, low=0,
+        self.shape = 2*((env.amount_of_gtps*4) + 13) + (self.in_que_observed * env.amount_of_gtps * 2) + (2 * env.amount_of_gtps)
+        self.observation_space = gym.spaces.Box(shape=(self.shape, ),
+                                                high=1, low=0,
                                                 dtype=np.uint8)
 
         #init queues
@@ -229,31 +231,23 @@ class simple_conveyor_6(gym.Env):
             self.carrier_type_map_obs[item[0][1]][item[0][0]] = item[1]
         # cut padding
         type_map_obs = self.carrier_type_map_obs[2:8, 1:-1]                     #for the carrier type
-        # row 0 and -1 (top and bottom)
-        conv_top_bottom = np.append(type_map_obs[0], type_map_obs[-1])          #top and bottom lane for the carrier type
-        logging.debug('topbottom lenght = {}'.format(len(conv_top_bottom)))
-        # left and right lane
-        conv_left_right = np.append(type_map_obs[1:-1][:, 0], type_map_obs[1:-1][:, -1])        #left and right lane for carrier type
-        logging.debug('leftright lenght = {}'.format(len(conv_left_right)))
-        # together
-        carrier_type_map_obs = np.append(conv_top_bottom, conv_left_right)                      #full circle for the carrier type
-        # type_map_obs = np.append(type_map_obs[-1], type_map_obs[1:-1][:, -1])            #for half observation
-        type_map_obs = np.array([self.encode(item) for item in list(carrier_type_map_obs)]).flatten()   #binary encoded memory for the type
-        logging.debug('typemap lenght = {}'.format(len(type_map_obs)))
 
-        # type_map_obs1 = np.append(type_map_obs1[-1], type_map_obs1[1:-1][:, -1])          #for half observation
+        #Only observe bottom lane
+        carrier_type_map_obs = type_map_obs[-1]        #top and bottom lane for the carrier type
+
+        type_map_obs = np.array([self.encode(item) for item in list(carrier_type_map_obs)]).flatten()   #binary encoded memory for the type
         logging.debug('size conveyor obs = {}'.format(len(type_map_obs)))
 
         ### For the observation of the items in queue ##################################################################
                     #length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
-        in_queue = [len(item)* 1/7 for item in self.in_queue] + [sum(item)* 1/21 for item in self.in_queue]
+        in_queue = [len(item)* 1/7 for item in self.in_queue] + [sum(item)* 1/(self.amount_of_gtps*7) for item in self.in_queue]
 
         ### For the observation of the demand of the GtP Queue #########################################################
         #make the init list
         init = []
         for item in self.init_queues:
-            init1 = item[:1]
-            init.append(init1 + [0] * (1 - len(init1)))
+            init1 = item[:self.in_que_observed]
+            init.append(init1 + [0] * (self.in_que_observed - len(init1)))
         init = list(np.array(init).flatten())
         # binary encoding of the categorical variables
         init = np.array([self.encode(item) for item in init]).flatten()
@@ -643,8 +637,12 @@ class simple_conveyor_6(gym.Env):
         #     self.terminate = False
         
         #terminate if the demand queues are empty (means all is processed)
-        if self.demand_queues == [[] * i for i in range(self.amount_of_gtps)] :
-            self.terminate= True
+        if self.termination_condition ==1:
+            if self.demand_queues == [[] * i for i in range(self.amount_of_gtps)] :
+                self.terminate= True
+        elif self.termination_condition==2:
+            if self.init_queues == [[] * i for i in range(self.amount_of_gtps)]:
+                self.terminate=True
 
         ### Summarized return for step function ####################################################################
         reward = self.reward
