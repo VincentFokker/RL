@@ -7,4 +7,3 @@ from .simple_conveyor_3 import simple_conveyor_3
 from .simple_conveyor_4 import simple_conveyor_4
 from .simple_conveyor_5 import simple_conveyor_5
 from .simple_conveyor_6 import simple_conveyor_6
-from .simple_conveyor_7 import simple_conveyor_7

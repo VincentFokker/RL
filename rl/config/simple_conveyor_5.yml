@@ -18,7 +18,7 @@ environment:
 
     # Rewards
     negative_reward_per_step: -1 #times all items in the system.
-    travelpath_to_gtp_reward: 1 #factor for the weight of reward for the length of the travelpath
+    travelpath_to_gtp_reward: 1  #factor for the weight of reward for the length of the travelpath
     negative_reward_for_cycle: -40
     negative_reward_for_flooding: -10
     negative_reward_for_empty_queue: -1     #negative reward for empty queue, otherwise queues are empty
