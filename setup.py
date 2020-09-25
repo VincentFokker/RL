@@ -7,9 +7,8 @@ packages = ['numpy==1.16.2',
             'opencv-python',
             'stable_baselines',
             'pyyaml',
-            'PyQt5',
             'pyqtgraph']
-
+#            'PyQt5',
 setup(
     name='rl',
     description='RL training library.',

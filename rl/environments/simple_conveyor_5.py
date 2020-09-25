@@ -79,6 +79,7 @@ class simple_conveyor_5(gym.Env):
         self.positive_reward = 0
         self.negative_reward = 0
         self.cycle_count = 0
+        self.run_count = 0
 
         #gym related part
         self.reward = 0
@@ -286,7 +287,7 @@ class simple_conveyor_5(gym.Env):
     def reset(self):
         """reset all the variables to zero, empty queues
         must return the current state of the environment"""
-
+        self.run_count +=1
         self.episode +=1
         print('Ep: {:5}, steps: {:3}, R: {:3.3f}'.format(self.episode, self.steps, self.reward), end='\r')
         self.D_states = {}
