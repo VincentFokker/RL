@@ -5,10 +5,11 @@ environment:
     exception_occurence: 0.0
     process_time_at_GTP: 6
     max_time_in_system: 400
+    in_que_observed: 3
+    termination_condition: 2
     percentage_small_carriers: 0.15
     percentage_medium_carriers: 0.55
     percentage_large_carriers: 0.35
-    termination_condition: 1
     negative_reward_per_step: -1
     travelpath_to_gtp_reward: 0
     negative_reward_for_cycle: -20
@@ -21,9 +22,9 @@ environment:
 main:
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 1
-    n_steps: 5000000
-    save_every: 1000000
+    n_workers: 8
+    n_steps: 20000000
+    save_every: 5000000
     logs:
     - steps
     - amount_of_items_on_conv
@@ -35,7 +36,7 @@ main:
     - run_count
 models:
     PPO2:
-        gamma: 0.999
+        gamma: 0.996
         n_steps: 512
         ent_coef: 0.01
         learning_rate: 0.001

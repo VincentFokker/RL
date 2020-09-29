@@ -52,9 +52,9 @@ main:
 
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 10      # Parallel environments
-    n_steps:    5000000    # Steps to train
-    save_every: 1000000  # Save a checkpoint of the model every n steps
+    n_workers: 8      # Parallel environments
+    n_steps:    20000000    # Steps to train
+    save_every: 5000000  # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
