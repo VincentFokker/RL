@@ -571,7 +571,7 @@ class simple_conveyor_8(gym.Env):
             else:
                 self.O_states[2] +=1
                 self.step_env()
-            logging.debug("- - action 2 executed")
+            logging.debug("- - action 2 executedsimple_conveyor_8.yml")
         elif action ==3:
             if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 3]) == len(
                     [item for sublist in self.init_queues for item in sublist if item == 3]):

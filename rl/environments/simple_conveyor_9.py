@@ -1,7 +1,8 @@
 ########################################################################################
 # Version: 8.0                                                                         #
 #                                           #
-# Decreased observation space             #
+# Decreased observation space to (42, 0)            #
+# Added action tracer
 # run with > python train.py -e simple_conveyor_4 -s Test -n Test123        #
 # TEST with > python test.py -e simple_conveyor_4 -s Test -n 0 --render
 
@@ -51,7 +52,7 @@ class simple_conveyor_9(gym.Env):
         # (2*width+width+2*height+height) * 2 + (10*amount_of_gtp*2(binary)*2(for init and queue) = shapesize
         # (2*(self.amount_of_gtps *4 + 13) + (self.amount_of_gtps *4 + 13) + 2*4 + 4) * 2 + (10 * (self.amount_of_gtps *4 + 13) * 2 * 2)
         # (50+25+8+4)                     * 2 + (10*3*2*2) = 174 + 120 = 294 shapesize
-        self.shape = 2*3*self.amount_of_gtps + (self.in_que_observed * self.amount_of_gtps * 2) + (2 * self.amount_of_gtps)
+        self.shape = 3*self.amount_of_gtps + (self.in_que_observed * self.amount_of_gtps * 2) + (2 * self.amount_of_gtps)
         self.observation_space = gym.spaces.Box(shape=(self.shape, ),
                                                 high=1, low=0,
                                                 dtype=np.uint8)
@@ -82,6 +83,7 @@ class simple_conveyor_9(gym.Env):
         self.negative_reward = 0
         self.cycle_count = 0
         self.run_count = 0
+
 
         #gym related part
         self.reward = 0
@@ -234,11 +236,11 @@ class simple_conveyor_9(gym.Env):
             amount_of_type1 = len([item for item in lowerpart if item[1] == 1 and item[0] >= location[0]])
             amount_of_type2 = len([item for item in lowerpart if item[1] == 2 and item[0] >= location[0]])
             amount_of_type3 = len([item for item in lowerpart if item[1] == 3 and item[0] >= location[0]])
-            all_types.append(amount_of_type1)
-            all_types.append(amount_of_type2)
-            all_types.append(amount_of_type3)
+            all_types.append((amount_of_type1 / (self.amount_of_gtps * 4 + 11)))
+            all_types.append((amount_of_type2 / (self.amount_of_gtps * 4 + 11)))
+            all_types.append((amount_of_type3 / (self.amount_of_gtps * 4 + 11)))
 
-        on_conv = np.array([self.encode(item) for item in all_types]).flatten()
+        on_conv = np.array(all_types)
 
         ### For the observation of the items in queue ##################################################################
                     #length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
@@ -314,6 +316,7 @@ class simple_conveyor_9(gym.Env):
         self.positive_reward = 0
         self.negative_reward = 0
         self.cycle_count = 0
+
 
         self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
                                       [self.percentage_small_carriers, self.percentage_medium_carriers,
@@ -546,6 +549,7 @@ class simple_conveyor_9(gym.Env):
 
 
     def step(self, action):
+
         self.step_reward_p = 0
         self.step_reward_n = 0
         logging.debug("Executed action: {}".format(action))
@@ -556,6 +560,7 @@ class simple_conveyor_9(gym.Env):
             logging.debug("- - action 0 executed")
             logging.debug("Divert locations :{}".format(self.diverter_locations))
             logging.debug('states of Divert points = {}'.format(self.D_states))
+
         elif action ==1:
             if len([item[1] for item in self.items_on_conv if item[0][1] < 8 and item[1] == 1]) == len(
                     [item for sublist in self.init_queues for item in sublist if item == 1]):
