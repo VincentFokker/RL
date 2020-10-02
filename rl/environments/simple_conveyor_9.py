@@ -27,9 +27,8 @@ class simple_conveyor_9(gym.Env):
     def __init__(self, config, **kwargs):
         """initialize states of the variables, the lists used"""
 
-        # init config
+        # init configs: for explaination of these variables, check: config/simple_conveyor_9.yml
         self.config = config['environment']
-
         self.amount_of_gtps = self.config['amount_gtp']
         self.amount_of_outputs = self.config['amount_output']
         self.gtp_buffer_size = self.config['gtp_buffer_size']
@@ -49,23 +48,26 @@ class simple_conveyor_9(gym.Env):
         self.action_space = gym.spaces.Discrete(4)
 
         #determination of observation_space:
-        # (2*width+width+2*height+height) * 2 + (10*amount_of_gtp*2(binary)*2(for init and queue) = shapesize
-        # (2*(self.amount_of_gtps *4 + 13) + (self.amount_of_gtps *4 + 13) + 2*4 + 4) * 2 + (10 * (self.amount_of_gtps *4 + 13) * 2 * 2)
-        # (50+25+8+4)                     * 2 + (10*3*2*2) = 174 + 120 = 294 shapesize
+        # shape = (for all 3 types of order carrier the total amount (normalized) * Amount of GTP (for each gtP) + (amount of observed instances * amount of gtp * 2(binary coding) + for each gtp_queue 2 values how full, and remaining time (normalized)
         self.shape = 3*self.amount_of_gtps + (self.in_que_observed * self.amount_of_gtps * 2) + (2 * self.amount_of_gtps)
         self.observation_space = gym.spaces.Box(shape=(self.shape, ),
                                                 high=1, low=0,
                                                 dtype=np.uint8)
 
         #init queues
-        self.queues = [random.choices(np.arange(1,self.amount_of_outputs+1), [self.percentage_small_carriers, self.percentage_medium_carriers, self.percentage_large_carriers], k=self.gtp_buffer_size) for item in range(self.amount_of_gtps)] # generate random queues
+        self.queues = [random.choices(np.arange(1,self.amount_of_outputs+1),
+                                      [self.percentage_small_carriers, self.percentage_medium_carriers,
+                                       self.percentage_large_carriers],
+                                      k=self.gtp_buffer_size) for item in range(self.amount_of_gtps)]                   # generate random queues based on distribution defined in config
         logging.info("queues that are initialized: {}".format(self.queues))
+
+        #make required copies
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
         self.in_queue = [[] for item in range(len(self.queues))]
 
         ## rewards
-        # All punishments found by: tag:punishment
+        # All rewards are define in the config file
         self.negative_reward_per_step = self.config['negative_reward_per_step']
         self.travelpath_to_gtp_reward = self.config['travelpath_to_gtp_reward']
         self.negative_reward_for_cycle = self.config['negative_reward_for_cycle']
@@ -74,7 +76,7 @@ class simple_conveyor_9(gym.Env):
         self.positive_reward_for_divert = self.config['positive_reward_for_divert']
         self.negative_reward_for_invalid = self.config['negative_reward_for_invalid']
 
-        #tracers
+        #tracers for logging during training
         self.amount_of_items_on_conv = 0
         self.amount_of_items_in_sys = 0
         self.remaining_demand = 0
@@ -96,7 +98,7 @@ class simple_conveyor_9(gym.Env):
 
         self.create_window()
 
-        #colors
+        #colors used in the render
         self.pallette = (np.asarray(sns.color_palette("Reds", self.amount_of_outputs)) * 255).astype(int)
 
         # build env
@@ -118,7 +120,7 @@ class simple_conveyor_9(gym.Env):
         for i in range(1,len(self.diverter_locations)+1):
             self.D_states[i] = False
         
-        #D conditions
+        #D conditions: for the render
         self.D_condition_1 = {}
         for i in range(1,len(self.diverter_locations)+1):
             self.D_condition_1[i] = False
@@ -133,21 +135,23 @@ class simple_conveyor_9(gym.Env):
         for i in range(1,len(self.output_locations)+1):
             self.O_states[i] = 0
 
-        # initialize transition points: 0=no transition, 1=transition
+        # initialize transition points: 0=no transition, 1=transition (for future use)
         self.T_states = {}
         for i in range(1,len(self.operator_locations)+1):
             self.T_states[i] = False
 
-        #initialize merge points
+        #initialize merge points    (for future use)
         self.M_states = {}
         for i in range(1,len(self.merge_locations)+1):
             self.M_states[i] = False
 
-####### FOR SIMULATION ONLY 
+####### FOR SIMULATION ONLY
+        # a counter to record the processing time at GtP station
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
-            self.W_times[i] = self.process_time_at_GTP +8*self.amount_of_gtps -5
+            self.W_times[i] = self.process_time_at_GTP +8*self.amount_of_gtps -5        #initialize with some time for first run
         logging.debug("Process times at operator are:{}".format(self.W_times))
+
 ####### FOR SIMULATION ONLY
         self.condition_to_transfer = False
         self.condition_to_process = False
@@ -161,7 +165,7 @@ class simple_conveyor_9(gym.Env):
 
 
     def warm_start(self):
-        # add items to queues
+        # add items to queues, so queues are not empty when starting with training (empty queue is punished with -1 each timestep)
         for _ in self.operator_locations:
             self.in_queue[self.operator_locations.index(_)].append(self.init_queues[self.operator_locations.index(_)][0])
 
@@ -231,7 +235,7 @@ class simple_conveyor_9(gym.Env):
         lowerpart = [[item[0][0], item[1]] for item in self.items_on_conv if item[0][1] == 7]
 
         all_types = []
-        # all type 1 for GTP3
+        # for each gtp diverter location; determine how many items are in the pipeline ; normalize to a standardized value
         for location in self.diverter_locations:
             amount_of_type1 = len([item for item in lowerpart if item[1] == 1 and item[0] >= location[0]])
             amount_of_type2 = len([item for item in lowerpart if item[1] == 2 and item[0] >= location[0]])
@@ -270,29 +274,30 @@ class simple_conveyor_9(gym.Env):
     def reset(self):
         """reset all the variables to zero, empty queues
         must return the current state of the environment"""
-        self.run_count +=1
-        self.episode +=1
+        self.run_count +=1      #for logging
+        self.episode +=1        #for logging
         print('Ep: {:5}, steps: {:3}, R: {:3.3f}'.format(self.episode, self.steps, self.reward), end='\r')
         self.D_states = {}
         for i in range(1,len(self.diverter_locations)+1):
             self.D_states[i] = False
         
-        #initialize output points
+        #reset output points
         self.O_states = {}
         for i in range(1,len(self.output_locations)+1):
             self.O_states[i] = 0
         
-        # initialize transition points: 0=no transition, 1=transition
+        # reset transition points: 0=no transition, 1=transition
         self.T_states = {}
         for i in range(1,len(self.operator_locations)+1):
             self.T_states[i] = False
 
-        #initialize merge points
+        #reset merge points
         self.M_states = {}
         for i in range(1,len(self.merge_locations)+1):
             self.M_states[i] = False
 
-####### FOR SIMULATION ONLY 
+####### FOR SIMULATION ONLY
+        # reset the time to initial values
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
             self.W_times[i] = self.process_time_at_GTP + 8*self.amount_of_gtps  -5
@@ -317,7 +322,7 @@ class simple_conveyor_9(gym.Env):
         self.negative_reward = 0
         self.cycle_count = 0
 
-
+        #reset the queues, initialize with a new random set of order sequences
         self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
                                       [self.percentage_small_carriers, self.percentage_medium_carriers,
                                        self.percentage_large_carriers], k=self.gtp_buffer_size) for item in
@@ -328,6 +333,7 @@ class simple_conveyor_9(gym.Env):
         self.empty_env = self.generate_env(self.amount_of_gtps, self.amount_of_outputs)
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1))
 
+        # do warm start
         self.warm_start()
 
         return self.make_observation()
@@ -338,26 +344,33 @@ class simple_conveyor_9(gym.Env):
     def process_at_GTP(self):
         # for each step; check if it needed to process an order carrier at GTP
         O_locs = copy(self.operator_locations)
+        # check for each operator location (also transition point) if:
         for Transition_point in O_locs:                                 #For all operator locations, check:
 
             try:
+                #if the order carrier is not equal to the demanded type; set condition to transfer to true
                 if self.demand_queues[O_locs.index(Transition_point)][0] != self.in_queue[O_locs.index(Transition_point)][0]:
                     self.condition_to_transfer = True
+                # if the order carrier is equal to the demanded type; set condition to process to true
                 elif self.demand_queues[O_locs.index(Transition_point)][0] == self.in_queue[O_locs.index(Transition_point)][0]:
                     self.condition_to_process = True
             except:
+                #else: set to false
                 self.condition_to_transfer = False
                 self.condition_to_process = False
 
+            # if processingtime at a gtp station == 0 , an order carrier is processed (removed)
             if self.W_times[O_locs.index(Transition_point)+1] == 0:     #if the waiting time is 0:
                 logging.debug('Waiting time at GTP {} is 0, check done on correctness:'.format(O_locs.index(Transition_point)+1))
                 if random.random() < self.exception_occurence: #if the random occurence is below exception occurence (set in config) do:
                     #remove an order carrier (broken)
                     logging.debug('With a change percentage an order carrier is removed')
-                    logging.info('trasition point is: {}'.format(Transition_point))
+                    logging.info('transition point is: {}'.format(Transition_point))
                     #self.update_queues(O_locs.index(Transition_point)+1, [item[1] for item in self.items_on_conv if item[0] == Transition_point][0])
+                    #set waiting time to 1 (next step you want to process again)
                     self.W_times[O_locs.index(Transition_point)+1] = 1
                     #self.O_states[[item[1] for item in self.items_on_conv if item[0] == Transition_point][0]] +=1
+                    #remove item from conveyor (e.g. because it is broken)
                     self.items_on_conv = [item for item in self.items_on_conv if item[0] !=Transition_point]
                 
                 elif self.condition_to_transfer:
@@ -365,8 +378,9 @@ class simple_conveyor_9(gym.Env):
                     for item  in self.items_on_conv:
                         if item[0] == Transition_point:
                             item[0][0] -=1
-                    self.W_times[O_locs.index(Transition_point)+1] = 1
-                    self.update_queues(O_locs.index(Transition_point)+1, self.in_queue[O_locs.index(Transition_point)][0])
+                    self.W_times[O_locs.index(Transition_point)+1] = 1                                          #set waiting time to 1; you want to check next item next step
+
+                    self.update_queues(O_locs.index(Transition_point)+1, self.in_queue[O_locs.index(Transition_point)][0])  #queues are updated to match situation
                 elif self.condition_to_process:
                     #Process an order at GTP successfully
                     logging.debug('Demand queues : {}'.format(self.demand_queues))
@@ -375,11 +389,11 @@ class simple_conveyor_9(gym.Env):
                     logging.debug('right order carrier is at GTP (location: {}'.format(Transition_point))
                     logging.debug('conveyor memory before processing: {}'.format(self.items_on_conv))
                     self.items_on_conv = [item for item in self.items_on_conv if item[0] !=Transition_point]
-                    self.reward += 10 + 10 + (O_locs.index(Transition_point)+1 * 4) * self.travelpath_to_gtp_reward
+                    self.reward += 10 + 10 + (O_locs.index(Transition_point)+1 * 4) * self.travelpath_to_gtp_reward         #a reward is given for processing an order (can be turned off in config if travelpath_to_gtp_reward = 0)
                     self.step_reward_p += 10 + 10 + (O_locs.index(Transition_point)+1 * 4)
                     self.positive_reward += 10 + 10 + (O_locs.index(Transition_point)+1 * 4) * self.travelpath_to_gtp_reward
 
-                    self.amount_of_orders_processed +=1
+                    self.amount_of_orders_processed +=1                       #for logging
                     logging.debug('order at GTP {} processed'.format(O_locs.index(Transition_point)+1))
                     logging.debug('conveyor memory after processing: {}'.format(self.items_on_conv))
 
@@ -396,6 +410,7 @@ class simple_conveyor_9(gym.Env):
 
                     except:
                         next_type = 99
+                    #set new waiting time; based on size of order carrier that is currently processed
                     self.W_times[O_locs.index(Transition_point)+1] = self.process_time_at_GTP if next_type == 1 else self.process_time_at_GTP+30 if next_type == 2 else self.process_time_at_GTP+60 if next_type == 3 else self.process_time_at_GTP+60 if next_type == 4 else self.process_time_at_GTP+60
                     logging.debug('new timestep set at GTP {} : {}'.format(O_locs.index(Transition_point)+1, self.W_times[O_locs.index(Transition_point)+1]))
                 else:
@@ -408,6 +423,7 @@ class simple_conveyor_9(gym.Env):
                     logging.debug('item removed from in-que')
                 except:
                     logging.debug("Except: queue was already empty!")
+            #this should not happen, but a condition to fix in case it does occur:
             elif self.W_times[O_locs.index(Transition_point)+1] < 0:
                 self.W_times[O_locs_locations.index(Transition_point)+1] = 0
                 logging.debug("Waiting time was below 0, reset to 0")
@@ -421,15 +437,19 @@ class simple_conveyor_9(gym.Env):
 ## STEP FUNCTION
 #
     def step_env(self):
+        """
+        Function that initiates 1 time advancement in the system. All items move one step. also possible action are done based on conditions.
+        Is ran for each action (each timestep)
+        """
 
-####make carrier type map
+####make carrier type map (observe the current state again)
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1)).astype(float)
         for item in self.items_on_conv:
             self.carrier_type_map[item[0][1]][item[0][0]] = item[1]
             item[2] += 1/self.max_time_in_system                                                       #increase the time in the system
 
         # give a negative reward for each step, for all the items that are taking are taking a loop
-        # self.reward += len([item for item in self.items_on_conv if item[0][1] < 7]) * self.negative_reward_per_step       #tag:punishment
+        # self.reward += len([item for item in self.items_on_conv if item[0][1] < 7]) * self.negative_reward_per_step       #tag:punishment (currently not used)
 
 #### Process the orders at GTP > For simulation: do incidental transfer of order carrier
         self.process_at_GTP()
@@ -466,11 +486,11 @@ class simple_conveyor_9(gym.Env):
                     self.D_condition_2[d_locs.index(loc2)+1] = True
                 else:
                     self.D_condition_2[d_locs.index(loc2)+1] = False
-
+                #check if the next space is empty (queue is not full)
                 condition_3 = carrier_map[loc2[1]+1][loc2[0]] ==0
                 logging.debug(carrier_map[loc2[1]+1][loc2[0]] ==0)
 
-
+                #if all conditions apply, an order carrier is set ready to move into queue
                 if condition_1 and condition_2 and condition_3: 
                     self.D_states[d_locs.index(loc2)+1] = True
                     logging.debug("set diverter state for diverter {} to TRUE".format(d_locs.index(loc2)+1))
@@ -501,7 +521,7 @@ class simple_conveyor_9(gym.Env):
                 try:
                     if self.D_states[self.diverter_locations.index(item[0])+1] == True and self.carrier_type_map[item[0][1]+1][item[0][0]] ==0:
                         item[0][1] +=1
-                        self.reward += self.positive_reward_for_divert
+                        self.reward += self.positive_reward_for_divert                                                  #if order carrier is correctly delivered, reward is given
                         self.step_reward_p += self.positive_reward_for_divert
                         logging.debug("moved order carrier into GTP lane {}".format(self.diverter_locations.index(loc1)+1))
                     else:
@@ -549,7 +569,15 @@ class simple_conveyor_9(gym.Env):
 
 
     def step(self, action):
+        """
+        Generic step function; takes a step bij calling step_env()
+        observation is returned
+        Reward is calculated
+        Tracers are logged
+        Termination case is determined
 
+        returns state, reward, terminate, {}
+        """
         self.step_reward_p = 0
         self.step_reward_n = 0
         logging.debug("Executed action: {}".format(action))
@@ -661,7 +689,7 @@ class simple_conveyor_9(gym.Env):
 
 ################## RENDER FUNCTIONS ################################################################################################
     def render_plt(self):
-        """Simple render function, uses matplotlib to render the image + some additional information on the transition points"""
+        """Simple render function, uses matplotlib to render the image in jupyter notebook + some additional information on the transition points"""
         # print('items on conveyor:')
         # print(self.items_on_conv)
         # print('states of Divert points = {}'.format(self.D_states))
@@ -676,32 +704,9 @@ class simple_conveyor_9(gym.Env):
         self.image = self.image / 255.0
         plt.imshow(np.asarray(self.image))
         plt.show()
-    
-
-    def render1(self):
-        """render with opencv, for faster processing"""
-        #printable check
-        printable_check = True
-        if printable_check == True:
-            for item in self.items_on_conv:
-                self.carrier_type_map[item[0][1]][item[0][0]] = item[1]
-            print(self.carrier_type_map)
-
-
-        resize_factor = 35
-        image = self.generate_env(self.amount_of_gtps, self.amount_of_outputs)
-
-        for item in self.items_on_conv:
-            image[item[0][1]][item[0][0]] = np.asarray([self.pallette[0] if item[1] ==1 else self.pallette[1] if item[1] ==2 else self.pallette[2] if item[1] ==3 else self.pallette[3]]) 
-
-        #resize with PIL
-        im = Image.fromarray(np.uint8(image))
-        img = im.resize((image.shape[1]*resize_factor,image.shape[0]*resize_factor), resample=Image.BOX) #BOX for no anti-aliasing)
-        cv2.imshow("Simulation-v0.9", cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
-        cv2.waitKey(0)
 
     def render(self):
-        """render with opencv, for faster processing"""
+        """render with opencv, for eyeballing while testing"""
         resize_factor = 36
         box_diameter = 30
         self.image = self.generate_env(self.amount_of_gtps, self.amount_of_outputs)
@@ -806,6 +811,7 @@ class simple_conveyor_9(gym.Env):
         cv2.waitKey(1)
 
     def create_window(self):
+        # used for visual training
         # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
         # cv2.resizeWindow(self.window_name, 1200, 480)
         pass
@@ -847,6 +853,3 @@ class simple_conveyor_9(gym.Env):
                 self.render()
         cv2.destroyAllWindows()
 
-from rl.baselines import get_parameters
-
-#env = simple_conveyor_2(get_parameters('simple_conveyor_2'))
