@@ -10,3 +10,4 @@ from .simple_conveyor_6 import simple_conveyor_6
 from .simple_conveyor_7 import simple_conveyor_7
 from .simple_conveyor_8 import simple_conveyor_8
 from .simple_conveyor_9 import simple_conveyor_9
+from .simple_conveyor_10 import simple_conveyor_10
