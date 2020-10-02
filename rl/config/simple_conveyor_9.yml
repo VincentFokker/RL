@@ -1,34 +1,35 @@
 # Arguments that get passed to the constructor of your class instance
 # as config={} keyword
 environment:
-    amount_gtp: 3
-    amount_output: 3
-    gtp_buffer_size: 10
-    exception_occurence: 0.0 #how often an exception occurs
-    process_time_at_GTP: 6 #time to process one product in sec
-    max_time_in_system: 400
-    in_que_observed: 3
-    termination_condition: 2
+    amount_gtp:             3        #how many GtP stations should there be in the environment?
+    amount_output:          3        #how many types of order carriers should there be in the environment?
+    gtp_buffer_size:        10       #how many items should be processed on a GtP for one episode?
+    exception_occurence:    0.0      #how often an exception occurs
+    process_time_at_GTP:    6        #time to process one product in sec
+    max_time_in_system:     400      #currently not used
+    in_que_observed:        3        #how many items of the queue demand the agent observes
+    termination_condition:  2        #when to terminate: 1 = terminate episode when all orders processed at GtP operator
+                                     #                   2 = terminate episode when all orders delivered in right queue
 
-    #carrier distribution
-    percentage_small_carriers: 0.15
-    percentage_medium_carriers: 0.55
-    percentage_large_carriers: 0.35
+    #carrier distribution: how the queues are initialized
+    percentage_small_carriers:  0.15         # 15% small order carriers
+    percentage_medium_carriers: 0.55         # 55% small order carriers
+    percentage_large_carriers:  0.35         # 35% small order carriers
 
 
     
 
     # Rewards
-    negative_reward_per_step: -1 #times all items in the system.
-    travelpath_to_gtp_reward: 0  #factor for the weight of reward for the length of the travelpath
-    negative_reward_for_cycle: -10
-    negative_reward_for_flooding: -10
-    negative_reward_for_empty_queue: -1     #negative reward for empty queue, otherwise queues are empty
-    positive_reward_for_divert: 5
-    negative_reward_for_invalid: -20
+    negative_reward_per_step:           -1            #times all items in the system. (NOT USED)
+    travelpath_to_gtp_reward:           0             #factor for the weight of reward for the length of the travelpath 0 = no reward, 1 = 1x the length towards the GtP queue as reward (NOT USED)
+    negative_reward_for_cycle:          -10           #when an order carrier travels past the last GtP queue lane, it is punished
+    negative_reward_for_flooding:       -10           #when there are more items on the conveyor then needed to fullfill demand of a specific type
+    negative_reward_for_empty_queue:    -1            #negative reward for empty queue, otherwise queues are empty
+    positive_reward_for_divert:         5             #when order carrier delivered at right GtP queue
+    negative_reward_for_invalid:        -20           # for invalid actions
 
     # FOR THE RENDER PART - NOT USED YET!!
-    resize_factor_render: 36
+    resize_factor_render: 36                          # if the render needs to be resized
     box_diameter_render: 30
 
 main:
@@ -52,16 +53,14 @@ main:
 
     model: PPO2
     policy: CustomMlpPolicy
-    n_workers: 8      # Parallel environments
-    n_steps:    5000000    # Steps to train
-    save_every: 1000000  # Save a checkpoint of the model every n steps
+    n_workers: 8                # Parallel environments (running on intel i7 6700HQ with 8 cpu cores)
+    n_steps:    5000000         # Steps to train
+    save_every: 1000000         # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
     logs:
         - steps
-        - amount_of_items_on_conv
-        - amount_of_items_in_sys
         - remaining_demand
         - amount_of_orders_processed
         - positive_reward
