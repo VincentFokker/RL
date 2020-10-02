@@ -12,7 +12,7 @@ Trains a model for each separate parameter file and saves them in a correspondin
 Usage:
     python scheduler.py -e ENVIRONMENT_NAME -p CONFIG_FOLDER -r TYPEOFMODELS
     python scheduler.py -e TestEnv -p experiment1 -r experiment1_models
-    python scheduler.py -e simple_conveyor_2 -p multiple_configurations -r DifferentGamma
+    python scheduler.py -e simple_conveyor_9 -p TuningGamma -r TuningGammaRes
 
     CTRL+C to stop training and save the model.
 """
