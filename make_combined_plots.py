@@ -74,7 +74,7 @@ if __name__ == "__main__":
             name='Episode loss'
          ), row=2, col=1)
 
-        fig.update_layout(height=1000, width=1800, title_text="Episode reward and loss for run: /{}/{}".format(args.environment, args.subdir))
+        fig.update_layout(height=1000, width=1800, title_text="Episode reward and loss for run: /{}/{}/{}".format(args.environment, args.subdir, args))
         fig.show()
         logging.info('- Plot is opened in a new browser window -')
 
