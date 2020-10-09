@@ -11,9 +11,9 @@ environment:
     termination_condition: 2
 
     #carrier distribution
-    percentage_small_carriers: 0.15
-    percentage_medium_carriers: 0.55
-    percentage_large_carriers: 0.35
+    percentage_small_carriers: 0.33
+    percentage_medium_carriers: 0.34
+    percentage_large_carriers: 0.33
 
 
     
@@ -71,10 +71,10 @@ main:
 
 models:
     PPO2:
-        gamma: 0.997          # Discount factor for future rewards
+        gamma: 0.99375          # Discount factor for future rewards
         n_steps: 512         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
-        learning_rate: 0.0005 # LR
+        learning_rate: 0.001 # LR
         vf_coef: 0.5         # The contribution of value function loss to the total loss of the network
         max_grad_norm: 0.5   # Max range of the gradient clipping
         lam: 0.95            # Generalized advantage estimation, for controlling variance/bias tradeoff

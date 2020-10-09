@@ -3,7 +3,7 @@
 environment:
     amount_gtp:             3        #how many GtP stations should there be in the environment?
     amount_output:          3        #how many types of order carriers should there be in the environment?
-    gtp_buffer_size:        10       #how many items should be processed on a GtP for one episode?
+    gtp_buffer_size:        20       #how many items should be processed per GtP station for one episode?
     exception_occurence:    0.0      #how often an exception occurs
     process_time_at_GTP:    6        #time to process one product in sec
     max_time_in_system:     400      #currently not used
@@ -54,15 +54,14 @@ main:
     model: PPO2
     policy: CustomMlpPolicy
     n_workers: 8                # Parallel environments (running on intel i7 6700HQ with 8 cpu cores)
-    n_steps:    10000000         # Steps to train
-    save_every: 2000000         # Save a checkpoint of the model every n steps
+    n_steps:    4000000         # Steps to train
+    save_every: 1000000         # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
     logs:
         - steps
         - remaining_demand
-        - amount_of_orders_processed
         - positive_reward
         - cycle_count
         - run_count

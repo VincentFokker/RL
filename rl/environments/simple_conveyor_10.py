@@ -275,7 +275,7 @@ class simple_conveyor_10(gym.Env):
 
         ### For the observation of the items in queue ##################################################################
                     #length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
-        in_queue = [len(item)* 1/7 for item in self.in_queue] + [sum(item)* 1/(self.amount_of_gtps*7) for item in self.in_queue]
+        in_queue = [len(item)* 1/7 for item in self.in_queue] + [sum(item)* 1/(3*7) for item in self.in_queue]
 
         ### For the observation of the demand of the GtP Queue #########################################################
         #make the init list
