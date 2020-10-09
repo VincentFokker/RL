@@ -2,10 +2,10 @@ from setuptools import setup
 import time, os
 
 packages = ['numpy==1.16.2',        
-            'tensorflow==1.14.0',
+            'tensorflow',
             'gym',
             'opencv-python',
-            'stable_baselines',
+            'stable_baselines==2.10.0',
             'pyyaml',
             'pyqtgraph']
 #            'PyQt5',

@@ -369,8 +369,7 @@ class Trainer(object):
             config = dict(
                 total_timesteps=save_every,
                 tb_log_name=self._unique_model_identifier,
-                reset_num_timesteps=True,
-                seed=None)
+                reset_num_timesteps=True)
 
             # Train the model and save a checkpoint every n steps
             print('CTRL + C to stop the training and save.\n')
