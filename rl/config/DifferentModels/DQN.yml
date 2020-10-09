@@ -12,9 +12,9 @@ environment:
                                      #                   2 = terminate episode when all orders delivered in right queue
 
     #carrier distribution: how the queues are initialized
-    percentage_small_carriers:  0.33         # 15% small order carriers
-    percentage_medium_carriers: 0.34        # 55% small order carriers
-    percentage_large_carriers:  0.33         # 35% small order carriers
+    percentage_small_carriers:  0.30         # 15% small order carriers
+    percentage_medium_carriers: 0.40         # 55% small order carriers
+    percentage_large_carriers:  0.30         # 35% small order carriers
 
 
 
@@ -51,17 +51,18 @@ main:
     #         CnnPolicy - CNN as described in 2014 Atari paper
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
-    model: PPO2
-    policy: CustomMlpPolicy
+    model: DQN
+    policy: MlpPolicy
     n_workers: 8                # Parallel environments (running on intel i7 6700HQ with 8 cpu cores)
-    n_steps:    1000000         # Steps to train
-    save_every: 500000         # Save a checkpoint of the model every n steps
+    n_steps:    4000000         # Steps to train
+    save_every: 1000000         # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
     logs:
         - steps
         - remaining_demand
+        - amount_of_orders_processed
         - positive_reward
         - cycle_count
         - run_count
