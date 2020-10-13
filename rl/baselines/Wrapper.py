@@ -28,7 +28,7 @@ def get_env_type(env_name):
     except:
         return 'rl'
 
-def create_env(env_name, config=None, n_workers=1, image_based=True, **kwargs):
+def create_env(env_name, config=None, n_workers=8, image_based=True, **kwargs):
     """
     Parses the environment to correctly return the attributes based on the spec and type
     Creates a corresponding vectorized environment

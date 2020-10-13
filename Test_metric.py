@@ -29,24 +29,16 @@ if __name__ == "__main__":
     specified_path = join(path, 'rl', 'trained_models', args.environment, args.subdir)
     model_name = [file for file in listdir(specified_path) if file.startswith(args.name)][0]
     print('Selected model is: {}'.format(model_name))
-    path_to_model = join(specified_path, model_name, 'model.pkl')
+    path_to_model = join(specified_path, model_name, 'model.zip')
     print('Path to model is: {}'.format(path_to_model))
     path_to_config = join(specified_path, model_name, 'config.yml')
     print('Path to config is: {}'.format(path_to_config))
 
-    # #load the model
-    with open(path_to_model, 'rb') as m:
-        model = ppo2.load(m)
+    #load model
+    model = Trainer(args.environment, args.subdir).load_model(args.name)
 
-    #load the config
-    with open(path_to_config, 'r') as c:
-        config = yaml.load(c)
-
-    #load env
-    spec = importlib.util.spec_from_file_location(args.environment, "rl/environments/{}.py".format(args.environment))
-    foo = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(foo)
-    env = foo.simple_conveyor_10(config)
+    #load environment
+    env = model = Trainer(args.environment, args.subdir).load_model(args.name)
 
     #evaluate
     mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)

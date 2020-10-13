@@ -20,4 +20,4 @@ if __name__ == "__main__":
 
     model = Trainer(args.environment, args.subdir).load_model(args.num)
     model.run(episodes=args.episodes, render=args.render)
-    model.test()                               #### <<<<<<
+    #model.test()                               #### <<<<<<

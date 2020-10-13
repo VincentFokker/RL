@@ -12,9 +12,9 @@ environment:
                                      #                   2 = terminate episode when all orders delivered in right queue
 
     #carrier distribution: how the queues are initialized
-    percentage_small_carriers:  0.15         # 15% small order carriers
-    percentage_medium_carriers: 0.55         # 55% small order carriers
-    percentage_large_carriers:  0.35         # 35% small order carriers
+    percentage_small_carriers:  0.33         # 15% small order carriers
+    percentage_medium_carriers: 0.34         # 55% small order carriers
+    percentage_large_carriers:  0.33         # 35% small order carriers
 
 
 
@@ -54,7 +54,7 @@ main:
     model: PPO2
     policy: CustomMlpPolicy
     n_workers: 8                # Parallel environments (running on intel i7 6700HQ with 8 cpu cores)
-    n_steps:    4000000         # Steps to train
+    n_steps:    5000000         # Steps to train
     save_every: 1000000         # Save a checkpoint of the model every n steps
 
 
@@ -68,7 +68,7 @@ main:
 
 models:
     PPO2:
-        gamma: 0.99375          # Discount factor for future rewards
+        gamma: 0.999375          # Discount factor for future rewards
         n_steps: 512         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR
@@ -80,6 +80,9 @@ models:
         cliprange: 0.2       # Clip factor for PPO (the action probability distribution of the updated policy cannot differ from the old one by this fraction [measured by KL divergence])
         full_tensorboard_log: False
         verbose: 2
+        seed: 93
+        n_cpu_tf_sess: 16
+
     DQN:
         gamma: 0.99
         learning_rate: 0.001
