@@ -1,37 +1,22 @@
-import rl.environments
-from rl.baselines import Trainer, get_parameters
-import os, argparse
-"""
-A script for training a RL model in a specified environment
-A configuration file from ../config/* that corresponds to the name of your environment or the 
-environment type.
+import gym
 
-Usage: python train.py --env_name TestEnv --subdir TestSubdirectory --name NewModel
-    or 
-       python train.py -e TestEnv -s TestSubdirectory -n NewModel -m DQN
-"""
-if __name__ == "__main__":
+from stable_baselines import PPO2
+from stable_baselines.common.callbacks import EvalCallback
+from stable_baselines.common.evaluation import evaluate_policy
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--environment', type=str, help='Name of the environment. Can be either a any gym environment or a custom one defined in rl.environments')
-    parser.add_argument('-s', '--subdir', type=str, help='Subdirectory where the trained model is going to be stored (useful for separating tensorboard logs): e.g. -> ../trained_models/env_type/env/[SUBDIR]/0_model/*')
-    parser.add_argument('-n', '--name', type=str, default=None, help='Unique identifier of the model, e.g. -> ../trained_models/env_type/env/subdir/0_[NAME]/*')
-    parser.add_argument('-m', '--model', type=str, default=None, help='Reinforcement learning model to use. PPO / ACER / ACKTR / DQN / .')
-    parser.print_help()
-    args = parser.parse_args()
+# Separate evaluation env
+eval_env = gym.make('Pendulum-v0')
+# Use deterministic actions for evaluation
+eval_callback = EvalCallback(eval_env, best_model_save_path='./logs/',
+                             log_path='./logs/', eval_freq=500,
+                             deterministic=True, render=False)
 
-    trainer = Trainer(args.environment, args.subdir)
-    config = get_parameters(args.environment)
-    if args.model is not None:
-        config['main']['model'] = args.model
-    trainer.create_model(name=args.name, config_file=config)
-    trainer._tensorboard()
-    trainer.train()
+model = PPO2('MlpPolicy', eval_env)
+model.learn(5000, callback=eval_callback)
+model.save('testsav')
 
+del model
 
-
-if __name__ == "__main__":
-    env = 'MountainCarContinuous-v0'
-    b = Trainer(env)
-    b.create_model()
-    b.run()
+model = PPO2.load('testsav')
+mean_reward, std_reward = evaluate_policy(model, eval_env, n_eval_episodes=10)
+print('Mean Reward : {}, Standardized Reward : {}'.format(mean_reward, std_reward))

@@ -1,22 +1,27 @@
-#from rl.environments.simple_conveyor_9 import simple_conveyor_9
-#import yaml
-import ray
-from ray import tune
+import argparse
+import numpy as np
 
-# config_path = 'rl/config/simple_conveyor_9.yml'
-# with open(config_path, 'r') as f:
-#     config = yaml.load(f)
-# env = simple_conveyor_9(config)
+from hyperspace import hyperdrive
+from hyperspace.benchmarks import StyblinskiTange
 
-ray.init(ignore_reinit_error=True)
-config = {
-    'env': 'CartPole-v0'
-}
-stop = {
-    'timesteps_total': 10000
-}
-results = tune.run(
-    'PPO', # Specify the algorithm to train
-    config=config,
-    stop=stop
-)
+
+def main():
+    parser = argparse.ArgumentParser(description='Styblinski-Tang Benchmark')
+    parser.add_argument('--ndims', type=int, default=2, help='Dimension of Styblinski-Tang')
+    parser.add_argument('--results', type=str, help='Path to save the results.')
+    args = parser.parse_args()
+
+    stybtang = StyblinskiTange(args.ndims)
+    bounds = np.tile((-5., 5.), (args.ndims, 1))
+
+    hyperdrive(objective=stybtang,
+               hyperparameters=bounds,
+               results_path=args.results,
+               checkpoints_path=args.results,
+               model="GP",
+               n_iterations=50,
+               verbose=True,
+               random_state=0)
+
+if __name__=='__main__':
+     main()
