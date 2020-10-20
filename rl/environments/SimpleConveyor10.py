@@ -312,7 +312,7 @@ class SimpleConveyor10(gym.Env):
 
         #amounts of each type in queue
         queue_amounts = []
-        for queue in env.in_queue:
+        for queue in self.in_queue:
             for i in range(3):
                 queue_amounts.append(len([box for box in queue if box == i]))
 

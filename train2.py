@@ -2,7 +2,7 @@ import pathlib
 import argparse
 from os import listdir
 from os.path import join
-from rl.environments.SimpleConveyor10 import SimpleConveyor10
+from rl.environments.SimpleConveyor12 import SimpleConveyor12
 from stable_baselines.common import make_vec_env
 from stable_baselines import PPO2
 from stable_baselines.common.callbacks import EvalCallback
@@ -13,9 +13,9 @@ from stable_baselines.common.evaluation import evaluate_policy
 
 """
 Usage of this trainer:
-    python train2.py -e [ENVIRONMENT_NAME] -s [SUBDIR] 
+    python train2.py -e [ENVIRONMENT_NAME] -s [SUBDIR] -n [LOGNAME]
     e.g.
-    python train2.py -e TestEnv -s Test123 -n 
+    python train2.py -e TestEnv -s Test123 -n Test123
 
 """
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements #DEBUG: show extra info
@@ -39,14 +39,14 @@ if __name__ == "__main__":
     n_checkpoints = n_steps // save_every
 
     #load environment with config variables
-    env = SimpleConveyor10(config)
+    env = SimpleConveyor12(config)
 
     # multiprocess environment
     env_8 = make_vec_env(lambda: env, n_envs=n_workers)
 
     # callback for evaluation
     eval_callback = EvalCallback(env, best_model_save_path=specified_path,
-                                 log_path=specified_path, eval_freq=1000,
+                                 log_path=specified_path, eval_freq=100000,
                                  deterministic=True, render=False)
 
     #train model

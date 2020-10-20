@@ -1,4 +1,4 @@
-from rl.environments.SimpleConveyor10 import SimpleConveyor10
+from rl.environments.SimpleConveyor11 import SimpleConveyor11
 from stable_baselines import PPO2
 from stable_baselines.common.vec_env import DummyVecEnv
 import matplotlib.pyplot as plt
@@ -12,7 +12,7 @@ import logging
 Usage of this tester:
     python test3.py -e [ENVIRONMENT_NAME] -n [NUMEPS] -m [MODELPATH]
     e.g.
-    python test3.py -e TestEnv -s Test123 -n 0
+    python test3.py -e TestEnv -n 1 -m /path/to/file.zip
 
 """
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements #DEBUG: show extra info
@@ -26,11 +26,11 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--modelpath', type=str, help='Path to the specific model to check')
     args = parser.parse_args()
 
-config_path = 'rl/config/SimpleConveyor10.yml'
+config_path = 'rl/config/{}.yml'.format(args.environment)
 with open(config_path, 'r') as f:
     config = yaml.load(f)
 #config = get_parameters(args.environment)
-env = SimpleConveyor10(config)
+env = SimpleConveyor11(config)
 
 modelpath = args.modelpath
 model = PPO2.load(modelpath, env=DummyVecEnv([lambda: env]))

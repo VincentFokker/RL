@@ -12,5 +12,6 @@
 from .simple_conveyor_9 import simple_conveyor_9
 from .SimpleConveyor10 import SimpleConveyor10
 from .SimpleConveyor11 import SimpleConveyor11
+from .SimpleConveyor12 import SimpleConveyor12
 # from .frozenlake import FrozenLakeEnv
 # from .blackjack import blackjack

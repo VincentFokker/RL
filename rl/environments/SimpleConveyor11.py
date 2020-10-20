@@ -701,7 +701,7 @@ class SimpleConveyor11(gym.Env):
         elif action != self.previous_action:
             self.same_action_count = 0
         self.previous_action = action
-        print('Action: {} Step {}'.format(action, self.steps), end='\r')
+        # print('Action: {} Step {}'.format(action, self.steps), end='\r')
         self.step_reward_p = 0
         self.step_reward_n = 0
         logging.debug("Executed action: {}".format(action))
