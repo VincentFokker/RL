@@ -47,8 +47,9 @@ class SimpleConveyor12(gym.Env):
 
         # determination of observation_space:
         # shape = (for all 3 types of order carrier the total amount (normalized) * Amount of GTP (for each gtP) + (amount of observed instances * amount of gtp * 2(binary coding) + for each gtp_queue 2 values how full, and remaining time (normalized)
-        self.shape = self.amount_of_gtps + 3 * self.amount_of_gtps + (
-                    self.in_que_observed * self.amount_of_gtps * 2) + (2 * self.amount_of_gtps)
+        # self.shape = self.amount_of_gtps + 3 * self.amount_of_gtps + (
+        #             self.in_que_observed * self.amount_of_gtps * 2) + (2 * self.amount_of_gtps)
+        self.shape = self.amount_of_gtps * 4 * 7
         self.observation_space = gym.spaces.Box(shape=(self.shape,),
                                                 high=1, low=0,
                                                 dtype=np.uint8)
@@ -76,6 +77,7 @@ class SimpleConveyor12(gym.Env):
         self.positive_reward_for_divert = self.config['positive_reward_for_divert']
         self.negative_reward_for_invalid = self.config['negative_reward_for_invalid']
         self.max_output_reward = self.config['max_output_reward']
+        self.max_reward_queues = self.config['max_reward_queues']
 
         # tracers for logging during training
         self.amount_of_items_on_conv = 0
@@ -180,6 +182,7 @@ class SimpleConveyor12(gym.Env):
         # remove from init
         self.init_queues = [item[1:] for item in self.init_queues]
 
+
     #### Generate the visual conveyor ##########################################################################################################
 
     def generate_env(self, no_of_gtp, no_of_output):
@@ -230,6 +233,13 @@ class SimpleConveyor12(gym.Env):
         """encodes categorical variables 0-3 to binary"""
         return (0, 0) if var == 0 else (0, 1) if var == 1 else (1, 0) if var == 2 else (1, 1) if var == 3 else var
 
+    def to_binary(self, var_in):
+        bin_list = []
+        binstring = "{0:07b}".format(var_in)
+        for var in binstring:
+            bin_list.append(int(var))
+        return bin_list
+
     def calc_output_reward(self, sigma2=25, mu_optimal=6):
         """
         For a given state, calculate reward for outputting an item on the conveyor
@@ -268,12 +278,29 @@ class SimpleConveyor12(gym.Env):
                         1 / (sigma * math.sqrt(2 * math.pi))) * math.e ** (
                                     (-1 / 2) * ((0 - mu) / sigma) ** 2))) * self.max_output_reward
             logging.debug('mu == {}, returned reward {}'.format(mu, returned_reward))
+
         return returned_reward
 
-#####################################################################################
+    def calculate_n_reward_per_queue(self, sigma2=1, mu_optimal=4):
+        """
+        Calculates a punishment value for having non-optimal balance in a queue
+        """
+        sigma = math.sqrt(sigma2)
+        mu = mu_optimal                             #ideal amount of items in a queue
+        total_rewards = 0
+        for queue in self.in_queue:
+            x = len(queue)
+            reward = (1 / (sigma * math.sqrt(2 * math.pi))) * math.e ** ((-1 / 2) * ((x - mu) / sigma) ** 2) * -1 / (
+                        (1 / (sigma * math.sqrt(2 * math.pi))) * math.e ** (
+                            (-1 / 2) * ((mu - mu) / sigma) ** 2)) * self.max_reward_queues + self.max_reward_queues
+
+            total_rewards += reward
+        return total_rewards
+
+    #####################################################################################
 ## Make Observation
 #
-    def make_observation(self):
+    def make_observation1(self):
         '''Builds the observation from the available variables'''
 
         ### For the obeservation of the conveyor ########################################################################
@@ -338,7 +365,7 @@ class SimpleConveyor12(gym.Env):
         logging.debug('size of observation is: {}'.format(len(obs)))
         return obs
 
-    def make_observation1(self):
+    def make_observation(self):
         """
         A Second function to make an observation of the system. Observing:
         1. what is on the conveyor (in types)
@@ -354,11 +381,11 @@ class SimpleConveyor12(gym.Env):
 
         #amounts of each type in queue
         queue_amounts = []
-        for queue in env.in_queue:
+        for queue in self.in_queue:
             for i in range(3):
                 queue_amounts.append(len([box for box in queue if box == i]))
-
-        return np.array(total_counts + queue_amounts)
+        obs = total_counts + queue_amounts
+        return np.array([self.to_binary(item) for item in obs]).flatten()
 
         #
 
@@ -370,7 +397,7 @@ class SimpleConveyor12(gym.Env):
         must return the current state of the environment"""
         self.run_count += 1  # for logging
         self.episode += 1  # for logging
-        #('Ep: {:5}, steps: {:3}, R: {:3.3f}'.format(self.episode, self.steps, self.reward), end='\r')
+        print('Ep: {:5}, steps: {:3}, R: {:3.3f}'.format(self.episode, self.steps, self.reward), end='\r')
         self.D_states = {}
         for i in range(1, len(self.diverter_locations) + 1):
             self.D_states[i] = False
@@ -721,7 +748,8 @@ class SimpleConveyor12(gym.Env):
             # else:
             self.O_states[1] += 1
             self.step_env()
-            self.reward += self.calc_output_reward()
+            # self.reward += self.calc_output_reward()
+            # self.reward += self.calculate_n_reward_per_queue()
 
             logging.debug("- - action 1 executed")
         elif action == 2:
@@ -732,7 +760,8 @@ class SimpleConveyor12(gym.Env):
             # else:
             self.O_states[2] += 1
             self.step_env()
-            self.reward += self.calc_output_reward()
+            # self.reward += self.calc_output_reward()
+            # self.reward += self.calculate_n_reward_per_queue()
 
             logging.debug("- - action 2 executed")
         elif action == 3:
@@ -743,7 +772,9 @@ class SimpleConveyor12(gym.Env):
             # else:
             self.O_states[3] += 1
             self.step_env()
-            self.reward += self.calc_output_reward()
+            # self.reward += self.calc_output_reward()
+            # self.reward += self.calculate_n_reward_per_queue()
+
             logging.debug("- - action 3 executed")
         else:
             self.reward -= 20  # tag:punishment
@@ -788,11 +819,15 @@ class SimpleConveyor12(gym.Env):
         #     else:
         #         logging.debug('Not too many items of type {} on conv!'.format(i))
 
-        # punishment for having empty queues
-        for queue in self.in_queue:
-            if len(queue) == 0:
-                self.reward += self.negative_reward_for_empty_queue  # tag:punishment
-                self.step_reward_n += self.negative_reward_for_empty_queue
+        # # punishment for having empty queues
+        # for queue in self.in_queue:
+        #     if len(queue) == 0:
+        #         self.reward += self.negative_reward_for_empty_queue  # tag:punishment
+        #         self.step_reward_n += self.negative_reward_for_empty_queue
+
+        #calculate both rewards
+        # self.reward += self.calc_output_reward()
+        self.reward += self.calculate_n_reward_per_queue()
 
         ### Define some tracers     ##################################################################################
         self.amount_of_items_on_conv = len([item for item in self.items_on_conv if item[0][1] < 8])
@@ -818,7 +853,7 @@ class SimpleConveyor12(gym.Env):
             self.terminate = True
             logging.info('Terminated because stuck in similar action')
 
-        if self.steps > 1000:                             #terminate when in deadlock
+        if self.steps > 10000:                             #terminate when in deadlock
             self.terminate = True
             logging.info('Terminated because possible deadlock situation occurred')
 

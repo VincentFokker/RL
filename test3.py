@@ -1,4 +1,4 @@
-from rl.environments.SimpleConveyor11 import SimpleConveyor11
+from rl.environments.SimpleConveyor12 import SimpleConveyor12
 from stable_baselines import PPO2
 from stable_baselines.common.vec_env import DummyVecEnv
 import matplotlib.pyplot as plt
@@ -30,7 +30,7 @@ config_path = 'rl/config/{}.yml'.format(args.environment)
 with open(config_path, 'r') as f:
     config = yaml.load(f)
 #config = get_parameters(args.environment)
-env = SimpleConveyor11(config)
+env = SimpleConveyor12(config)
 
 modelpath = args.modelpath
 model = PPO2.load(modelpath, env=DummyVecEnv([lambda: env]))

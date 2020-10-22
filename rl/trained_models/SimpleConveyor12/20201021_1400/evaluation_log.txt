@@ -1,0 +1,6 @@
+1_model_WithEval_1.zip: Mean Reward : -76184.625        , Standardized Reward : 115802.546875
+1_model_WithEval_2.zip: Mean Reward : -11773.9375       , Standardized Reward : 27872.900390625
+1_model_WithEval_3.zip: Mean Reward : -70731.1953125    , Standardized Reward : 88932.9765625
+1_model_WithEval_4.zip: Mean Reward : -192961.90625     , Standardized Reward : 425695.28125
+1_model_WithEval_5.zip: Mean Reward : -49810.93359375   , Standardized Reward : 110714.3828125
+best_model.zip        : Mean Reward : -581854.75        , Standardized Reward : 1455455.75

@@ -7,7 +7,7 @@ environment:
     exception_occurence:    0.0      #how often an exception occurs
     process_time_at_GTP:    6        #time to process one product in sec
     max_time_in_system:     400      #currently not used
-    in_que_observed:        3        #how many items of the queue demand the agent observes
+    in_que_observed:        1        #how many items of the queue demand the agent observes
     termination_condition:  2        #when to terminate: 1 = terminate episode when all orders processed at GtP operator
                                      #                   2 = terminate episode when all orders delivered in right queue
 
@@ -20,14 +20,15 @@ environment:
 
 
     # Rewards
-    negative_reward_per_step:           -1            #times all items in the system. (NOT USED)
+    negative_reward_per_step:           0            #times all items in the system. (NOT USED)
     travelpath_to_gtp_reward:           0             #factor for the weight of reward for the length of the travelpath 0 = no reward, 1 = 1x the length towards the GtP queue as reward (NOT USED)
     negative_reward_for_cycle:          -10           #when an order carrier travels past the last GtP queue lane, it is punished
     negative_reward_for_flooding:       -10           #when there are more items on the conveyor then needed to fullfill demand of a specific type
-    negative_reward_for_empty_queue:    -1            #negative reward for empty queue, otherwise queues are empty
+    negative_reward_for_empty_queue:    0            #negative reward for empty queue, otherwise queues are empty
     positive_reward_for_divert:         5             #when order carrier delivered at right GtP queue
     negative_reward_for_invalid:        -20           # for invalid actions
     max_output_reward:                  5
+    max_reward_queues:                  -3
 
     # FOR THE RENDER PART - NOT USED YET!!
     resize_factor_render: 36                          # if the render needs to be resized
