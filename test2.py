@@ -7,7 +7,7 @@ import logging
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines import PPO2
 #from rl.environments.SimpleConveyor10 import simple_conveyor_10
-from rl.environments.SimpleConveyor12 import SimpleConveyor12
+from rl.environments.SimpleConveyor10 import SimpleConveyor10
 from stable_baselines.common.vec_env import DummyVecEnv
 
 """
@@ -42,10 +42,10 @@ if __name__ == "__main__":
         try:
             path = join(specified_path, file)
             print(path)
-            env = SimpleConveyor12(config)
+            env = SimpleConveyor10(config)
             env = DummyVecEnv([lambda: env])
-            model = PPO2('MlpPolicy', env=env, tensorboard_log=specified_path, **model_config).load(path, env=env)
-            #model = PPO2.load(path, env=env)
+            #model = PPO2('MlpPolicy', env=env, tensorboard_log=specified_path, **model_config).load(path, env=env)
+            model = PPO2.load(path, env=env)
 
             #evaluate
             mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=1000, render=args.render, deterministic=False)

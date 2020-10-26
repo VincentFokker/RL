@@ -25,7 +25,7 @@ environment:
     negative_reward_for_cycle:          -10           #when an order carrier travels past the last GtP queue lane, it is punished
     negative_reward_for_flooding:       -10           #when there are more items on the conveyor then needed to fullfill demand of a specific type
     negative_reward_for_empty_queue:    -1            #negative reward for empty queue, otherwise queues are empty
-    positive_reward_for_divert:         0             #when order carrier delivered at right GtP queue
+    positive_reward_for_divert:         5             #when order carrier delivered at right GtP queue
     negative_reward_for_invalid:        -20           # for invalid actions
 
     # FOR THE RENDER PART - NOT USED YET!!
@@ -68,7 +68,7 @@ main:
 
 models:
     PPO2:
-        gamma: 0.999375          # Discount factor for future rewards
+        gamma: 0.99375          # Discount factor for future rewards
         n_steps: 512         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR

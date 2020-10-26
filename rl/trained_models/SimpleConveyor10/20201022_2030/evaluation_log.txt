@@ -1,0 +1,11 @@
+0_model_TrainValidate_1.zip:  Mean Reward :  -56288.88671875,     Standardized Reward     : 126247.046875
+0_model_TrainValidate_2.zip:  Mean Reward :  -37864.26171875,     Standardized Reward     :  79726.53125
+0_model_TrainValidate_3.zip:  Mean Reward :  -21839.583984375,    Standardized Reward     :  64519.93359375
+0_model_TrainValidate_4.zip:  Mean Reward :  -39629.64453125,     Standardized Reward     : 103093.90625
+0_model_TrainValidate_5.zip:  Mean Reward :  -23505.666015625,    Standardized Reward     :  70241.484375
+1_model_TrainValidate2_1.zip: Mean Reward :  -26708.189453125,    Standardized Reward     :  58851.72265625
+1_model_TrainValidate2_2.zip: Mean Reward :  -82343.453125,       Standardized Reward     : 213857.328125
+1_model_TrainValidate2_3.zip: Mean Reward : -113968.8125,         Standardized Reward     : 243412.796875
+1_model_TrainValidate2_4.zip: Mean Reward :  -50341.8671875,      Standardized Reward     : 122501.9765625
+1_model_TrainValidate2_5.zip: Mean Reward : -131104.71875,        Standardized Reward     : 244318.265625
+best_model.zip              : Mean Reward :  -72899.890625,       Standardized Reward     : 154773.921875

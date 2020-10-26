@@ -2,7 +2,7 @@ import pathlib
 import argparse
 from os import listdir
 from os.path import join, isfile
-from rl.environments.SimpleConveyor12 import SimpleConveyor12
+from rl.environments.SimpleConveyor10 import SimpleConveyor10
 from stable_baselines.common import make_vec_env
 from stable_baselines import PPO2
 from stable_baselines.common.callbacks import EvalCallback
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     n_checkpoints = n_steps // save_every
 
     #load environment with config variables
-    env = SimpleConveyor12(config)
+    env = SimpleConveyor10(config)
 
     # multiprocess environment
     env_8 = make_vec_env(lambda: env, n_envs=n_workers)

@@ -47,12 +47,14 @@ class SimpleConveyor12(gym.Env):
 
         # determination of observation_space:
         # shape = (for all 3 types of order carrier the total amount (normalized) * Amount of GTP (for each gtP) + (amount of observed instances * amount of gtp * 2(binary coding) + for each gtp_queue 2 values how full, and remaining time (normalized)
-        # self.shape = self.amount_of_gtps + 3 * self.amount_of_gtps + (
-        #             self.in_que_observed * self.amount_of_gtps * 2) + (2 * self.amount_of_gtps)
-        self.shape = self.amount_of_gtps * 4 * 7
+        self.shape = self.amount_of_gtps + 3 * self.amount_of_gtps + (
+                    self.in_que_observed * self.amount_of_gtps * 2) + (2 * self.amount_of_gtps)                 #1
+        # self.shape = self.amount_of_gtps * 3                                                                  #3
         self.observation_space = gym.spaces.Box(shape=(self.shape,),
                                                 high=1, low=0,
                                                 dtype=np.uint8)
+
+        #self.observation_space = gym.spaces.Discrete(self.shape)
 
         # init queues
         self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
@@ -300,7 +302,7 @@ class SimpleConveyor12(gym.Env):
     #####################################################################################
 ## Make Observation
 #
-    def make_observation1(self):
+    def make_observation(self):
         '''Builds the observation from the available variables'''
 
         ### For the obeservation of the conveyor ########################################################################
@@ -365,7 +367,7 @@ class SimpleConveyor12(gym.Env):
         logging.debug('size of observation is: {}'.format(len(obs)))
         return obs
 
-    def make_observation(self):
+    def make_observation2(self):
         """
         A Second function to make an observation of the system. Observing:
         1. what is on the conveyor (in types)
@@ -388,6 +390,28 @@ class SimpleConveyor12(gym.Env):
         return np.array([self.to_binary(item) for item in obs]).flatten()
 
         #
+    def make_observation3(self):
+        """
+        Minimal observation; only observe demand, length of queue
+        """
+        ### The next demanded type
+        init = []
+        for item in self.init_queues:
+            init1 = item[:self.in_que_observed]
+            init.append(init1 + [0] * (self.in_que_observed - len(init1)))
+        init = list(np.array(init).flatten())
+        # # binary encoding of the categorical variables
+        # init = np.array([self.encode(item) for item in init]).flatten()
+        in_queue = [len(item) for item in self.in_queue]
+
+        pipeline_amounts = []
+        for i in range(1, 4):
+            pipeline_amounts.append(len([item[1] for item in self.items_on_conv if item[0][1] == 7 and item[1] == i]))
+        obs = init + in_queue + pipeline_amounts
+
+        return np.array(obs)
+
+
 
     ########################################################################################################################################################
     ## RESET FUNCTION
@@ -826,8 +850,8 @@ class SimpleConveyor12(gym.Env):
         #         self.step_reward_n += self.negative_reward_for_empty_queue
 
         #calculate both rewards
-        # self.reward += self.calc_output_reward()
-        self.reward += self.calculate_n_reward_per_queue()
+        self.reward += self.calc_output_reward()
+        #self.reward += self.calculate_n_reward_per_queue()
 
         ### Define some tracers     ##################################################################################
         self.amount_of_items_on_conv = len([item for item in self.items_on_conv if item[0][1] < 8])

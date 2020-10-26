@@ -153,8 +153,8 @@ class SimpleConveyor10(gym.Env):
             self.W_times[
                 i] = self.process_time_at_GTP + 8 * self.amount_of_gtps - 5  # initialize with some time for first run
         logging.debug("Process times at operator are:{}".format(self.W_times))
-
         ####### FOR SIMULATION ONLY
+
         self.condition_to_transfer = False
         self.condition_to_process = False
 
