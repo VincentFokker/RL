@@ -1,0 +1,86 @@
+environment:
+    amount_of_gtps:             2        #how many GtP stations should there be in the environment?
+    amount_output:          2        #how many types of order carriers should there be in the environment?
+    gtp_buffer_size:        300       #how many items should be processed per GtP station for one episode?
+    max_items_processed:    450
+    exception_occurrence:    0.0      #how often an exception occurs
+    process_time_at_GTP:    6        #time to process one product in sec
+    max_cycle_count:     250         #max ammount of cycles allowed
+    in_que_observed:        3        #how many items of the queue demand the agent observes
+    termination_condition:  3        #when to terminate: 1 = terminate episode when all orders processed at GtP operator
+                                     #                   2 = terminate episode when all orders delivered in right queue
+    repurpose_goal:         True    #if a goal of an carrier is repurposed when it travels past its goal.
+
+    #carrier distribution: how the queues are initialized
+    percentage_small_carriers:  0.33         # 15% small order carriers
+    percentage_medium_carriers: 0.34         # 55% small order carriers
+    percentage_large_carriers:  0.33         # 35% small order carriers
+
+    ###   observation: list including number of what to include
+    # 1 - Full bottom conveyor: type for each location, binary
+    # 2 - occupation of the output point (1/0)
+    # 3 - Length of the queue, for each queue, normalized
+    # 4 - observed demand, per queue, binary
+    # 5 - Amount of items on conveyor, normalized
+    # 6 - cycle factor (amount of cycles / max) normalized
+    # 7 - usability of items on conveyor - factor (mean over amount of gtp)
+    # 8 - remaining processing time of the queue (per queue), normalized
+    # 9 - queue can still take items, per queue (1/0)
+    # 10 - queue is empty (< 3), per queue (1/0)
+    # 11 - there is an item in the lead  for each type
+    # 12 - The amount of items of each type in pipeline for a queue, normalized to max 7
+    observation_shape: [1,4,9,10,12] #determines which parts are taken in the observation
+
+    ## Rewards
+    # parameters
+    optimal_pipe                      :      8
+
+    #reward values
+    positive_reward_for_divert          :      10
+    wrong_sup_at_goal                   :     -10
+    negative_reward_for_invalid_action  :     -10           #when the agent tries to output when not possible. (space is occupied)
+    shortage_reward                     :     0
+    flooding_reward                     :     0
+    proper_queue_reward                 :     -5
+    negative_reward_for_cycle           :     0           #when an order carrier travels past the last GtP queue lane, it is punished
+
+main:
+    model: PPO2
+    policy: MlpPolicy
+    n_workers: 8                # Parallel environments (running on intel i7 6700HQ with 8 cpu cores)
+    n_steps:    6000000         # Steps to train
+    save_every:  2000000         # Save a checkpoint of the model every n steps
+
+    # Tensorboard logs for environment attributes e.g. self.steps
+    logs:
+        - steps
+
+models:
+    PPO2:
+        gamma: 0.99375         # Discount factor for future rewards
+        n_steps: 128         # Batch size (n_steps * n_workers)
+        ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
+        learning_rate: 0.00025 # LR
+        vf_coef: 0.5         # The contribution of value function loss to the total loss of the network
+        max_grad_norm: 0.5   # Max range of the gradient clipping
+        lam: 0.95            # Generalized advantage estimation, for controlling variance/bias tradeoff
+        nminibatches: 4      # Number of minibatches for SGD/Adam updates
+        noptepochs: 4        # Number of iterations for SGD/Adam
+        cliprange: 0.2       # Clip factor for PPO (the action probability distribution of the updated policy cannot differ from the old one by this fraction [measured by KL divergence])
+        full_tensorboard_log: False
+        verbose: 0
+        n_cpu_tf_sess: 8
+        seed: 999
+
+
+policies:
+    CustomMlpPolicy:
+        shared:
+            - 64
+            - 32
+            - 16
+        h_actor: [] # Policy head
+            # - 16
+        h_critic: [] # Value head
+            # - 16
+

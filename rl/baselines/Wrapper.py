@@ -13,9 +13,9 @@ import glob
 
 # Error suppression (numpy 1.16.2, tensorflow 1.13.1)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
-tf.logging.info('TensorFlow')
-tf.logging.set_verbosity(tf.logging.ERROR)
-tf.logging.info('TensorFlow')
+tf.compat.v1.logging.info('TensorFlow')
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+tf.compat.v1.logging.info('TensorFlow')
 
 def get_env_type(env_name):
     """
