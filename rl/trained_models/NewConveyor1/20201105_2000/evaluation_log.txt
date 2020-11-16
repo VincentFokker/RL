@@ -1,0 +1,4 @@
+0_model_TestPipeObs_1.zip: Mean Reward : -1871.000, Standard deviation Reward : 941.950
+0_model_TestPipeObs_2.zip: Mean Reward : -4289.500, Standard deviation Reward : 1041.908
+0_model_TestPipeObs_3.zip: Mean Reward : -209.000, Standard deviation Reward : 156.984
+best_model.zip: Mean Reward : -6144.000, Standard deviation Reward : 1136.683

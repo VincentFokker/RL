@@ -1,0 +1,11 @@
+0_model_Test2NewRewards_1.zip: Mean Reward : -3384.350, Standard deviation Reward : 4161.141
+0_model_Test2NewRewards_2.zip: Mean Reward : -417.900, Standard deviation Reward : 1333.164
+0_model_Test2NewRewards_3.zip: Mean Reward : -874.400, Standard deviation Reward : 1473.151
+1_model_Test2NewRewards_1.zip: Mean Reward : -488.300, Standard deviation Reward : 1462.563
+1_model_Test2NewRewards_1_interupt.zip: Mean Reward : -3051.800, Standard deviation Reward : 3340.924
+1_model_Test2NewRewards_2.zip: Mean Reward : -991.000, Standard deviation Reward : 1989.221
+1_model_Test2NewRewards_3.zip: Mean Reward : -3801.000, Standard deviation Reward : 2608.018
+2_model_Test2NewRewards_1.zip: Mean Reward : -441.450, Standard deviation Reward : 1132.011
+2_model_Test2NewRewards_2.zip: Mean Reward : -371.850, Standard deviation Reward : 1401.512
+2_model_Test2NewRewards_3.zip: Mean Reward : -2528.500, Standard deviation Reward : 2556.454
+best_model.zip: Mean Reward : -237.100, Standard deviation Reward : 1289.572

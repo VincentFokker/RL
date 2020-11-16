@@ -1,3 +1,0 @@
-Training time for model 0: 56.464690 min, steps/s: 2951.69721192763
-Training time for model 1: 58.864805 min, steps/s: 2831.3466260429673
-Training time for model 2: 63.449929 min, steps/s: 2626.7431586871908

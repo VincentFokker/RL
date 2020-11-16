@@ -1,0 +1,4 @@
+0_model_AddedPunishCycle_1.zip: Mean Reward : -114.3499984741211, Standardized Reward : 302.8148193359375
+0_model_AddedPunishCycle_2.zip: Mean Reward : -25.5, Standardized Reward : 406.5706787109375
+0_model_AddedPunishCycle_3.zip: Mean Reward : -169.64999389648438, Standardized Reward : 385.3558349609375
+best_model.zip: Mean Reward : -24.850000381469727, Standardized Reward : 337.12646484375

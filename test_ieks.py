@@ -7,7 +7,7 @@ from stable_baselines import PPO2
 from stable_baselines.common.callbacks import EvalCallback
 from copy import copy
 
-config_path = 'rl/config/SimpleConveyor10.yml'
+config_path = 'rl/config/0. Old Files/SimpleConveyor10.yml'
 
 with open(config_path, 'r') as f:
     config = yaml.load(f)
