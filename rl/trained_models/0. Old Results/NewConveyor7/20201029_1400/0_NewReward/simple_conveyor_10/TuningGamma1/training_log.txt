@@ -1,0 +1,2 @@
+ raining time for model 0: 24.770408 min, steps/s: 3364.229285795987
+-otal runtime: 81.57431515057881 minutes

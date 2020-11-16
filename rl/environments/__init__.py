@@ -27,3 +27,4 @@ from .NewConveyor11 import NewConveyor11
 from .NewConveyor12 import NewConveyor12
 from .SimpleConveyor1 import SimpleConveyor1
 from .SimpleConveyor1GA import SimpleConveyor1GA
+from .MultiConveyor import MultiConveyor

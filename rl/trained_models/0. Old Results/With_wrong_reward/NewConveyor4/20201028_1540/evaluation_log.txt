@@ -1,0 +1,4 @@
+0_model_NewRewardsObs_1.zip: Mean Reward : -92581.703125, Standardized Reward : 67337.453125
+0_model_NewRewardsObs_2.zip: Mean Reward : -52647.5, Standardized Reward : 60014.90234375
+0_model_NewRewardsObs_3.zip: Mean Reward : -139911.90625, Standardized Reward : 99874.6015625
+best_model.zip: Mean Reward : -57821.55078125, Standardized Reward : 78961.234375

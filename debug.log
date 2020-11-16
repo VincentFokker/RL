@@ -6,3 +6,4 @@
 [1109/153819.059:ERROR:filesystem_win.cc(129)] GetFileAttributes C:\Users\_Vinc\AppData\Local\Google\Chrome\User Data\Crashpad\attachments\ac5ee1e5-e2a1-43e8-8e0e-0e5a4533a35c: Het systeem kan het opgegeven pad niet vinden. (0x3)
 [1110/190933.069:ERROR:directory_reader_win.cc(43)] FindFirstFile: Het systeem kan het opgegeven pad niet vinden. (0x3)
 [1111/200851.725:ERROR:directory_reader_win.cc(43)] FindFirstFile: Het systeem kan het opgegeven pad niet vinden. (0x3)
+[1116/113740.220:ERROR:directory_reader_win.cc(43)] FindFirstFile: Het systeem kan het opgegeven pad niet vinden. (0x3)
