@@ -19,12 +19,12 @@
 # from .NewConveyor6 import NewConveyor6
 # from .NewConveyor7 import NewConveyor7
 from .NewConveyor1 import NewConveyor1
-from .NewConveyor2 import NewConveyor2
-from .NewConveyor3 import NewConveyor3
-from .NewConveyor1GA import NewConveyor1GA
-from .NewConveyor10 import NewConveyor10
-from .NewConveyor11 import NewConveyor11
-from .NewConveyor12 import NewConveyor12
-from .SimpleConveyor1 import SimpleConveyor1
-from .SimpleConveyor1GA import SimpleConveyor1GA
-from .MultiConveyor import MultiConveyor
+# from .NewConveyor2 import NewConveyor2
+# from .NewConveyor3 import NewConveyor3
+# from .NewConveyor1GA import NewConveyor1GA
+# from .NewConveyor10 import NewConveyor10
+# from .NewConveyor11 import NewConveyor11
+# from .NewConveyor12 import NewConveyor12
+# from .SimpleConveyor1 import SimpleConveyor1
+# from .SimpleConveyor1GA import SimpleConveyor1GA
+# from .MultiConveyor import MultiConveyor
