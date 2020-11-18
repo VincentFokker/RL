@@ -550,7 +550,7 @@ class MultiConveyor(gym.Env):
 # 
     def process_at_GTP(self):
         # for each step; check if it needed to process an order carrier at GTP
-        O_locs = copy(self.operator_locations)
+        O_locs = deepcopy(self.operator_locations)
         for Transition_point in O_locs:                                 #For all operator locations, check:
 
             try:
@@ -567,7 +567,7 @@ class MultiConveyor(gym.Env):
                 if random.random() < self.exception_occurence: #if the random occurence is below exception occurence (set in config) do:
                     #remove an order carrier (broken)
                     logging.debug('With a change percentage an order carrier is removed')
-                    logging.debug('trasition point is: {}'.format(Transition_point))
+                    logging.debug('transition point is: {}'.format(Transition_point))
                     #self.update_queues(O_locs.index(Transition_point)+1, [item[1] for item in self.items_on_conv if item[0] == Transition_point][0])
                     self.W_times[O_locs.index(Transition_point)+1] = 1
                     #self.O_states[[item[1] for item in self.items_on_conv if item[0] == Transition_point][0]] +=1
@@ -608,7 +608,7 @@ class MultiConveyor(gym.Env):
                     except:
                         next_type = 99
                     self.W_times[O_locs.index(Transition_point)+1] = self.process_time_at_GTP if next_type == 1 else self.process_time_at_GTP+30 if next_type == 2 else self.process_time_at_GTP+60 if next_type == 3 else self.process_time_at_GTP+60 if next_type == 4 else self.process_time_at_GTP+60
-                    logging.debug('new timestep set at GTP {} : {}'.format(O_locs.index(Transition_point)+1, self.W_times[O_locs.index(Transition_point)+1]))
+                    logging.info('new timestep set at GTP {} : {}'.format(O_locs.index(Transition_point)+1, self.W_times[O_locs.index(Transition_point)+1]))
                 else:
                     logging.debug('Else statement activated')
 
@@ -632,6 +632,7 @@ class MultiConveyor(gym.Env):
 ## STEP FUNCTION
 #
     def step_env(self):
+        logging.info('W-times are: {}'.format(self.W_times))
 
 ####make carrier type map
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1)).astype(float)
@@ -782,6 +783,7 @@ class MultiConveyor(gym.Env):
 
         # Terminate for too much steps
         if self.steps > 10000:
+            self.reward += self.negative_reward_for_invalid
             self.terminate = True
             self.termination_cases['too_much_steps'] += 1
 
@@ -792,6 +794,7 @@ class MultiConveyor(gym.Env):
 
         #terminate when too many cycles
         if self.cycle_count > self.max_cycle_count:
+            self.reward += self.negative_reward_for_invalid
             self.terminate = True
             self.termination_cases['cycle_count'] += 1
 

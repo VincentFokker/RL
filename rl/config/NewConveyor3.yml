@@ -1,6 +1,6 @@
 environment:
-    amount_of_gtps:             2        #how many GtP stations should there be in the environment?
-    amount_output:          2        #how many types of order carriers should there be in the environment?
+    amount_of_gtps:             3        #how many GtP stations should there be in the environment?
+    amount_output:          3        #how many types of order carriers should there be in the environment?
     gtp_buffer_size:        300       #how many items should be processed per GtP station for one episode?
     max_items_processed:    450
     exception_occurrence:    0.0      #how often an exception occurs
@@ -29,7 +29,7 @@ environment:
     # 10 - queue is empty (< 3), per queue (1/0)
     # 11 - there is an item in the lead  for each type
     # 12 - The amount of items of each type in pipeline for a queue, normalized to max 7
-    observation_shape: [1,4,9,10,12] #determines which parts are taken in the observation
+    observation_shape: [14,4,9,10,12] #determines which parts are taken in the observation
 
     ## Rewards
     # parameters
@@ -37,9 +37,9 @@ environment:
 
     #reward values
     positive_reward_for_divert          :      10
-    wrong_sup_at_goal                   :     -10
-    negative_reward_for_invalid_action  :     -10           #when the agent tries to output when not possible. (space is occupied)
-    shortage_reward                     :     0
+    wrong_sup_at_goal                   :     -5
+    negative_reward_for_invalid_action  :     -5           #when the agent tries to output when not possible. (space is occupied)
+    shortage_reward                     :     -5
     flooding_reward                     :     0
     proper_queue_reward                 :     -5
     negative_reward_for_cycle           :     0           #when an order carrier travels past the last GtP queue lane, it is punished

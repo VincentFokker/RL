@@ -10,7 +10,7 @@ environment:
     max_time_in_system: 400
     in_que_observed: 1
     termination_condition: 3
-    max_cycle_count: 10000
+    max_cycle_count: 200
 
 
     #carrier distribution
@@ -33,15 +33,15 @@ environment:
     observation_shape: [14, 3, 4, 9, 10, 11] #determines which parts are taken in the observation
 
     # Rewards
-    negative_reward_for_cycle: -10
+    negative_reward_for_cycle: -5
     negative_reward_for_flooding: 0
-    negative_reward_full_queue:   -5
-    negative_reward_for_empty_queue: 0   #negative reward for empty queue, otherwise queues are empty
+    negative_reward_full_queue:   -10
+    negative_reward_for_empty_queue: -5   #negative reward for empty queue, otherwise queues are empty
     positive_reward_for_divert: 10
-    negative_reward_for_invalid: 0
+    negative_reward_for_invalid: -5
 
     punishment_for_not_taken: 0
-    negative_reward_for_wrong_demand: 0
+    negative_reward_for_wrong_demand: -5
 
 main:
     # MODELS:
@@ -65,8 +65,8 @@ main:
     model: PPO2
     policy: MlpPolicy
     n_workers: 8      # Parallel environments
-    n_steps: 4500000    # Steps to train
-    save_every: 1500000  # Save a checkpoint of the model every n steps
+    n_steps: 10000000    # Steps to train
+    save_every: 2500000  # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps

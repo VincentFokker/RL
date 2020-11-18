@@ -74,7 +74,7 @@ class NewConveyor3(gym.Env):
 
         # init queues
         self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
-                                      [0.5, 0.5],
+                                      [0.33, 0.34, 0.33],
                                       k=self.gtp_buffer_size) for _ in
                        range(self.amount_of_gtps)]  # generate random queues based on distribution defined in config
         logging.info("queues that are initialized: {}".format(self.queues))
@@ -126,6 +126,8 @@ class NewConveyor3(gym.Env):
             self.shape += 4
         if 12 in self.observation_shape:
             self.shape += self.amount_of_gtps * self.amount_of_outputs
+        if 14 in self.observation_shape:
+            self.shape += 2 * self.amount_of_gtps
 
         logging.info('Action Space: {}, Observation shape: {}'.format(self.amount_of_outputs * self.amount_of_gtps + 1,
                                                                       self.shape))
@@ -290,6 +292,12 @@ class NewConveyor3(gym.Env):
         logging.debug(output_points)
         # TODO: return: output_points
 
+        ### 14. Occupation type of the divert points #####################################################################
+        divert_points = carrier_type_map_obs[3:self.amount_of_gtps * 4][
+                        ::4]  ## returns: array([[3.],[3.],[3.]])                         # 3
+        divert_points = np.array([self.encode(item) for item in divert_points]).flatten()
+        # TODO: return: divert_points
+
         ### 3. For the observation of the items in queue ##################################################################
         # length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
         in_queue = [len(item) * 1 / 7 for item in self.in_queue]
@@ -420,6 +428,8 @@ class NewConveyor3(gym.Env):
             obs = np.append(obs, info)
         if 12 in self.observation_shape:
             obs = np.append(obs, in_pipe)
+        if 14 in self.observation_shape:
+            obs = np.append(obs, divert_points)
 
         return obs
 
@@ -441,7 +451,7 @@ class NewConveyor3(gym.Env):
 
         # reset the queues, initialize with a new random set of order sequences
         self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
-                                      [0.5, 0.5], k=self.gtp_buffer_size) for item in
+                                      [0.33, 0.34, 0.33], k=self.gtp_buffer_size) for item in
                        range(self.amount_of_gtps)]  # generate random queues
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
