@@ -50,7 +50,7 @@ class MultiConveyor(gym.Env):
         #determination of observation_space:
         self.shape = 0
         if 1 in self.observation_shape:
-            self.shape += 2*((self.amount_of_gtps*4) + 6 + 2*self.amount_of_outputs)
+            self.shape += 2*((self.amount_of_gtps*4) + 7 + 2*self.amount_of_outputs)
         if 2 in self.observation_shape:
             self.shape += self.amount_of_outputs
         if 3 in self.observation_shape:
@@ -85,7 +85,7 @@ class MultiConveyor(gym.Env):
                                                 dtype=np.uint8)
 
         #init queues
-        self.queues = [random.choices(np.arange(1,self.amount_of_outputs+1), [0.33, 0.34, 0.33], k=self.gtp_buffer_size) for item in range(self.amount_of_gtps)] # generate random queues
+        self.queues = [random.choices(np.arange(1,self.amount_of_outputs+1), [0.5, 0.5], k=self.gtp_buffer_size) for item in range(self.amount_of_gtps)] # generate random queues
         logging.debug("queues that are initialized: {}".format(self.queues))
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
@@ -194,8 +194,12 @@ class MultiConveyor(gym.Env):
 ####### FOR SIMULATION ONLY 
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
-            self.W_times[i] = self.process_time_at_GTP +8*self.amount_of_gtps -5
+            self.W_times[i] = random.randint(6,60)
         logging.debug("Process times at operator are:{}".format(self.W_times))
+
+        self.idle_times_operator = {}
+        for i in range(len(self.operator_locations)):
+            self.idle_times_operator[i] = 0
 ####### FOR SIMULATION ONLY
         self.condition_to_transfer = False
         self.condition_to_process = False
@@ -210,6 +214,17 @@ class MultiConveyor(gym.Env):
     def do_warm_start(self, x):
         for _ in range(x):
             self.warm_start()
+        self.spawn_item_conv()
+
+
+    def spawn_item_conv(self):
+        low, high = self.diverter_locations[-1], self.output_locations[-1]
+        cand = [item[:2] for item in self.init_queues][::-1]
+        cand = [[item[i] for item in cand] for i in range(2)]
+        to_add = [item for sublist in [
+            [[[low[0] + random.randint(0, 1) + ((idx2) * 4) + (idx1 * 11), low[1]], var, 0] for idx2, var in
+             enumerate(item)] for idx1, item in enumerate(cand)] for item in sublist]
+        self.items_on_conv += to_add
 
     def warm_start(self):
         # add items to queues
@@ -508,8 +523,12 @@ class MultiConveyor(gym.Env):
 ####### FOR SIMULATION ONLY 
         self.W_times = {}
         for i in range(1,len(self.operator_locations)+1):
-            self.W_times[i] = self.process_time_at_GTP + 8*self.amount_of_gtps  -5
+            self.W_times[i] = self.W_times[i] = random.randint(6,60)
         logging.debug("Process times at operator are: {}".format(self.W_times))
+
+        self.idle_times_operator = {}
+        for i in range(len(self.operator_locations)):
+            self.idle_times_operator[i] = 0
 ####### FOR SIMULATION ONLY
 
         #empty amount of items on conv.
@@ -533,7 +552,7 @@ class MultiConveyor(gym.Env):
         self.items_processed = 0
 
         self.queues = [random.choices(np.arange(1, self.amount_of_outputs + 1),
-                                      [0.33, 0.34, 0.33], k=self.gtp_buffer_size) for item in
+                                      [0.5, 0.5], k=self.gtp_buffer_size) for item in
                        range(self.amount_of_gtps)]  # generate random queues
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
@@ -563,6 +582,7 @@ class MultiConveyor(gym.Env):
                 self.condition_to_process = False
 
             if self.W_times[O_locs.index(Transition_point)+1] == 0:     #if the waiting time is 0:
+                self.idle_times_operator[O_locs.index(Transition_point)] += 1
                 logging.debug('Waiting time at GTP {} is 0, check done on correctness:'.format(O_locs.index(Transition_point)+1))
                 if random.random() < self.exception_occurence: #if the random occurence is below exception occurence (set in config) do:
                     #remove an order carrier (broken)
@@ -602,12 +622,18 @@ class MultiConveyor(gym.Env):
                         logging.debug("Except: Demand queue for this lane is allready empty")
 
                     #set new timestep for the next order
-                    try: 
-                        next_type = [item[1] for item in self.items_on_conv if item[0] == [Transition_point[0], Transition_point[1]-1]][0]
-
-                    except:
-                        next_type = 99
-                    self.W_times[O_locs.index(Transition_point)+1] = self.process_time_at_GTP if next_type == 1 else self.process_time_at_GTP+30 if next_type == 2 else self.process_time_at_GTP+60 if next_type == 3 else self.process_time_at_GTP+60 if next_type == 4 else self.process_time_at_GTP+60
+                    # try:
+                    #     next_type = [item[1] for item in self.items_on_conv if item[0] == [Transition_point[0], Transition_point[1]-1]][0]
+                    #
+                    # except:
+                    #     next_type = 99
+                    # self.W_times[O_locs.index(Transition_point)+1] = self.process_time_at_GTP if next_type == 1 else self.process_time_at_GTP*5 if next_type == 2 else self.process_time_at_GTP*10 if next_type == 3 else self.process_time_at_GTP*12 if next_type == 4 else self.process_time_at_GTP*15
+                    to_check = self.in_queue[O_locs.index(Transition_point)][:1]
+                    next_W_time = 0 if to_check == [] else self.process_time_at_GTP if to_check == [
+                        1] else self.process_time_at_GTP * 5 if to_check == [
+                        2] else self.process_time_at_GTP * 10 if to_check == [3] else self.process_time_at_GTP * 10
+                    self.W_times[O_locs.index(Transition_point) + 1] = next_W_time
+                    self.idle_times_operator[O_locs.index(Transition_point)] -=1
                     logging.debug('new timestep set at GTP {} : {}'.format(O_locs.index(Transition_point)+1, self.W_times[O_locs.index(Transition_point)+1]))
                 else:
                     logging.debug('Else statement activated')

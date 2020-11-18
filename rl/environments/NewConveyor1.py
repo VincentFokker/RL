@@ -8,7 +8,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import cv2
+#import cv2
 from copy import copy
 import seaborn as sns
 import random
@@ -896,8 +896,8 @@ class NewConveyor1(gym.Env):
 
         # resize with PIL
         # img = img.resize((1200,480), resample=Image.BOX)
-        cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
-        cv2.waitKey(1)
+        # cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
+        # cv2.waitKey(1)
 
 
     def create_window(self):
@@ -942,7 +942,7 @@ class NewConveyor1(gym.Env):
                 state, reward, self.terminate, _ = self.step(action)
                 print('Reward: {:2.3f}, state: {}, action: {}'.format(reward, state, action))
                 self.render()
-        cv2.destroyAllWindows()
+        #cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
