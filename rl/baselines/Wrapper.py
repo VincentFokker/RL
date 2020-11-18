@@ -5,7 +5,7 @@ from stable_baselines.common.schedules import LinearSchedule, linear_interpolati
 from collections import deque
 import numpy as np
 import os, yaml, sys, subprocess, webbrowser, time, datetime, random, copy
-import cv2
+#import cv2
 import stable_baselines, gym, rl
 import rl.settings as settings
 import tensorflow as tf
