@@ -484,7 +484,7 @@ class MultiConveyor(gym.Env):
         self.run_count +=1
         self.episode +=1
         print('Ep: {:5}, steps: {:3}, R: {:3.3f}'.format(self.episode, self.steps, self.reward), end='\r')
-        print('\n {}'.format(self.termination_cases), end='\r')
+        #print('\n {}'.format(self.termination_cases), end='\r')
         self.D_states = {}
         for i in range(1,len(self.diverter_locations)+1):
             self.D_states[i] = False
@@ -608,7 +608,7 @@ class MultiConveyor(gym.Env):
                     except:
                         next_type = 99
                     self.W_times[O_locs.index(Transition_point)+1] = self.process_time_at_GTP if next_type == 1 else self.process_time_at_GTP+30 if next_type == 2 else self.process_time_at_GTP+60 if next_type == 3 else self.process_time_at_GTP+60 if next_type == 4 else self.process_time_at_GTP+60
-                    logging.info('new timestep set at GTP {} : {}'.format(O_locs.index(Transition_point)+1, self.W_times[O_locs.index(Transition_point)+1]))
+                    logging.debug('new timestep set at GTP {} : {}'.format(O_locs.index(Transition_point)+1, self.W_times[O_locs.index(Transition_point)+1]))
                 else:
                     logging.debug('Else statement activated')
 
@@ -632,7 +632,7 @@ class MultiConveyor(gym.Env):
 ## STEP FUNCTION
 #
     def step_env(self):
-        logging.info('W-times are: {}'.format(self.W_times))
+        logging.debug('W-times are: {}'.format(self.W_times))
 
 ####make carrier type map
         self.carrier_type_map = np.zeros((self.empty_env.shape[0],self.empty_env.shape[1],1)).astype(float)
@@ -660,7 +660,9 @@ class MultiConveyor(gym.Env):
                     cond_3 = item[1] == self.init_queues[self.diverter_locations.index(item[0])][0]
                     logging.debug('condition 1 = {}, and condition 2= {}, condition 3 = {}'.format(cond_1, cond_2, cond_3))
                     if cond_1 and cond_2 and cond_3:
-                        item[0][1] +=1
+                        self.in_queue[self.diverter_locations.index(item[0])].append(item[1])
+                        self.remove_from_queue(self.diverter_locations.index(item[0])+1)
+                        item[0][1] += 1
                         self.reward += self.positive_reward_for_divert
 
                     elif cond_1 and cond_2 and not cond_3:
@@ -673,10 +675,13 @@ class MultiConveyor(gym.Env):
 
                     elif cond_1 and not cond_2 and not cond_3:
                         item[0][0] -= 1
-                        self.reward += self.negative_reward_full_queue + self.negative_reward_for_wrong_demand
+                        #self.reward += self.negative_reward_full_queue + self.negative_reward_for_wrong_demand
 
                     elif not cond_1 and cond_2 and cond_3:
-                        item[0][1] += 1
+                        # self.in_queue[self.diverter_locations.index(item[0])].append(item[1])
+                        # self.remove_from_queue(self.diverter_locations.index(item[0]) + 1)
+                        # item[0][1] += 1
+                        item[0][0] -= 1
                         self.reward -= self.negative_reward_for_wrong_demand
 
                     else:
