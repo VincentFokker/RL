@@ -224,6 +224,7 @@ class MultiConveyor(gym.Env):
         to_add = [item for sublist in [
             [[[low[0] + random.randint(0, 1) + ((idx2) * 4) + (idx1 * 11), low[1]], var, 0] for idx2, var in
              enumerate(item)] for idx1, item in enumerate(cand)] for item in sublist]
+        to_add = [item for item in to_add if item[0][0] + 1 <= high[0]]
         self.items_on_conv += to_add
 
     def warm_start(self):

@@ -142,8 +142,12 @@ class NewConveyor1(gym.Env):
         for i in range(1, len(self.init_queues) + 1):
             self.W_times[i] = self.process_time_at_GTP if self.in_queue[i - 1][
                                                               0] == 1 else self.process_time_at_GTP * 3 if \
-            self.in_queue[i - 1][0] == 2 else self.process_time_at_GTP * 6 if self.in_queue[i - 1][
-                                                                                  0] == 1 else self.process_time_at_GTP * 9
+            self.in_queue[i - 1][0] == 2 else self.process_time_at_GTP * 6 if self.in_queue[i - 1][0] == 1 else self.process_time_at_GTP * 9
+
+        self.idle_times_operator = {}
+        for i in range(len(self.operator_locations)):
+            self.idle_times_operator[i] = 0
+
         logging.debug("Process times at operator are:{}".format(self.W_times))
 
         self.condition_to_transfer = False
@@ -165,6 +169,18 @@ class NewConveyor1(gym.Env):
     def do_warm_start(self, x):
         for _ in range(x):
             self.warm_start()
+        self.spawn_item_conv()
+
+    def spawn_item_conv(self):
+        low, high = self.diverter_locations[-1], self.output_locations[-1]
+        low1, high1 = self.diverter_locations[0], self.output_locations[0]
+        cand = [item[:2] for item in self.init_queues][::-1]
+        cand = [[item[i] for item in cand] for i in range(2)]
+        to_add = [item for sublist in [
+            [[[low[0] + random.randint(0, 1) + ((idx2) * 4) + (idx1 * (low1[0])), low[1]], var, self.amount_of_gtps - idx2] for
+             idx2, var in enumerate(item)] for idx1, item in enumerate(cand)] for item in sublist]
+        to_add = [item for item in to_add if item[0][0] + 1 <= high[0]]
+        self.items_on_conv += to_add
 
     def warm_start(self):
         # add items to queues, so queues are not empty when starting with training (empty queue is punished with -1 each timestep)
@@ -469,6 +485,9 @@ class NewConveyor1(gym.Env):
                 self.in_queue[i - 1][0] == 2 else self.process_time_at_GTP * 6 if self.in_queue[i - 1][
                                                                                       0] == 1 else self.process_time_at_GTP * 9
 
+        self.idle_times_operator = {}
+        for i in range(len(self.operator_locations)):
+            self.idle_times_operator[i] = 0
 
         return self.make_observation()
 
@@ -497,6 +516,7 @@ class NewConveyor1(gym.Env):
 
             # if processingtime at a gtp station == 0 , an order carrier is processed (removed)
             if self.W_times[O_locs.index(Transition_point) + 1] == 0:  # if the waiting time is 0:
+                self.idle_times_operator[O_locs.index(Transition_point)] += 1
                 logging.debug('Waiting time at GTP {} is 0, check done on correctness:'.format(
                     O_locs.index(Transition_point) + 1))
                 if random.random() < self.exception_occurrence:  # if the random occurence is below exception occurence (set in config) do:
@@ -542,15 +562,22 @@ class NewConveyor1(gym.Env):
                         logging.info("Except: Demand queue for this lane is allready empty")
 
                     # set new timestep for the next order
-                    try:
-                        next_type = [item[1] for item in self.items_on_conv if
-                                     item[0] == [Transition_point[0], Transition_point[1] - 1]][0]
+                    # try:
+                    #     next_type = [item[1] for item in self.items_on_conv if
+                    #                  item[0] == [Transition_point[0], Transition_point[1] - 1]][0]
+                    #
+                    # except:
+                    #     next_type = 99
+                    # # set new waiting time; based on size of order carrier that is currently processed
+                    # self.W_times[O_locs.index(
+                    #     Transition_point) + 1] = self.process_time_at_GTP if next_type == 1 else self.process_time_at_GTP + 30 if next_type == 2 else self.process_time_at_GTP + 60 if next_type == 3 else self.process_time_at_GTP + 60 if next_type == 4 else self.process_time_at_GTP + 60
+                    to_check = self.in_queue[O_locs.index(Transition_point)][:1]
+                    next_W_time = 0 if to_check == [] else self.process_time_at_GTP if to_check == [
+                        1] else self.process_time_at_GTP * 5 if to_check == [
+                        2] else self.process_time_at_GTP * 10 if to_check == [3] else self.process_time_at_GTP * 10
+                    self.W_times[O_locs.index(Transition_point) + 1] = next_W_time
+                    self.idle_times_operator[O_locs.index(Transition_point)] -= 1
 
-                    except:
-                        next_type = 99
-                    # set new waiting time; based on size of order carrier that is currently processed
-                    self.W_times[O_locs.index(
-                        Transition_point) + 1] = self.process_time_at_GTP if next_type == 1 else self.process_time_at_GTP + 30 if next_type == 2 else self.process_time_at_GTP + 60 if next_type == 3 else self.process_time_at_GTP + 60 if next_type == 4 else self.process_time_at_GTP + 60
                     logging.debug('new timestep set at GTP {} : {}'.format(O_locs.index(Transition_point) + 1,
                                                                            self.W_times[
                                                                                O_locs.index(Transition_point) + 1]))

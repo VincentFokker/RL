@@ -1,8 +1,8 @@
 environment:
-    amount_of_gtps:             2        #how many GtP stations should there be in the environment?
+    amount_of_gtps:             3        #how many GtP stations should there be in the environment?
     amount_output:          2        #how many types of order carriers should there be in the environment?
     gtp_buffer_size:        300       #how many items should be processed per GtP station for one episode?
-    max_items_processed:    450
+    max_items_processed:    250
     exception_occurrence:    0.0      #how often an exception occurs
     process_time_at_GTP:    6        #time to process one product in sec
     max_cycle_count:     250         #max ammount of cycles allowed
@@ -69,7 +69,7 @@ models:
         full_tensorboard_log: False
         verbose: 0
         n_cpu_tf_sess: 8
-        seed: 999
+        seed: 42
 
 
 policies:
