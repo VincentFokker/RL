@@ -67,7 +67,7 @@ models:
         noptepochs: 4        # Number of iterations for SGD/Adam
         cliprange: 0.2       # Clip factor for PPO (the action probability distribution of the updated policy cannot differ from the old one by this fraction [measured by KL divergence])
         full_tensorboard_log: False
-        verbose: 0
+        verbose: 1
         n_cpu_tf_sess: 8
         seed: 42
 
