@@ -208,13 +208,13 @@ class AbstractConveyor(gym.Env):
 #####################################################################################################################################
 ## For Heuristic approach
 
-    def do_heuristic_guided_step(self, bezetgr=0.30):
+    def do_heuristic_guided_step(self, bezetgr=15):
         """
-        Sets a step in the environment based on the
+        Sets a step in the environment based on the FiFo policy.
         """
         order_sequence = []  # we build a FiFo list here
         for idx, queue in enumerate(self.in_queue[::-1]):  # reversed, because you want to service the last queue first
-            if len(queue) + len(self.in_pipe[::-1][idx]) < 0.5 * self.gtp_buffer_length + (self.pipeline_length // 15):
+            if len(queue) + len(self.in_pipe[::-1][idx]) < 0.5 * self.gtp_buffer_length + (self.pipeline_length // bezetgr):
                 try:
                     current_demand = [item for item in self.init_queues[::-1]][idx][len(self.in_pipe[::-1][idx]):][0]
                     order_sequence.append((current_demand, len(self.in_queue) - idx))
@@ -225,7 +225,8 @@ class AbstractConveyor(gym.Env):
         except:
             order_type, goal = 0, 0
 
-        env.step(None, order_type, goal)
+        self.step(None, order_type, goal)
+
 #############################################################################################################################
     def make_observation(self):
         '''Builds the observation from the available variables'''
