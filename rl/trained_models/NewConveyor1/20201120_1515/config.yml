@@ -1,0 +1,59 @@
+environment:
+    amount_of_gtps: 3
+    amount_output: 2
+    gtp_buffer_size: 300
+    max_items_processed: 250
+    exception_occurrence: 0.0
+    process_time_at_GTP: 6
+    max_cycle_count: 250
+    in_que_observed: 3
+    termination_condition: 3
+    percentage_small_carriers: 0.33
+    percentage_medium_carriers: 0.34
+    percentage_large_carriers: 0.33
+    observation_shape:
+    - 1
+    - 4
+    - 9
+    - 10
+    - 12
+    optimal_pipe: 8
+    positive_reward_for_divert: 10
+    wrong_sup_at_goal: -10
+    negative_reward_for_invalid_action: -10
+    shortage_reward: 0
+    flooding_reward: 0
+    proper_queue_reward: -5
+    negative_reward_for_cycle: 0
+main:
+    model: PPO2
+    policy: MlpPolicy
+    n_workers: 16
+    n_steps: 15000000
+    save_every: 5000000
+    logs:
+    - steps
+models:
+    PPO2:
+        gamma: 0.99375
+        n_steps: 128
+        ent_coef: 0.01
+        learning_rate: 0.00025
+        vf_coef: 0.5
+        max_grad_norm: 0.5
+        lam: 0.95
+        nminibatches: 4
+        noptepochs: 4
+        cliprange: 0.2
+        full_tensorboard_log: false
+        verbose: 1
+        n_cpu_tf_sess: 8
+        seed: 42
+policies:
+    CustomMlpPolicy:
+        shared:
+        - 64
+        - 32
+        - 16
+        h_actor: []
+        h_critic: []
