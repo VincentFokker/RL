@@ -74,7 +74,7 @@ class AbstractConveyor(gym.Env):
         # determination of observation_space:
         self.shape = 0
         if 1 in self.observation_shape:
-            self.shape += 2 * ((self.amount_of_gtps * 4) + 6 + 2 * self.amount_of_outputs)
+            self.shape += 2 * ((self.amount_of_gtps * 4) + self.pipeline_length -1 +2 * self.amount_of_outputs)
         if 2 in self.observation_shape:
             self.shape += self.amount_of_outputs
         if 3 in self.observation_shape:
@@ -424,7 +424,9 @@ class AbstractConveyor(gym.Env):
         """reset all the variables to zero, empty queues
         must return the current state of the environment"""
         #init variables
-        self.episode = 0
+        self.episode += 1
+        print('Ep: {:5}, steps: {:3}, R: {:3.3f}'.format(self.episode, self.steps, self.reward), end='\r')
+
         self.reward = 0
         self.terminate = False
         self.items_on_conv = []
@@ -703,8 +705,16 @@ class AbstractConveyor(gym.Env):
         cycle_count2 = self.cycle_count
         self.cycle_count_delta = cycle_count2 - cycle_count1
 
+        output_reward = 0
+        # priming to output carriers
+        if self.next_O != 0:
+            output_reward = self.output_priming_reward
         step_reward = -1 * (self.idle_time_delta * self.idle_time_reward_factor + self.cycle_count_delta * self.cycle_count_reward_factor)
-        self.reward += step_reward
+        self.reward += step_reward + output_reward
+
+        ## terminate on high cycle count
+        if self.cycle_count > self.max_cycle_count:
+            self.terminate = True
 
         ## termination conditions
         if self.termination_condition == 1:
@@ -717,7 +727,7 @@ class AbstractConveyor(gym.Env):
             if self.items_processed > self.max_items_processed:
                 self.terminate = True
 
-        next_state = {}
+        next_state = self.make_observation()
         reward = self.reward
         terminate = self.terminate
         return next_state, reward, terminate, {}

@@ -5,7 +5,7 @@ environment:
     max_items_processed:    250
     exception_occurrence:    0.0      #how often an exception occurs
     process_time_at_GTP:    6        #time to process one product in sec
-    max_cycle_count:     250         #max ammount of cycles allowed
+    max_cycle_count:     400         #max ammount of cycles allowed
     in_que_observed:        3        #how many items of the queue demand the agent observes
     termination_condition:  3        #when to terminate: 1 = terminate episode when all orders processed at GtP operator
                                      #                   2 = terminate episode when all orders delivered in right queue
@@ -67,7 +67,7 @@ models:
         noptepochs: 4        # Number of iterations for SGD/Adam
         cliprange: 0.2       # Clip factor for PPO (the action probability distribution of the updated policy cannot differ from the old one by this fraction [measured by KL divergence])
         full_tensorboard_log: False
-        verbose: 1
+        verbose: 0
         n_cpu_tf_sess: 8
         seed: 42
 
