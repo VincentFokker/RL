@@ -39,6 +39,7 @@ class AbstractConveyor(gym.Env):
         self.empty_env = self.image = self.generate_env()
         self.pallette = (np.asarray(sns.color_palette("Reds", self.amount_of_outputs)) * 255).astype(int)
         self.window_name = 'Conveyor Render v5.1'
+        self.render_width = self.config['render_width']
 
         #init variables
         self.episode = 0
@@ -204,7 +205,28 @@ class AbstractConveyor(gym.Env):
             empty[7][i] = (255, 242, 229)
 
         return empty
+#####################################################################################################################################
+## For Heuristic approach
 
+    def do_heuristic_guided_step(self, bezetgr=0.30):
+        """
+        Sets a step in the environment based on the
+        """
+        order_sequence = []  # we build a FiFo list here
+        for idx, queue in enumerate(self.in_queue[::-1]):  # reversed, because you want to service the last queue first
+            if len(queue) + len(self.in_pipe[::-1][idx]) < 0.5 * self.gtp_buffer_length + (self.pipeline_length // 15):
+                try:
+                    current_demand = [item for item in self.init_queues[::-1]][idx][len(self.in_pipe[::-1][idx]):][0]
+                    order_sequence.append((current_demand, len(self.in_queue) - idx))
+                except:
+                    pass
+        try:
+            order_type, goal = order_sequence[0]
+        except:
+            order_type, goal = 0, 0
+
+        env.step(None, order_type, goal)
+#############################################################################################################################
     def make_observation(self):
         '''Builds the observation from the available variables'''
         pass
@@ -443,6 +465,7 @@ class AbstractConveyor(gym.Env):
 
     def step(self, action=None, next_O=None, next_D=None):
         """
+        Allows to set Next_O and next_D for the heuristic approach.
         Generic step function; takes a step bij calling step_env()
         observation is returned
         Reward is calculated
@@ -459,13 +482,14 @@ class AbstractConveyor(gym.Env):
             # do nothing but step env
             self.next_O, self.next_D = 0, 0
 
-
+        #for the rest of the actions
         for i in range(1, self.amount_of_outputs * self.amount_of_gtps + 1):
             if action == i:
                 self.next_O, self.next_D = (i - 1) // self.amount_of_gtps + 1, ((i - 1) % self.amount_of_gtps) + 1
 
         self.step_env()
-        #cycle tracer
+
+        ## cycle tracer
         # rewards for taking cycles in the system
         if len([item for item in self.items_on_conv if
                 item[0] == [1, 7]]) == 1:  # in case that negative reward is calculated with cycles
@@ -538,6 +562,8 @@ class AbstractConveyor(gym.Env):
             color = self.pallette[0] if item[1] == 1 else self.pallette[1] if item[1] == 2 else self.pallette[2] if \
                 item[1] == 3 else self.pallette[3]
             draw.rectangle([x0, y0, x1, y1], fill=tuple(color), outline='black')
+            draw.text((x0, y0),'{}'.format(item[2]), fill='black',
+                      font=ImageFont.truetype(font='arial', size=20, index=0, encoding='unic', layout_engine=None))
 
         # Draw demands
         for item in copy(self.diverter_locations):
@@ -581,54 +607,59 @@ class AbstractConveyor(gym.Env):
             draw.text((x7, y7 + 15), '{}'.format(self.in_queue[self.diverter_locations.index(item)][:5]), fill='white',
                       font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
 
-            # ##### TURN OFF FOR FASTER RENDERING #############################################################################################
-            # # values of the O_states
-            # for item in copy(self.output_locations):
-            #     x0 = item[0] * resize_factor + 40
-            #     y0 = item[1] * resize_factor + 40
-            #     draw.text((x0, y0), '{}'.format(self.O_states[self.output_locations.index(item) + 1]), fill='white',
-            #               font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
-            #
-            # draw reward
-            x0, y0 = self.diverter_locations[0][0] * resize_factor + 130, self.diverter_locations[0][
-                1] * resize_factor + 150
-            y1 = y0 + 25
-            y2 = y1 + 25
-            draw.text((x0, y0), ' Total Reward: {}'.format(self.reward), fill='white',
-                      font=ImageFont.truetype(font='arial', size=15, index=0, encoding='unic', layout_engine=None))
-            # draw.text((x0, y1), ' Positive Reward: {}'.format(self.step_reward_p), fill='green',
-            #           font=ImageFont.truetype(font='arial', size=15, index=0, encoding='unic', layout_engine=None))
-            # draw.text((x0, y2), ' Negative Reward: {}'.format(self.step_reward_n), fill='red',
-            #           font=ImageFont.truetype(font='arial', size=15, index=0, encoding='unic', layout_engine=None))
-            # ###################################################################################################################################
+        # ##### TURN OFF FOR FASTER RENDERING #############################################################################################
+        # # values of the O_states
+        # for item in copy(self.output_locations):
+        #     x0 = item[0] * resize_factor + 40
+        #     y0 = item[1] * resize_factor + 40
+        #     draw.text((x0, y0), '{}'.format(self.O_states[self.output_locations.index(item) + 1]), fill='white',
+        #               font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
+        #
+        # draw reward
+        x0, y0 = self.diverter_locations[0][0] * resize_factor + 130, self.diverter_locations[0][
+            1] * resize_factor + 150
+        y1 = y0 + 25
+        y2 = y1 + 25
+        draw.text((x0, y0), ' Total Reward: {}'.format(self.reward), fill='white',
+                  font=ImageFont.truetype(font='arial', size=15, index=0, encoding='unic', layout_engine=None))
+        # draw.text((x0, y1), ' Positive Reward: {}'.format(self.step_reward_p), fill='green',
+        #           font=ImageFont.truetype(font='arial', size=15, index=0, encoding='unic', layout_engine=None))
+        # draw.text((x0, y2), ' Negative Reward: {}'.format(self.step_reward_n), fill='red',
+        #           font=ImageFont.truetype(font='arial', size=15, index=0, encoding='unic', layout_engine=None))
+        # ###################################################################################################################################
 
-            # Draw GTP demands
-            for item in copy(self.operator_locations):
-                x0 = item[0] * resize_factor + 40
-                y0 = item[1] * resize_factor
-                x1 = x0 + 30
-                y1 = y0 + 30
+        # Draw GTP demands
+        for item in copy(self.operator_locations):
+            x0 = item[0] * resize_factor + 40
+            y0 = item[1] * resize_factor
+            x1 = x0 + 30
+            y1 = y0 + 30
 
-                try:
-                    next_up = self.demand_queues[self.operator_locations.index(item)][0]
-                except:
-                    next_up = '-'
-                color = self.pallette[0] if next_up == 1 else self.pallette[1] if next_up == 2 else self.pallette[
-                    2] if next_up == 3 else (225, 225, 225)
-                draw.ellipse([x0, y0, x1, y1], fill=tuple(color), outline=None)
-                draw.text((x0 + 10, y0 + 5), '{}'.format(next_up), fill='black',
-                          font=ImageFont.truetype(font='arial', size=20, index=0, encoding='unic', layout_engine=None))
-                draw.text((x0, y0 - 45), 'Demand \n at GtP',
-                          font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
+            try:
+                next_up = self.demand_queues[self.operator_locations.index(item)][0]
+            except:
+                next_up = '-'
+            color = self.pallette[0] if next_up == 1 else self.pallette[1] if next_up == 2 else self.pallette[
+                2] if next_up == 3 else (225, 225, 225)
+            draw.ellipse([x0, y0, x1, y1], fill=tuple(color), outline=None)
+            draw.text((x0 + 10, y0 + 5), '{}'.format(next_up), fill='black',
+                      font=ImageFont.truetype(font='arial', size=20, index=0, encoding='unic', layout_engine=None))
+            draw.text((x0, y0 - 45), 'Demand \n at GtP',
+                      font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
 
-                # demand queues
-                draw.text((x0, y0 - 15), '{}'.format(self.demand_queues[self.operator_locations.index(item)][:5]),
-                          font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
+            # demand queues
+            draw.text((x0, y0 - 15), '{}'.format(self.demand_queues[self.operator_locations.index(item)][:5]),
+                      font=ImageFont.truetype(font='arial', size=10, index=0, encoding='unic', layout_engine=None))
 
-            #resize with PIL
-            img = img.resize((1200,480), resample=Image.BOX)
-            cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
-            cv2.waitKey(1)
+        #resize with PIL
+        #img = img.resize((1200,480), resample=Image.BOX)
+        width, height = img.size
+        if width > self.render_width:
+            new_width = self.render_width
+            new_height = int(height * (new_width / width))
+            img = img.resize((new_width, new_height), resample=Image.BOX)
+        cv2.imshow(self.window_name, cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB))
+        cv2.waitKey(1)
 
     def create_window(self):
         # cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
