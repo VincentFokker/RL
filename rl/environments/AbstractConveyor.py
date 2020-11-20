@@ -41,6 +41,8 @@ class AbstractConveyor(gym.Env):
         self.window_name = 'Conveyor Render v5.1'
         self.render_width = self.config['render_width']
         self.max_cycle_count = self.config['max_cycle_count']
+        self.steps_by_heuristic = self.config['steps_by_heuristic']
+        self.repurpose_goal = self.config['repurpose_goal']
 
         #init variables
         self.episode = 0
@@ -50,6 +52,13 @@ class AbstractConveyor(gym.Env):
         self.amount_of_orders_processed = 0
         self.condition_to_transfer = False
         self.condition_to_process = False
+        self.idle_time_delta = 0
+        self.cycle_count_delta = 0
+
+        #init reward vars
+        self.idle_time_reward_factor = self.config['idle_time_reward_factor']
+        self.cycle_count_reward_factor = self.config['cycle_count_reward_factor']
+        self.output_priming_reward = self.config['output_priming_reward']
 
         #define locations
         self.diverter_locations =   [[i, 7] for i in range(4, self.amount_of_gtps * 4 + 1, 4)][::-1]
@@ -127,10 +136,18 @@ class AbstractConveyor(gym.Env):
         for i in range(len(self.operator_locations)):
             self.idle_times_operator[i] = 0
 
+        self.do_warm_start2(self.steps_by_heuristic)
+
+    def do_warm_start2(self, y):
+
+        for _ in range(y):
+            self.do_heuristic_guided_step()
+
     def do_warm_start(self, x):
         for _ in range(x):
             self.warm_start()
         #self.spawn_item_conv()
+
 
     def spawn_item_conv(self):
         low, high = self.diverter_locations[-1], self.output_locations[-1]
@@ -256,15 +273,14 @@ class AbstractConveyor(gym.Env):
         # TODO: return:type_map_obs
 
         ###  2. Occupation of the The output points ########################################################################
-        output_points = carrier_type_map_obs[-2 * self.amount_of_outputs:][
-                        ::2]  ## returns: array([[3.],[3.],[3.]])                         # 3
+        output_points = carrier_type_map_obs[-2 * self.amount_of_outputs:][::2]  ## returns: array([[3.],[3.],[3.]])
         output_points = np.array([1 if item != 0 else 0 for item in output_points])  # Returns array(1, 1, 1)
         logging.debug(output_points)
         # TODO: return: output_points
 
         ### 3. For the observation of the items in queue ##################################################################
         # length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
-        in_queue = [len(item) * 1 / 7 for item in self.in_queue]
+        in_queue = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
         in_queue = np.array(in_queue).flatten()
 
         # TODO: return: in_queue
@@ -331,9 +347,9 @@ class AbstractConveyor(gym.Env):
             # TODO: return: cantake
 
             ##### 10. Var if queue is lower then 2 ##################################################################
-            if len(queue) < 3:
+            if len(queue) < 2:
                 isempty.append(1)
-            elif len(queue) >= 3:
+            elif len(queue) >= 2:
                 isempty.append(0)
         # TODO: return: isempty
 
@@ -359,13 +375,17 @@ class AbstractConveyor(gym.Env):
 
         # TODO: return: info
 
-        #### 12. in pipeline for each queue ##########################################################################
+        #### 12. in pipeline for each queue ###########################################################################
         in_pipe = [[len([item for item in self.items_on_conv if item[2] == i and item[1] == j]) for j in
                     range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
         in_pipe = np.array(in_pipe).flatten()
-        in_pipe = np.array([1 if item > 7 else item / 7 for item in in_pipe])
+        in_pipe = np.array([1 if item > (self.gtp_buffer_length + self.pipeline_length // 15) else item / (
+                    self.gtp_buffer_length + self.pipeline_length // 15) for item in in_pipe])
 
         # TODO: return:in_pipe
+        ### 13. what is currently in pipe ##############################################################################
+
+
         ### Combine All to one array ###################################################################################
 
         obs = np.array([])
@@ -411,6 +431,8 @@ class AbstractConveyor(gym.Env):
         self.amount_of_orders_processed = 0
         self.condition_to_transfer = False
         self.condition_to_process = False
+        self.idle_time_delta = 0
+        self.cycle_count_delta = 0
 
         #reset queue demands
         self.queues = [[random.randint(1, self.amount_of_outputs) for _ in range(self.gtp_demand_size)] for item in
@@ -557,7 +579,7 @@ class AbstractConveyor(gym.Env):
                 # condition 1: if the item at Dloc == the current demand
                 condition_1 = item[1] == self.queue_demand[self.diverter_locations.index(item[0])]
                 # condition 2: if the goal of the current item == the current gtp queue
-                condition_2 = item[2] == (self.diverter_locations.index(item[0]) + 1)
+                condition_2 = item[2] == (self.diverter_locations.index(item[0]) + 1) or item[2] == 999
                 # condition 3: queue is not full
                 condition_3 = [item[0][0], item[0][1] + 1] not in [item[0] for item in self.items_on_conv]
 
@@ -573,11 +595,20 @@ class AbstractConveyor(gym.Env):
                 elif condition_2 and condition_3 and not condition_1:
                     #self.reward += self.wrong_sup_at_goal
                     item[0][0] -= 1
+                    if self.repurpose_goal:
+                        item[2] = 999
 
                 elif condition_1 and condition_2 and not condition_3:
                     #self.reward += self.flooding_reward
                     item[0][0] -= 1
+                    if self.repurpose_goal:
+                        item[2] = 999
 
+                elif condition_2 and not condition_1 and not condition_3:
+                    #self.reward += self.wrong_sup_at_goal + self.flooding_reward
+                    item[0][0] -= 1
+                    if self.repurpose_goal:
+                        item[2] = 999
                 else:
                     item[0][0] -= 1
 
@@ -651,7 +682,15 @@ class AbstractConveyor(gym.Env):
             if action == i:
                 self.next_O, self.next_D = (i - 1) // self.amount_of_gtps + 1, ((i - 1) % self.amount_of_gtps) + 1
 
+        #before the step
+        Idle_time1 = sum(self.idle_times_operator.values())
+        cycle_count1 = self.cycle_count
+
         self.step_env()
+
+        #after the step
+        Idle_time2 = sum(self.idle_times_operator.values())
+        self.idle_time_delta = Idle_time2-Idle_time1
 
         ## cycle tracer
         # rewards for taking cycles in the system
@@ -659,6 +698,13 @@ class AbstractConveyor(gym.Env):
                 item[0] == [1, 7]]) == 1:  # in case that negative reward is calculated with cycles
             #self.reward += self.negative_reward_for_cycle  # punish if order carriers take a cycle #tag:punishment
             self.cycle_count +=1
+
+        #after cyclecount
+        cycle_count2 = self.cycle_count
+        self.cycle_count_delta = cycle_count2 - cycle_count1
+
+        step_reward = -1 * (self.idle_time_delta * self.idle_time_reward_factor + self.cycle_count_delta * self.cycle_count_reward_factor)
+        self.reward += step_reward
 
         ## termination conditions
         if self.termination_condition == 1:
