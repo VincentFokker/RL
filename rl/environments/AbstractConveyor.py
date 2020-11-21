@@ -59,6 +59,7 @@ class AbstractConveyor(gym.Env):
         self.idle_time_reward_factor = self.config['idle_time_reward_factor']
         self.cycle_count_reward_factor = self.config['cycle_count_reward_factor']
         self.output_priming_reward = self.config['output_priming_reward']
+        self.delivery_reward = self.config['delivery_reward']
 
         #define locations
         self.diverter_locations =   [[i, 7] for i in range(4, self.amount_of_gtps * 4 + 1, 4)][::-1]
@@ -517,6 +518,7 @@ class AbstractConveyor(gym.Env):
                     self.items_on_conv = [item for item in self.items_on_conv if item[0] != Transition_point]
 
                     self.items_processed += 1
+                    self.reward += self.delivery_reward
                     logging.debug('order at GTP {} processed'.format(O_locs.index(Transition_point) + 1))
                     logging.debug('conveyor memory after processing: {}'.format(self.items_on_conv))
 

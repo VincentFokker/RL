@@ -54,7 +54,8 @@ environment:
     # factors are:
     idle_time_reward_factor:    5
     cycle_count_reward_factor:  5
-    output_priming_reward:      0.1
+    output_priming_reward:      0.00
+    delivery_reward: 0
 
     # old rewards
     negative_reward_for_cycle: -10
@@ -86,7 +87,7 @@ main:
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
     model: PPO2
-    policy: MlpPolicy
+    policy: CustomMlpPolicy
     n_workers: 8      # Parallel environments
     n_steps:    5000000    # Steps to train
     save_every: 1000000  # Save a checkpoint of the model every n steps
@@ -105,7 +106,7 @@ main:
 
 models:
     PPO2:
-        gamma: 0.994          # Discount factor for future rewards
+        gamma: 0.999         # Discount factor for future rewards
         n_steps: 128         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR
@@ -187,6 +188,7 @@ policies:
     CustomMlpPolicy:
         shared:
             - 128
+            - 64
             - 64
             - 16
         h_actor: [] # Policy head
