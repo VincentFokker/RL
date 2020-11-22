@@ -61,6 +61,13 @@ class AbstractConveyor(gym.Env):
         self.output_priming_reward = self.config['output_priming_reward']
         self.delivery_reward = self.config['delivery_reward']
 
+        self.positive_reward_for_divert = self.config['positive_reward_for_divert']
+        self.wrong_sup_at_goal = self.config['wrong_sup_at_goal']
+        self.flooding_reward = self.config['flooding_reward']
+        self.neg_reward_ia = self.config['neg_reward_ia']
+        self.reward_empty_queue = self.config['negative_reward_for_empty_queue']
+        self.negative_reward_for_cycle = self.config['negative_reward_for_cycle']
+
         #define locations
         self.diverter_locations =   [[i, 7] for i in range(4, self.amount_of_gtps * 4 + 1, 4)][::-1]
         self.merge_locations =      [[i - 1, 7] for i in range(4, self.amount_of_gtps * 4 + 1, 4)][::-1]
@@ -592,24 +599,24 @@ class AbstractConveyor(gym.Env):
                     self.update_queue_demand()
                     self.in_queue[self.diverter_locations.index(item[0])].append(item[1])
                     self.in_pipe[self.diverter_locations.index(item[0])] = self.in_pipe[self.diverter_locations.index(item[0])][1:]
-                    #self.reward += self.positive_reward_for_divert + self.diverter_locations.index(item[0]) * 4  # postive_reward_for_divert
+                    self.reward += self.positive_reward_for_divert #+ self.diverter_locations.index(item[0]) * 4  # postive_reward_for_divert
                     item[0][1] += 1
                     logging.debug('moved carrier into lane')
 
                 elif condition_2 and condition_3 and not condition_1:
-                    #self.reward += self.wrong_sup_at_goal
+                    self.reward += self.wrong_sup_at_goal
                     item[0][0] -= 1
                     if self.repurpose_goal:
                         item[2] = 999
 
                 elif condition_1 and condition_2 and not condition_3:
-                    #self.reward += self.flooding_reward
+                    self.reward += self.flooding_reward
                     item[0][0] -= 1
                     if self.repurpose_goal:
                         item[2] = 999
 
                 elif condition_2 and not condition_1 and not condition_3:
-                    #self.reward += self.wrong_sup_at_goal + self.flooding_reward
+                    self.reward += self.wrong_sup_at_goal + self.flooding_reward
                     item[0][0] -= 1
                     if self.repurpose_goal:
                         item[2] = 999
@@ -659,7 +666,7 @@ class AbstractConveyor(gym.Env):
                 self.in_pipe[self.next_D-1].append(self.output_locations.index(loc) + 1)
             if condition1 and condition2 == False:
                 pass
-                #self.reward += self.neg_reward_ia
+                self.reward += self.neg_reward_ia
 
 
     def step(self, action=None, next_O=None, next_D=None):
@@ -700,7 +707,7 @@ class AbstractConveyor(gym.Env):
         # rewards for taking cycles in the system
         if len([item for item in self.items_on_conv if
                 item[0] == [1, 7]]) == 1:  # in case that negative reward is calculated with cycles
-            #self.reward += self.negative_reward_for_cycle  # punish if order carriers take a cycle #tag:punishment
+            self.reward += self.negative_reward_for_cycle  # punish if order carriers take a cycle #tag:punishment
             self.cycle_count +=1
 
         #after cyclecount
@@ -713,6 +720,11 @@ class AbstractConveyor(gym.Env):
             output_reward = self.output_priming_reward
         step_reward = -1 * (self.idle_time_delta * self.idle_time_reward_factor + self.cycle_count_delta * self.cycle_count_reward_factor)
         self.reward += step_reward + output_reward
+
+        # rewards for the queue
+        for item in self.in_queue:
+            if len(item) < 1:
+                self.reward += self.reward_empty_queue
 
         ## terminate on high cycle count
         if self.cycle_count > self.max_cycle_count:

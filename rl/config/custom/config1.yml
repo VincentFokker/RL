@@ -1,38 +1,54 @@
 environment:
-    amount_of_gtps: 3
-    amount_output: 2
-    gtp_buffer_size: 300
-    max_items_processed: 250
-    exception_occurrence: 0.0
+    amount_of_gtps: 2
+    amount_of_outputs: 2
+    gtp_demand_size: 100
     process_time_at_GTP: 6
-    max_cycle_count: 250
-    in_que_observed: 3
+    speed_improvement: 0.0
+    gtp_buffer_length: 7
+    pipeline_length: 10
+    in_que_observed: 1
+    exception_occurence: 0.0
     termination_condition: 3
+    max_items_processed: 400
+    max_cycle_count: 400
+    steps_by_heuristic: 20
+    repurpose_goal: false
+    render_width: 1280
     percentage_small_carriers: 0.33
     percentage_medium_carriers: 0.34
     percentage_large_carriers: 0.33
     observation_shape:
     - 1
+    - 2
     - 4
     - 9
     - 10
     - 12
-    optimal_pipe: 8
-    positive_reward_for_divert: 10
-    wrong_sup_at_goal: -10
-    negative_reward_for_invalid_action: -10
-    shortage_reward: 0
+    idle_time_reward_factor: 10
+    cycle_count_reward_factor: 5
+    output_priming_reward: 0.01
+    delivery_reward: 1
+    positive_reward_for_divert: 0
+    wrong_sup_at_goal: 0
     flooding_reward: 0
-    proper_queue_reward: -5
+    neg_reward_ia: 0
+    negative_reward_for_empty_queue: 0
     negative_reward_for_cycle: 0
 main:
     model: PPO2
-    policy: CustomMlpPolicy
+    policy: MlpPolicy
     n_workers: 8
-    n_steps   : 20000000
-    save_every:  5000000
+    n_steps: 5000000
+    save_every: 1000000
     logs:
     - steps
+    - amount_of_items_on_conv
+    - amount_of_items_in_sys
+    - remaining_demand
+    - amount_of_orders_processed
+    - positive_reward
+    - cycle_count
+    - run_count
 models:
     PPO2:
         gamma: 0.99375
@@ -48,9 +64,8 @@ models:
         full_tensorboard_log: false
         verbose: 0
         n_cpu_tf_sess: 8
-        seed: 42
     DQN:
-        gamma: 0.99
+        gamma: 0.996
         learning_rate: 0.001
         buffer_size: 20000
         exploration_fraction: 0.1
@@ -116,8 +131,10 @@ models:
 policies:
     CustomMlpPolicy:
         shared:
+        - 128
         - 64
         - 64
+        - 16
         h_actor: []
         h_critic: []
     CustomDQNPolicy:

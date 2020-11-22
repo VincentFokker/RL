@@ -39,8 +39,8 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
 
     config_env = config['environment']
-    amount_output = config_env['amount_output']
-    amount_gtps = config_env['amount_gtp']
+    amount_output = config_env['amount_of_outputs']
+    amount_gtps = config_env['amount_of_gtps']
     stop = amount_gtps * amount_output + 1
     #load environment with config variables
     env_obj = getattr(rl.environments, args.environment)
@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 f, (ax1, ax2) = plt.subplots(1, 2)
                 ax1.imshow(state_n)
                 ax1.set_title('State')
-                ax2.bar(x=range(0,32), height=model.action_probability(state))
+                ax2.bar(x=range(0,amount_gtps*amount_output+1), height=model.action_probability(state))
                 ax2.set_title('Action Distribution')
                 f.savefig('buffer_img.png')
                 plt.close(f)
