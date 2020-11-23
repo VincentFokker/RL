@@ -26,20 +26,20 @@ environment:
     - 12
     idle_time_reward_factor: 7
     cycle_count_reward_factor: 3
-    output_priming_reward: 0.0
+    output_priming_reward: 0.01
     delivery_reward: 10
-    positive_reward_for_divert: 2
-    wrong_sup_at_goal: -5
-    flooding_reward: -1
-    neg_reward_ia: -7
-    negative_reward_for_empty_queue: -2
+    positive_reward_for_divert: 1
+    wrong_sup_at_goal: 0
+    flooding_reward: -7
+    neg_reward_ia: -2
+    negative_reward_for_empty_queue: -10
     negative_reward_for_cycle: -1
 main:
     model: PPO2
     policy: MlpPolicy
     n_workers: 8
-    n_steps: 10000000
-    save_every: 2000000
+    n_steps: 5000000
+    save_every: 1000000
     logs:
     - steps
     - amount_of_items_on_conv
@@ -51,7 +51,7 @@ main:
     - run_count
 models:
     PPO2:
-        gamma: 0.99375
+        gamma: 0.999375
         n_steps: 128
         ent_coef: 0.01
         learning_rate: 0.00025

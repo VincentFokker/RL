@@ -52,10 +52,10 @@ environment:
     # Delta cycle count = 1 if cycle in step else 0
     # factors are:
 
-    idle_time_reward_factor:        7
-    cycle_count_reward_factor:      3
-    output_priming_reward:          0.01
-    delivery_reward:                10
+    idle_time_reward_factor:        0
+    cycle_count_reward_factor:      0
+    output_priming_reward:          0.00
+    delivery_reward:                0
 
     positive_reward_for_divert:     0   #10
     wrong_sup_at_goal:              0   #-10
@@ -103,7 +103,7 @@ main:
 
 models:
     PPO2:
-        gamma: 0.999375         # Discount factor for future rewards
+        gamma: 0.99375        # Discount factor for future rewards
         n_steps: 128         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR

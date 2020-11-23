@@ -25,7 +25,7 @@ environment:
     - 10
     - 12
     idle_time_reward_factor: 7
-    cycle_count_reward_factor: 3
+    cycle_count_reward_factor: 7
     output_priming_reward: 0.0
     delivery_reward: 10
     positive_reward_for_divert: 0
