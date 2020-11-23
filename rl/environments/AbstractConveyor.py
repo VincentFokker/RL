@@ -604,19 +604,19 @@ class AbstractConveyor(gym.Env):
                     logging.debug('moved carrier into lane')
 
                 elif condition_2 and condition_3 and not condition_1:
-                    self.reward += self.wrong_sup_at_goal
+                    self.reward -= self.wrong_sup_at_goal
                     item[0][0] -= 1
                     if self.repurpose_goal:
                         item[2] = 999
 
                 elif condition_1 and condition_2 and not condition_3:
-                    self.reward += self.flooding_reward
+                    self.reward -= self.flooding_reward
                     item[0][0] -= 1
                     if self.repurpose_goal:
                         item[2] = 999
 
                 elif condition_2 and not condition_1 and not condition_3:
-                    self.reward += self.wrong_sup_at_goal + self.flooding_reward
+                    self.reward -= self.wrong_sup_at_goal - self.flooding_reward
                     item[0][0] -= 1
                     if self.repurpose_goal:
                         item[2] = 999
@@ -666,7 +666,7 @@ class AbstractConveyor(gym.Env):
                 self.in_pipe[self.next_D-1].append(self.output_locations.index(loc) + 1)
             if condition1 and condition2 == False:
                 pass
-                self.reward += self.neg_reward_ia
+                self.reward -= self.neg_reward_ia
 
 
     def step(self, action=None, next_O=None, next_D=None):
@@ -707,7 +707,7 @@ class AbstractConveyor(gym.Env):
         # rewards for taking cycles in the system
         if len([item for item in self.items_on_conv if
                 item[0] == [1, 7]]) == 1:  # in case that negative reward is calculated with cycles
-            self.reward += self.negative_reward_for_cycle  # punish if order carriers take a cycle #tag:punishment
+            self.reward -= self.negative_reward_for_cycle  # punish if order carriers take a cycle #tag:punishment
             self.cycle_count +=1
 
         #after cyclecount
@@ -724,7 +724,7 @@ class AbstractConveyor(gym.Env):
         # rewards for the queue
         for item in self.in_queue:
             if len(item) < 1:
-                self.reward += self.reward_empty_queue
+                self.reward -= self.reward_empty_queue
 
         ## terminate on high cycle count
         if self.cycle_count > self.max_cycle_count:
