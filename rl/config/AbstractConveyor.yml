@@ -53,8 +53,8 @@ environment:
     # factors are:
 
     idle_time_reward_factor:        7
-    cycle_count_reward_factor:      1
-    output_priming_reward:          0.01
+    cycle_count_reward_factor:      3
+    output_priming_reward:          0.00
     delivery_reward:                10
 
     positive_reward_for_divert:     0   #10

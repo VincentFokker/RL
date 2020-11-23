@@ -9,7 +9,7 @@ environment:
     in_que_observed: 1
     exception_occurence: 0.0
     termination_condition: 3
-    max_items_processed: 400
+    max_items_processed: 150
     max_cycle_count: 400
     steps_by_heuristic: 20
     repurpose_goal: false
@@ -24,22 +24,22 @@ environment:
     - 9
     - 10
     - 12
-    idle_time_reward_factor: 0
-    cycle_count_reward_factor: 0
+    idle_time_reward_factor: 7
+    cycle_count_reward_factor: 3
     output_priming_reward: 0.0
-    delivery_reward: 0
-    positive_reward_for_divert: 10
-    wrong_sup_at_goal: -7
-    flooding_reward: -2
-    neg_reward_ia: -2
-    negative_reward_for_empty_queue: -10
-    negative_reward_for_cycle: -1
+    delivery_reward: 10
+    positive_reward_for_divert: 1
+    wrong_sup_at_goal: -2
+    flooding_reward: -10
+    neg_reward_ia: -10
+    negative_reward_for_empty_queue: -5
+    negative_reward_for_cycle: -5
 main:
     model: PPO2
     policy: MlpPolicy
     n_workers: 8
-    n_steps: 5000000
-    save_every: 1000000
+    n_steps: 10000000
+    save_every: 2000000
     logs:
     - steps
     - amount_of_items_on_conv
@@ -63,7 +63,6 @@ models:
         cliprange: 0.2
         full_tensorboard_log: false
         verbose: 0
-        n_cpu_tf_sess: 8
     DQN:
         gamma: 0.996
         learning_rate: 0.001

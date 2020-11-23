@@ -107,6 +107,8 @@ class AbstractConveyor1(gym.Env):
             self.shape += 4
         if 12 in self.observation_shape:
             self.shape += self.amount_of_gtps * self.amount_of_outputs
+        if 13 in self.observation_shape:
+            self.shape += self.amount_of_gtps * self.amount_of_outputs
 
         self.observation_space = gym.spaces.Box(shape=(self.shape,),
                                                 high=1, low=0,
@@ -394,8 +396,13 @@ class AbstractConveyor1(gym.Env):
 
         # TODO: return:in_pipe
         ### 13. what is currently in pipe ##############################################################################
-
-
+        in_pipe2 = [
+            [len([item for item in self.items_on_conv if item[2] == i and item[1] == j and item[0][1] < 8]) for j in
+             range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
+        in_pipe2 = np.array(in_pipe2).flatten()
+        in_pipe2 = np.array([1 if item > (self.pipeline_length // 15) else item / (
+                    self.pipeline_length // 15) for item in in_pipe2])
+        #TODO: return in_pipe2
         ### Combine All to one array ###################################################################################
 
         obs = np.array([])
@@ -423,6 +430,8 @@ class AbstractConveyor1(gym.Env):
             obs = np.append(obs, info)
         if 12 in self.observation_shape:
             obs = np.append(obs, in_pipe)
+        if 13 in self.observation_shape:
+            obs = np.append(obs, in_pipe2)
 
         return obs
 
