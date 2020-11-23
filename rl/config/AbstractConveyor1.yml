@@ -53,10 +53,10 @@ environment:
     # Delta idle time = Sum(idle time per gtp)
     # Delta cycle count = 1 if cycle in step else 0
     # factors are:
-    idle_time_reward_factor:        0
-    cycle_count_reward_factor:      0
-    output_priming_reward:          0.00
-    delivery_reward:                0
+    idle_time_reward_factor:        7
+    cycle_count_reward_factor:      2
+    output_priming_reward:          0.01
+    delivery_reward:                10
 
     positive_reward_for_divert:     0   #10
     wrong_sup_at_goal:              0   #-10
