@@ -54,7 +54,7 @@ environment:
 
     idle_time_reward_factor:        7
     cycle_count_reward_factor:      3
-    output_priming_reward:          0.00
+    output_priming_reward:          0.01
     delivery_reward:                10
 
     positive_reward_for_divert:     0   #10
@@ -86,8 +86,8 @@ main:
     model: PPO2
     policy: MlpPolicy
     n_workers: 8      # Parallel environments
-    n_steps:    10000000    # Steps to train
-    save_every: 2000000  # Save a checkpoint of the model every n steps
+    n_steps:    5000000    # Steps to train
+    save_every: 1000000  # Save a checkpoint of the model every n steps
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
@@ -103,7 +103,7 @@ main:
 
 models:
     PPO2:
-        gamma: 0.99375         # Discount factor for future rewards
+        gamma: 0.999375         # Discount factor for future rewards
         n_steps: 128         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR
