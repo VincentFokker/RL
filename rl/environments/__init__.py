@@ -29,3 +29,4 @@ from .SimpleConveyor1 import SimpleConveyor1
 from .SimpleConveyor1GA import SimpleConveyor1GA
 from .MultiConveyor import MultiConveyor
 from .AbstractConveyor import AbstractConveyor
+from .AbstractConveyor1 import AbstractConveyor1
