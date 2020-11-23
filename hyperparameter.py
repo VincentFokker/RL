@@ -63,7 +63,7 @@ negative_reward_for_cycle\t:\t{}\n'.format(prfd, wsag, fr, nria, nrfeq, nrfc))
     #define folder and path
     now = datetime.datetime.now()
     folder ='{}{}{}_{}{}'.format(now.year, str(now.month).zfill(2), str(now.day).zfill(2), str(now.hour).zfill(2), str(now.minute).zfill(2))
-    specified_path = join(path, 'rl', 'trained_models', env_name, folder)
+    specified_path = join(path, 'rl', 'trained_models', env_name, 'hyper-parameter',folder)
     print('Results stored in: {}'.format(specified_path))
     
     # callback for evaluation
