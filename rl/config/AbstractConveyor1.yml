@@ -40,7 +40,7 @@ environment:
     # 11 - there is an item in the lead  for each type
 
     #to try
-    observation_shape: [1, 2, 3, 4, 9, 10, 13]
+    observation_shape: [1, 4, 9, 10, 12]
     #observation_shape: [2, 4, 9, 10, 12]
     #observation_shape: [1, 12 , 4, 9, 10]
     #observation_shape: [1, 3, 4, 9, 10, 12]
@@ -53,9 +53,9 @@ environment:
     # Delta idle time = Sum(idle time per gtp)
     # Delta cycle count = 1 if cycle in step else 0
     # factors are:
-    idle_time_reward_factor:        7
-    cycle_count_reward_factor:      3
-    output_priming_reward:          0.00
+    idle_time_reward_factor:        10
+    cycle_count_reward_factor:      5
+    output_priming_reward:          0.01
     delivery_reward:                10
 
     positive_reward_for_divert:     0   #10
@@ -105,7 +105,7 @@ main:
 
 models:
     PPO2:
-        gamma: 0.999375         # Discount factor for future rewards
+        gamma: 0.999375      # Discount factor for future rewards
         n_steps: 128         # Batch size (n_steps * n_workers)
         ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate: 0.00025 # LR
@@ -117,7 +117,6 @@ models:
         cliprange: 0.2       # Clip factor for PPO (the action probability distribution of the updated policy cannot differ from the old one by this fraction [measured by KL divergence])
         full_tensorboard_log: False
         verbose: 0
-        n_cpu_tf_sess: 8
 
     DQN:
         gamma: 0.996
