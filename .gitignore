@@ -16249,3 +16249,10 @@ rl/trained_models/SimpleConveyor12/20201022_1400/3_OldObsNewRewards3_2/events.ou
 rl/trained_models/SimpleConveyor12/20201022_1400/3_OldObsNewRewards3_3/events.out.tfevents.1603373880.DESKTOP-U0A7GKI
 rl/trained_models/SimpleConveyor12/20201022_1400/3_OldObsNewRewards3_4/events.out.tfevents.1603374592.DESKTOP-U0A7GKI
 rl/trained_models/SimpleConveyor12/20201022_1400/3_OldObsNewRewards3_5/events.out.tfevents.1603375295.DESKTOP-U0A7GKI
+*.pyc
+*.pyc
+rl/baselines/__pycache__/__init__.cpython-36.pyc
+rl/baselines/__pycache__/CustomPolicies.cpython-36.pyc
+rl/baselines/__pycache__/Wrapper.cpython-36.pyc
+rl/environments/__pycache__/__init__.cpython-36.pyc
+rl/__pycache__/settings.cpython-36.pyc

@@ -86,14 +86,16 @@ def plotly_data(df):
              }, labels=['iets', 'niets'])
     fig.show()
 
-def matplot_data(df, scalar, timevar='wall_time'):
+def matplot_data(df, scalar, timevar='wall_time', show=True):
     """builds matplotlib figure of the data"""
     plt.style.use('ggplot')
-    plt.figure(figsize=(15, 5))
+    fig = plt.figure(figsize=(15, 5))
     plt.plot(df[timevar], df.value, color ='#f9d1b3')
     plt.plot(df[timevar], df.value_s, color = '#f06d07')
     plt.xlabel('Timestep')
     plt.ylabel(scalar)
     #plt.grid(color='grey')
     #plt.axhline(color='black')
-    plt.show()
+    if show:
+        plt.show()
+    return fig
