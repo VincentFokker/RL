@@ -11,6 +11,7 @@ from rl.baselines import *
 from rl.helpers import launch_tensorboard
 import logging
 import yaml
+import datetime
 
 
 """
@@ -24,6 +25,9 @@ Usage of this trainer:
 logging.basicConfig(level=logging.INFO)
 
 if __name__ == "__main__":
+    now = datetime.datetime.now()
+    print('Starttime: {}:{}:{} on {}-{}-{}'.format(str(now.hour).zfill(2), str(now.minute).zfill(2),
+                                                   str(now.second).zfill(2), now.day, now.month, now.year))
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--environment', type=str, help='Name of the environment.')
     parser.add_argument('-s', '--subdir', type=str, help='Subdir to combine and analyze.')
