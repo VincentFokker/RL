@@ -101,7 +101,7 @@ negative_reward_for_cycle\t:\t{}\n'.format(prfd, wsag, fr, nria, nrfeq, nrfc))
                 results['cycle_count'] += env.cycle_count
                 results['idle_time'] += sum(env.idle_times_operator.values())
     
-    return -1*((results['cycle_count'] + results['idle_time']) /episodes)
+    return (results['cycle_count'] + results['idle_time']) /episodes
     
 def main():
     #hparams = [(low, high),        #per var
