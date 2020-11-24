@@ -24,16 +24,16 @@ environment:
     - 9
     - 10
     - 12
-    idle_time_reward_factor: 7
-    cycle_count_reward_factor: 3
-    output_priming_reward: 0.01
-    delivery_reward: 10
-    positive_reward_for_divert: 1
-    wrong_sup_at_goal: 0
-    flooding_reward: -7
-    neg_reward_ia: -2
-    negative_reward_for_empty_queue: -10
-    negative_reward_for_cycle: -1
+    idle_time_reward_factor: 0
+    cycle_count_reward_factor: 0
+    output_priming_reward: 0.0
+    delivery_reward: 0
+    positive_reward_for_divert: 5
+    wrong_sup_at_goal: 2
+    flooding_reward: 2
+    neg_reward_ia: 5
+    negative_reward_for_empty_queue: 1
+    negative_reward_for_cycle: 10
 main:
     model: PPO2
     policy: MlpPolicy
@@ -51,7 +51,7 @@ main:
     - run_count
 models:
     PPO2:
-        gamma: 0.999375
+        gamma: 0.99375
         n_steps: 128
         ent_coef: 0.01
         learning_rate: 0.00025
