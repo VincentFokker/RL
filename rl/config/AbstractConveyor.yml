@@ -36,6 +36,7 @@ environment:
     # 9 - queue can still take items, per queue (1/0)
     # 10 - queue is empty (< 2), per queue (1/0)
     # 11 - there is an item in the lead  for each type
+    # 12 - in the pipeline for each queue
 
     #to try
     observation_shape: [1, 2, 4, 9, 10, 12]
@@ -57,12 +58,12 @@ environment:
     output_priming_reward:          0.00
     delivery_reward:                0
 
-    positive_reward_for_divert:     0   #10
-    wrong_sup_at_goal:              0   #-10
-    flooding_reward:                0
-    neg_reward_ia:                  0   #-10
-    negative_reward_for_empty_queue: 0  #-5   #negative reward for empty queue, otherwise queues are empty
-    negative_reward_for_cycle:      0
+    positive_reward_for_divert:     5   #10
+    wrong_sup_at_goal:              4   #-10
+    flooding_reward:                10
+    neg_reward_ia:                  5   #-10
+    negative_reward_for_empty_queue: 4  #-5   #negative reward for empty queue, otherwise queues are empty
+    negative_reward_for_cycle:      2
 
 main:
     # MODELS:
@@ -86,7 +87,7 @@ main:
     model: PPO2
     policy: MlpPolicy
     n_workers: 8      # Parallel environments
-    n_steps:    5000000    # Steps to train
+    n_steps:    4000000    # Steps to train
     save_every: 1000000  # Save a checkpoint of the model every n steps
 
 
