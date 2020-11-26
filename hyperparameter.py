@@ -106,12 +106,12 @@ negative_reward_for_cycle\t:\t{}\n'.format(prfd, wsag, fr, nria, nrfeq, nrfc))
 def main():
     #hparams = [(low, high),        #per var
     #           (low, high)]
-    hparams = [(0, 10), #positive_reward_for_divert
-               (0, 10), #wrong_sup_at_goal
-               (0, 10), #flooding_reward
-               (0, 10), #neg_reward_ia
-               (0, 10), #negative_reward_for_empty_queue
-               (0, 10)] #negative_reward_for_cycle
+    hparams = [(0, 15), #positive_reward_for_divert
+               (0, 15), #wrong_sup_at_goal
+               (0, 15), #flooding_reward
+               (0, 15), #neg_reward_ia
+               (0, 15), #negative_reward_for_empty_queue
+               (0, 15)] #negative_reward_for_cycle
     
     #define path for the results
     hyperdive_results = join(path, 'rl', 'hyper_parameter', env_name)
