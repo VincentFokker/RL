@@ -93,7 +93,7 @@ output_priming_reward\t\t\t:\t{}\ndelivery_reward\t\t\t:\t{}\n'.format(itrf, ccr
         done = False
         meta_data = []
         while not done:
-            action, _ = test_model.predict(state, deterministic=False)
+            action, _ = test_model.predict(state, deterministic=True)
             state, reward, done, _ = env.step(action)
             if done:
                 results['cycle_count'] += env.cycle_count

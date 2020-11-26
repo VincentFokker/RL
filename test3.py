@@ -30,6 +30,7 @@ if __name__ == "__main__":
     parser.add_argument('-w', '--waitkey', type=int, help='Waitkey for the render')
     parser.add_argument('-r', '--render', action='store_true', help='Render the agents.')
     parser.add_argument('-p', '--probability', action='store_true', help='Renders action probability.')
+    parser.add_argument('-d', '--deterministic', action='store_true', help='If the agent should be deterministic.')
     args = parser.parse_args()
 
     path = pathlib.Path().absolute()
@@ -56,7 +57,7 @@ if __name__ == "__main__":
         done = False
         meta_data = []
         while not done:
-            action, _ = model.predict(state)
+            action, _ = model.predict(state, deterministic=args.deterministic)
             logging.debug(model.action_probability(state))
 
             if args.probability:

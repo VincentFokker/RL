@@ -65,12 +65,12 @@ environment:
     output_priming_reward:          0.00
     delivery_reward:                0
 
-    positive_reward_for_divert:     5   #10
-    wrong_sup_at_goal:              4   #-10
-    flooding_reward:                10
-    neg_reward_ia:                  5   #-10
-    negative_reward_for_empty_queue: 4  #-5   #negative reward for empty queue, otherwise queues are empty
-    negative_reward_for_cycle:      2
+    positive_reward_for_divert:     0 #5   #10
+    wrong_sup_at_goal:              0 #4   #-10
+    flooding_reward:                0 #10
+    neg_reward_ia:                  0 #5   #-10
+    negative_reward_for_empty_queue: 0 #4  #-5   #negative reward for empty queue, otherwise queues are empty
+    negative_reward_for_cycle:      0 #2
 
 main:
     # MODELS:
@@ -94,8 +94,8 @@ main:
     model: PPO2
     policy: MlpPolicy
     n_workers: 8      # Parallel environments
-    n_steps:    8000000    # Steps to train
-    save_every: 2000000  # Save a checkpoint of the model every n steps
+    n_steps:    5000000    # Steps to train
+    save_every: 1000000  # Save a checkpoint of the model every n steps
 
 
 
