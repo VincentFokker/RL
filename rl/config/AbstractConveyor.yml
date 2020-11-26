@@ -39,11 +39,18 @@ environment:
     # 12 - in the pipeline for each queue
 
     #to try
-    observation_shape: [1, 2, 4, 9, 10, 12]
+    #bservation_shape: [1, 2, 4, 9, 10, 12]
     #observation_shape: [2, 4, 9, 10, 12]
     #observation_shape: [1, 12 , 4, 9, 10]
     #observation_shape: [1, 3, 4, 9, 10, 12]
     #observation_shape: [2, 3, 4, 9, 10, 12]
+
+    #according to optimize
+    observation_shape: [1,2,3,4,5,6,8,10,11,12]
+    #observation_shape: [2,3,4,6,8,11]
+    #observation_shape: [1,3,6,10,11,12]
+    #observation_shape: [1,5,6,12]
+
 
     # Rewards
     # Reward fuction:
@@ -87,8 +94,8 @@ main:
     model: PPO2
     policy: MlpPolicy
     n_workers: 8      # Parallel environments
-    n_steps:    4000000    # Steps to train
-    save_every: 1000000  # Save a checkpoint of the model every n steps
+    n_steps:    8000000    # Steps to train
+    save_every: 2000000  # Save a checkpoint of the model every n steps
 
 
 

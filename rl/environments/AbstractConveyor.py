@@ -460,6 +460,8 @@ class AbstractConveyor(gym.Env):
 
         ######## Do a warm_start
         self.do_warm_start(int(0.5*self.gtp_buffer_length))
+        self.do_warm_start2(self.steps_by_heuristic)
+
 
         self.W_times = {}
         for i in range(1, len(self.init_queues) + 1):
