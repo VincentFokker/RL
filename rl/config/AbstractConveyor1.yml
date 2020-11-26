@@ -86,7 +86,7 @@ main:
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
     model: PPO2
-    policy: CustomMlpPolicy
+    policy: MlpPolicy
     n_workers: 8      # Parallel environments
     n_steps:    5000000    # Steps to train
     save_every: 1000000  # Save a checkpoint of the model every n steps
