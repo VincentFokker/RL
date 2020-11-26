@@ -369,7 +369,7 @@ class AbstractConveyor(gym.Env):
         if 1 in bottom_conv:
             info.append(1)
             info.append(len([item for item in bottom_conv if item == 1]) / (
-                    (self.amount_of_gtps * 4) + 6 + 2 * self.amount_of_outputs))
+                    (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
         else:
             info.append(0)
             info.append(0)
@@ -377,7 +377,7 @@ class AbstractConveyor(gym.Env):
         if 2 in bottom_conv:
             info.append(1)
             info.append(len([item for item in bottom_conv if item == 2]) / (
-                    (self.amount_of_gtps * 4) + 6 + 2 * self.amount_of_outputs))
+                    (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
         else:
             info.append(0)
             info.append(0)
