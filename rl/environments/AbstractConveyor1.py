@@ -537,8 +537,7 @@ class AbstractConveyor1(gym.Env):
             except:
                 self.condition_to_transfer = False
                 self.condition_to_process = False
-
-            if self.W_times[O_locs.index(Transition_point) + 1] == 0:  # if the waiting time is 0:
+            if self.W_times[str(O_locs.index(Transition_point) + 1)] == 0:  # if the waiting time is 0:
                 self.idle_times_operator[O_locs.index(Transition_point)] += 1
                 logging.debug(
                     'Waiting time at GTP {} is 0, check done on correctness:'.format(O_locs.index(Transition_point) + 1))
@@ -547,7 +546,7 @@ class AbstractConveyor1(gym.Env):
                     logging.debug('With a change percentage an order carrier is removed')
                     logging.debug('transition point is: {}'.format(Transition_point))
                     # self.update_queues(O_locs.index(Transition_point)+1, [item[1] for item in self.items_on_conv if item[0] == Transition_point][0])
-                    self.W_times[O_locs.index(Transition_point) + 1] = 1
+                    self.W_times[str(O_locs.index(Transition_point) + 1)] = 1
                     # self.O_states[[item[1] for item in self.items_on_conv if item[0] == Transition_point][0]] +=1
                     self.items_on_conv = [item for item in self.items_on_conv if item[0] != Transition_point]
 
@@ -556,7 +555,7 @@ class AbstractConveyor1(gym.Env):
                     for item in self.items_on_conv:
                         if item[0] == Transition_point:
                             item[0][0] -= 1
-                    self.W_times[O_locs.index(Transition_point) + 1] = 1
+                    self.W_times[str(O_locs.index(Transition_point) + 1)] = 1
                     self.update_queues(O_locs.index(Transition_point) + 1, self.in_queue[O_locs.index(Transition_point)][0])
                 elif self.condition_to_process:
                     # Process an order at GTP successfully
@@ -591,10 +590,10 @@ class AbstractConveyor1(gym.Env):
                     next_W_time = 0 if to_check == [] else int(self.process_time_at_GTP*(1-self.speed_improvement)) if to_check == [
                         1] else int(self.process_time_at_GTP * 5*(1-self.speed_improvement)) if to_check == [
                         2] else int(self.process_time_at_GTP * 10*(1-self.speed_improvement)) if to_check == [3] else int(self.process_time_at_GTP * 10*(1-self.speed_improvement))
-                    self.W_times[O_locs.index(Transition_point) + 1] = next_W_time
+                    self.W_times[str(O_locs.index(Transition_point) + 1)] = next_W_time
                     self.idle_times_operator[O_locs.index(Transition_point)] -= 1
                     logging.debug('new timestep set at GTP {} : {}'.format(O_locs.index(Transition_point) + 1, self.W_times[
-                        O_locs.index(Transition_point) + 1]))
+                        str(O_locs.index(Transition_point) + 1)]))
                 else:
                     logging.debug('Else statement activated')
 
@@ -605,14 +604,14 @@ class AbstractConveyor1(gym.Env):
                     logging.debug('item removed from in-que')
                 except:
                     logging.debug("Except: queue was already empty!")
-            elif self.W_times[O_locs.index(Transition_point) + 1] < 0:
-                self.W_times[O_locs_locations.index(Transition_point) + 1] = 0
+            elif self.W_times[str(O_locs.index(Transition_point) + 1)] < 0:
+                self.W_times[str(O_locs_locations.index(Transition_point) + 1)] = 0
                 logging.debug("Waiting time was below 0, reset to 0")
             else:
-                self.W_times[O_locs.index(Transition_point) + 1] -= 1  # decrease timestep with 1
+                self.W_times[str(O_locs.index(Transition_point) + 1)] -= 1  # decrease timestep with 1
                 logging.debug('waiting time decreased with 1 time instance')
                 logging.debug('waiting time at GTP{} is {}'.format(O_locs.index(Transition_point) + 1,
-                                                                   self.W_times[O_locs.index(Transition_point) + 1]))
+                                                                   self.W_times[str(O_locs.index(Transition_point) + 1)]))
 
     ########################################################################################################################################################
 ## STEP FUNCTION
