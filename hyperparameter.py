@@ -11,7 +11,7 @@ import os
 import yaml
 import rl
 
-env_name = 'AbstractConveyor'
+env_name = 'AbstractConveyor1'
 
 
 path = pathlib.Path().absolute()
