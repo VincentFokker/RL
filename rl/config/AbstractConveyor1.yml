@@ -15,7 +15,7 @@ environment:
     max_cycle_count: 400
     steps_by_heuristic: 20      #how many steps to start up by heuristic
     repurpose_goal: False
-    remove_cycles: False
+    remove_cycles: True
 
     #for render
     render_width: 1280
@@ -58,12 +58,12 @@ environment:
     output_priming_reward:          0.00
     delivery_reward:                0
 
-    positive_reward_for_divert:     5 #5   #10
-    wrong_sup_at_goal:              0 #4   #-10
-    flooding_reward:                10 #10
-    neg_reward_ia:                  2 #5   #-10
-    negative_reward_for_empty_queue: 1 #4  #-5   #negative reward for empty queue, otherwise queues are empty
-    negative_reward_for_cycle:      1 #2
+    positive_reward_for_divert:           10
+    wrong_sup_at_goal:                   0
+    flooding_reward:                       9
+    neg_reward_ia:                       15
+    negative_reward_for_empty_queue:       15
+    negative_reward_for_cycle:           6
 
 
 main:

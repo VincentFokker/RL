@@ -12,7 +12,7 @@ environment:
     max_items_processed: 150
     max_cycle_count: 400
     steps_by_heuristic: 20
-    repurpose_goal: false
+    repurpose_goal: True
     render_width: 1280
     percentage_small_carriers: 0.33
     percentage_medium_carriers: 0.34
