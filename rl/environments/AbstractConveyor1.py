@@ -48,6 +48,7 @@ class AbstractConveyor1(gym.Env):
         self.steps_by_heuristic = self.config['steps_by_heuristic']
         self.repurpose_goal = self.config['repurpose_goal']
         self.remove_cycles = self.config['remove_cycles']
+        self.max_steps = self.config['max_steps']
 
         #load set of predefined start_states generated with the heuristic
         with open(join('rl', 'helpers', 'start_states.json'), 'r') as f:
@@ -773,6 +774,10 @@ class AbstractConveyor1(gym.Env):
 
         ## terminate on high cycle count
         if self.cycle_count > self.max_cycle_count:
+            self.terminate = True
+
+        ## when stuck in loop, terminate after x steps
+        if self.steps > self.max_steps:
             self.terminate = True
 
         ## termination conditions

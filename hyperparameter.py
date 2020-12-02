@@ -95,7 +95,7 @@ negative_reward_for_cycle\t:\t{}\n'.format(prfd, wsag, fr, nria, nrfeq, nrfc))
         done = False
         meta_data = []
         while not done:
-            action, _ = test_model.predict(state, deterministic=False)
+            action, _ = test_model.predict(state, deterministic=True)
             state, reward, done, _ = env.step(action)
             if done:
                 results['cycle_count'] += env.cycle_count
@@ -106,12 +106,12 @@ negative_reward_for_cycle\t:\t{}\n'.format(prfd, wsag, fr, nria, nrfeq, nrfc))
 def main():
     #hparams = [(low, high),        #per var
     #           (low, high)]
-    hparams = [(0, 15), #positive_reward_for_divert
-               (0, 15), #wrong_sup_at_goal
-               (0, 15), #flooding_reward
-               (0, 15), #neg_reward_ia
-               (0, 15), #negative_reward_for_empty_queue
-               (0, 15)] #negative_reward_for_cycle
+    hparams = [(0, 20), #positive_reward_for_divert
+               (0, 20), #wrong_sup_at_goal
+               (0, 20), #flooding_reward
+               (0, 20), #neg_reward_ia
+               (0, 20), #negative_reward_for_empty_queue
+               (0, 20)] #negative_reward_for_cycle
     
     #define path for the results
     hyperdive_results = join(path, 'rl', 'hyper_parameter', env_name)
