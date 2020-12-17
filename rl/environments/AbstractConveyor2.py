@@ -9,17 +9,19 @@ import logging
 import gym
 import seaborn as sns
 from PIL import Image, ImageDraw, ImageFont
+from os.path import join
+import json
 
 # TODO: resize the observation space
 # TODO: larger warm start
 # TODO: Revise the observation
 
-# Version including a new warm start
+## VERSION FOR THE ADJUSTABLE BUFFER SIZE
 
 #CHANGE LOGGING SETTINGS HERE: #INFO; showing all print statements
 logging.basicConfig(level=logging.INFO)
 
-class AbstractConveyor(gym.Env):
+class AbstractConveyor2(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
     def __init__(self, config, **kwargs):
@@ -45,12 +47,21 @@ class AbstractConveyor(gym.Env):
         self.max_cycle_count = self.config['max_cycle_count']
         self.steps_by_heuristic = self.config['steps_by_heuristic']
         self.repurpose_goal = self.config['repurpose_goal']
+        self.remove_cycles = self.config['remove_cycles']
+        self.max_steps = self.config['max_steps']
+
+        #load set of predefined start_states generated with the heuristic
+        with open(join('rl', 'helpers', 'start_states_adj_buffer.json'), 'r') as f:
+            self.start_states = json.load(f)
+
+        #select one of these start_states
+        self.start_state = self.start_states['{}x{}'.format(self.amount_of_gtps, self.amount_of_outputs)]['buffer{}'.format(self.gtp_buffer_length)][str(random.randint(0,5000))]
 
         #init variables
         self.episode = 0
         self.reward = 0
         self.terminate = False
-        self.items_on_conv = []
+        self.items_on_conv = self.start_state['items_on_conv']
         self.amount_of_orders_processed = 0
         self.condition_to_transfer = False
         self.condition_to_process = False
@@ -107,6 +118,8 @@ class AbstractConveyor(gym.Env):
             self.shape += 4
         if 12 in self.observation_shape:
             self.shape += self.amount_of_gtps * self.amount_of_outputs
+        # if 13 in self.observation_shape:
+        #     self.shape += self.amount_of_gtps * self.amount_of_outputs
 
         self.observation_space = gym.spaces.Box(shape=(self.shape,),
                                                 high=1, low=0,
@@ -123,30 +136,41 @@ class AbstractConveyor(gym.Env):
         self.queues = [[random.randint(1, self.amount_of_outputs) for _ in range(self.gtp_demand_size)] for item in range(self.amount_of_gtps)]
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
-        self.in_queue = [[] for _ in range(len(self.queues))]
-        self.in_pipe = [[] for _ in range(len(self.queues))]
+        self.in_queue = self.start_state['in_queue']
+        self.in_pipe = self.start_state['in_pipe']
+        self.W_times = self.start_state['W_times']
+
+        #update demand and init
+        for idx, item in enumerate(self.in_pipe):
+            self.demand_queues[idx] = item + self.demand_queues[idx]
+            self.init_queues[idx] = item + self.init_queues[idx]
+        for idx, item in enumerate(self.in_queue):
+            self.demand_queues[idx] = item + self.demand_queues[idx]
+
         self.queue_demand = [item[0] for item in self.init_queues]
 
 
 
         ######## Do a warm_start
-        self.do_warm_start(int(0.5*self.gtp_buffer_length))
+        #self.do_warm_start(int(0.5*self.gtp_buffer_length))
 
         ####### FOR SIMULATION ONLY
         # a counter to record the processing time at GtP station
-        self.W_times = {}
-        for i in range(1, len(self.init_queues) + 1):
-            try:
-                self.W_times[i] = int(self.process_time_at_GTP *(1-self.speed_improvement)) if self.in_queue[i - 1][0] == 1 else int(self.process_time_at_GTP * 3 *(1-self.speed_improvement)) if \
-                self.in_queue[i - 1][0] == 2 else int(self.process_time_at_GTP * 6 *(1-self.speed_improvement)) if self.in_queue[i - 1][
-                                                                                      0] == 1 else int(self.process_time_at_GTP * 9 *(1-self.speed_improvement))
-            except:
-                self.W_times[i] = 6
+        # self.W_times = {}
+        # for i in range(1, len(self.init_queues) + 1):
+        #     try:
+        #         self.W_times[i] = int(self.process_time_at_GTP *(1-self.speed_improvement)) if self.in_queue[i - 1][0] == 1 else int(self.process_time_at_GTP * 3 *(1-self.speed_improvement)) if \
+        #         self.in_queue[i - 1][0] == 2 else int(self.process_time_at_GTP * 6 *(1-self.speed_improvement)) if self.in_queue[i - 1][
+        #                                                                               0] == 1 else int(self.process_time_at_GTP * 9 *(1-self.speed_improvement))
+        #     except:
+        #         self.W_times[i] = 6
         self.idle_times_operator = {}
         for i in range(len(self.operator_locations)):
             self.idle_times_operator[i] = 0
 
-        self.do_warm_start2(self.steps_by_heuristic)
+        #self.do_warm_start2(self.steps_by_heuristic)
+        len_queues = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
+        self.len_queues = np.array(len_queues).flatten()
 
     def do_warm_start2(self, y):
 
@@ -290,8 +314,8 @@ class AbstractConveyor(gym.Env):
 
         ### 3. For the observation of the items in queue ##################################################################
         # length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
-        in_queue = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
-        in_queue = np.array(in_queue).flatten()
+        len_queues = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
+        self.len_queues = np.array(len_queues).flatten()
 
         # TODO: return: in_queue
         ### 4. For the observation of the demand of the GtP Queue #########################################################
@@ -369,7 +393,7 @@ class AbstractConveyor(gym.Env):
         if 1 in bottom_conv:
             info.append(1)
             info.append(len([item for item in bottom_conv if item == 1]) / (
-                    (self.amount_of_gtps * 4) + 6 + 2 * self.amount_of_outputs))
+                    (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
         else:
             info.append(0)
             info.append(0)
@@ -377,7 +401,7 @@ class AbstractConveyor(gym.Env):
         if 2 in bottom_conv:
             info.append(1)
             info.append(len([item for item in bottom_conv if item == 2]) / (
-                    (self.amount_of_gtps * 4) + 6 + 2 * self.amount_of_outputs))
+                    (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
         else:
             info.append(0)
             info.append(0)
@@ -394,8 +418,13 @@ class AbstractConveyor(gym.Env):
 
         # TODO: return:in_pipe
         ### 13. what is currently in pipe ##############################################################################
-
-
+        # in_pipe2 = [
+        #     [len([item for item in self.items_on_conv if item[2] == i and item[1] == j and item[0][1] < 8]) for j in
+        #      range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
+        # in_pipe2 = np.array(in_pipe2).flatten()
+        # in_pipe2 = np.array([1 if item > (self.pipeline_length // 15) else item / (
+        #             self.pipeline_length // 15) for item in in_pipe2])
+        #TODO: return in_pipe2
         ### Combine All to one array ###################################################################################
 
         obs = np.array([])
@@ -404,7 +433,7 @@ class AbstractConveyor(gym.Env):
         if 2 in self.observation_shape:
             obs = np.append(obs, output_points)
         if 3 in self.observation_shape:
-            obs = np.append(obs, in_queue)
+            obs = np.append(obs, self.len_queues)
         if 4 in self.observation_shape:
             obs = np.append(obs, init)
         if 5 in self.observation_shape:
@@ -423,6 +452,8 @@ class AbstractConveyor(gym.Env):
             obs = np.append(obs, info)
         if 12 in self.observation_shape:
             obs = np.append(obs, in_pipe)
+        # if 13 in self.observation_shape:
+        #     obs = np.append(obs, in_pipe2)
 
         return obs
 
@@ -439,20 +470,32 @@ class AbstractConveyor(gym.Env):
 
         self.reward = 0
         self.terminate = False
-        self.items_on_conv = []
         self.amount_of_orders_processed = 0
         self.condition_to_transfer = False
         self.condition_to_process = False
         self.idle_time_delta = 0
         self.cycle_count_delta = 0
 
+        # select one of these start_states
+        self.start_state = self.start_states['{}x{}'.format(self.amount_of_gtps, self.amount_of_outputs)]['buffer{}'.format(self.gtp_buffer_length)][str(random.randint(0,5000))]
+
         #reset queue demands
         self.queues = [[random.randint(1, self.amount_of_outputs) for _ in range(self.gtp_demand_size)] for item in
                        range(self.amount_of_gtps)]
         self.init_queues = copy(self.queues)
         self.demand_queues = copy(self.queues)
-        self.in_queue = [[] for _ in range(len(self.queues))]
-        self.in_pipe = [[] for _ in range(len(self.queues))]
+        self.in_queue = self.start_state['in_queue']
+        self.in_pipe = self.start_state['in_pipe']
+        self.items_on_conv = self.start_state['items_on_conv']
+        self.W_times = self.start_state['W_times']
+
+        #update demand and init
+        for idx, item in enumerate(self.in_pipe):
+            self.demand_queues[idx] = item + self.demand_queues[idx]
+            self.init_queues[idx] = item + self.init_queues[idx]
+        for idx, item in enumerate(self.in_queue):
+            self.demand_queues[idx] = item + self.demand_queues[idx]
+
         self.queue_demand = [item[0] for item in self.init_queues]
 
         #reset tracers
@@ -461,19 +504,18 @@ class AbstractConveyor(gym.Env):
         self.cycle_count = 0
 
         ######## Do a warm_start
-        self.do_warm_start(int(0.5*self.gtp_buffer_length))
-        self.do_warm_start2(self.steps_by_heuristic)
+        #self.do_warm_start(int(0.5*self.gtp_buffer_length))
+        #self.do_warm_start2(self.steps_by_heuristic)
 
-
-        self.W_times = {}
-        for i in range(1, len(self.init_queues) + 1):
-            try:
-                self.W_times[i] = int(self.process_time_at_GTP*(1-self.speed_improvement)) if self.in_queue[i - 1][
-                                                              0] == 1 else int(self.process_time_at_GTP * 3*(1-self.speed_improvement)) if \
-                self.in_queue[i - 1][0] == 2 else int(self.process_time_at_GTP * 6*(1-self.speed_improvement)) if self.in_queue[i - 1][
-                                                                                      0] == 1 else int(self.process_time_at_GTP * 9*(1-self.speed_improvement))
-            except:
-                self.W_times[i] = 6
+        # self.W_times = {}
+        # for i in range(1, len(self.init_queues) + 1):
+        #     try:
+        #         self.W_times[i] = int(self.process_time_at_GTP*(1-self.speed_improvement)) if self.in_queue[i - 1][
+        #                                                       0] == 1 else int(self.process_time_at_GTP * 3*(1-self.speed_improvement)) if \
+        #         self.in_queue[i - 1][0] == 2 else int(self.process_time_at_GTP * 6*(1-self.speed_improvement)) if self.in_queue[i - 1][
+        #                                                                               0] == 1 else int(self.process_time_at_GTP * 9*(1-self.speed_improvement))
+        #     except:
+        #         self.W_times[i] = 6
         self.idle_times_operator = {}
         for i in range(len(self.operator_locations)):
             self.idle_times_operator[i] = 0
@@ -498,8 +540,7 @@ class AbstractConveyor(gym.Env):
             except:
                 self.condition_to_transfer = False
                 self.condition_to_process = False
-
-            if self.W_times[O_locs.index(Transition_point) + 1] == 0:  # if the waiting time is 0:
+            if self.W_times[str(O_locs.index(Transition_point) + 1)] == 0:  # if the waiting time is 0:
                 self.idle_times_operator[O_locs.index(Transition_point)] += 1
                 logging.debug(
                     'Waiting time at GTP {} is 0, check done on correctness:'.format(O_locs.index(Transition_point) + 1))
@@ -508,7 +549,7 @@ class AbstractConveyor(gym.Env):
                     logging.debug('With a change percentage an order carrier is removed')
                     logging.debug('transition point is: {}'.format(Transition_point))
                     # self.update_queues(O_locs.index(Transition_point)+1, [item[1] for item in self.items_on_conv if item[0] == Transition_point][0])
-                    self.W_times[O_locs.index(Transition_point) + 1] = 1
+                    self.W_times[str(O_locs.index(Transition_point) + 1)] = 1
                     # self.O_states[[item[1] for item in self.items_on_conv if item[0] == Transition_point][0]] +=1
                     self.items_on_conv = [item for item in self.items_on_conv if item[0] != Transition_point]
 
@@ -517,7 +558,7 @@ class AbstractConveyor(gym.Env):
                     for item in self.items_on_conv:
                         if item[0] == Transition_point:
                             item[0][0] -= 1
-                    self.W_times[O_locs.index(Transition_point) + 1] = 1
+                    self.W_times[str(O_locs.index(Transition_point) + 1)] = 1
                     self.update_queues(O_locs.index(Transition_point) + 1, self.in_queue[O_locs.index(Transition_point)][0])
                 elif self.condition_to_process:
                     # Process an order at GTP successfully
@@ -552,10 +593,10 @@ class AbstractConveyor(gym.Env):
                     next_W_time = 0 if to_check == [] else int(self.process_time_at_GTP*(1-self.speed_improvement)) if to_check == [
                         1] else int(self.process_time_at_GTP * 5*(1-self.speed_improvement)) if to_check == [
                         2] else int(self.process_time_at_GTP * 10*(1-self.speed_improvement)) if to_check == [3] else int(self.process_time_at_GTP * 10*(1-self.speed_improvement))
-                    self.W_times[O_locs.index(Transition_point) + 1] = next_W_time
+                    self.W_times[str(O_locs.index(Transition_point) + 1)] = next_W_time
                     self.idle_times_operator[O_locs.index(Transition_point)] -= 1
                     logging.debug('new timestep set at GTP {} : {}'.format(O_locs.index(Transition_point) + 1, self.W_times[
-                        O_locs.index(Transition_point) + 1]))
+                        str(O_locs.index(Transition_point) + 1)]))
                 else:
                     logging.debug('Else statement activated')
 
@@ -566,14 +607,14 @@ class AbstractConveyor(gym.Env):
                     logging.debug('item removed from in-que')
                 except:
                     logging.debug("Except: queue was already empty!")
-            elif self.W_times[O_locs.index(Transition_point) + 1] < 0:
-                self.W_times[O_locs_locations.index(Transition_point) + 1] = 0
+            elif self.W_times[str(O_locs.index(Transition_point) + 1)] < 0:
+                self.W_times[str(O_locs_locations.index(Transition_point) + 1)] = 0
                 logging.debug("Waiting time was below 0, reset to 0")
             else:
-                self.W_times[O_locs.index(Transition_point) + 1] -= 1  # decrease timestep with 1
+                self.W_times[str(O_locs.index(Transition_point) + 1)] -= 1  # decrease timestep with 1
                 logging.debug('waiting time decreased with 1 time instance')
                 logging.debug('waiting time at GTP{} is {}'.format(O_locs.index(Transition_point) + 1,
-                                                                   self.W_times[O_locs.index(Transition_point) + 1]))
+                                                                   self.W_times[str(O_locs.index(Transition_point) + 1)]))
 
     ########################################################################################################################################################
 ## STEP FUNCTION
@@ -620,7 +661,8 @@ class AbstractConveyor(gym.Env):
                         item[2] = 999
 
                 elif condition_2 and not condition_1 and not condition_3:
-                    self.reward -= self.wrong_sup_at_goal - self.flooding_reward
+                    self.reward -= self.wrong_sup_at_goal
+                    self.reward -= self.flooding_reward
                     item[0][0] -= 1
                     if self.repurpose_goal:
                         item[2] = 999
@@ -712,6 +754,8 @@ class AbstractConveyor(gym.Env):
         if len([item for item in self.items_on_conv if
                 item[0] == [1, 7]]) == 1:  # in case that negative reward is calculated with cycles
             self.reward -= self.negative_reward_for_cycle  # punish if order carriers take a cycle #tag:punishment
+            if self.remove_cycles:
+                self.items_on_conv = [item for item in self.items_on_conv if item[0] != [1, 7]]
             self.cycle_count +=1
 
         #after cyclecount
@@ -732,6 +776,10 @@ class AbstractConveyor(gym.Env):
 
         ## terminate on high cycle count
         if self.cycle_count > self.max_cycle_count:
+            self.terminate = True
+
+        ## when stuck in loop, terminate after x steps
+        if self.steps > self.max_steps:
             self.terminate = True
 
         ## termination conditions
