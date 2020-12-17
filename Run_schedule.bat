@@ -1,8 +1,6 @@
-python train2.py -e AbstractConveyor1 -s 20201128_1200 -n 7_0_5_13_11_8 	 -c config1
-python plotmaker.py -e AbstractConveyor1 -s 20201128_1200
-python train2.py -e AbstractConveyor1 -s 20201128_1250 -n 15_6_6_15_9_6 	 -c config2
-python plotmaker.py -e AbstractConveyor1 -s 20201128_1250
-python train2.py -e AbstractConveyor1 -s 20201128_1340 -n 7_0_5_13_11_8 	 -c config3
-python plotmaker.py -e AbstractConveyor1 -s 20201128_1340
+python train.py -e AbstractConveyor1 -s 20201217_1200 -n option1x2 	 -c config1
+python train.py -e AbstractConveyor1 -s 20201217_1300 -n option3x3 	 -c config3
+python train.py -e AbstractConveyor1 -s 20201217_1600 -n option4x3 	 -c config4
+python train.py -e AbstractConveyor1 -s 20201217_2200 -n option5x3 	 -c config5
 
 PAUSE

@@ -55,7 +55,7 @@ class AbstractConveyor1(gym.Env):
             self.start_states = json.load(f)
 
         #select one of these start_states
-        self.start_state = self.start_states['2x2'][str(random.randint(0,5000))]
+        self.start_state = self.start_states['{}x{}'.format(self.amount_of_gtps, self.amount_of_outputs)][str(random.randint(0,5000))]
 
         #init variables
         self.episode = 0
@@ -169,6 +169,8 @@ class AbstractConveyor1(gym.Env):
             self.idle_times_operator[i] = 0
 
         #self.do_warm_start2(self.steps_by_heuristic)
+        len_queues = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
+        self.len_queues = np.array(len_queues).flatten()
 
     def do_warm_start2(self, y):
 
@@ -312,8 +314,8 @@ class AbstractConveyor1(gym.Env):
 
         ### 3. For the observation of the items in queue ##################################################################
         # length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
-        in_queue = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
-        in_queue = np.array(in_queue).flatten()
+        len_queues = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
+        self.len_queues = np.array(len_queues).flatten()
 
         # TODO: return: in_queue
         ### 4. For the observation of the demand of the GtP Queue #########################################################
@@ -431,7 +433,7 @@ class AbstractConveyor1(gym.Env):
         if 2 in self.observation_shape:
             obs = np.append(obs, output_points)
         if 3 in self.observation_shape:
-            obs = np.append(obs, in_queue)
+            obs = np.append(obs, self.len_queues)
         if 4 in self.observation_shape:
             obs = np.append(obs, init)
         if 5 in self.observation_shape:
@@ -475,7 +477,7 @@ class AbstractConveyor1(gym.Env):
         self.cycle_count_delta = 0
 
         # select one of these start_states
-        self.start_state = self.start_states['2x2'][str(random.randint(0, 5000))]
+        self.start_state = self.start_states['{}x{}'.format(self.amount_of_gtps, self.amount_of_outputs)][str(random.randint(0, 5000))]
 
         #reset queue demands
         self.queues = [[random.randint(1, self.amount_of_outputs) for _ in range(self.gtp_demand_size)] for item in

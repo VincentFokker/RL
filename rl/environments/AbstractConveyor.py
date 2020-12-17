@@ -34,7 +34,7 @@ class AbstractConveyor(gym.Env):
         self.in_que_observed = self.config['in_que_observed']
         self.exception_occurence = self.config['exception_occurence']
         self.termination_condition = self.config['termination_condition']
-        self.max_items_processed = self.config['max_items_processed']
+        self.max_items_processed = self.amount_of_gtps * self.gtp_demand_size - self.config['max_items_processed']
         self.speed_improvement = self.config['speed_improvement']
         self.empty_env = self.image = self.generate_env()
         self.pallette = (np.asarray(sns.color_palette("Reds", self.amount_of_outputs)) * 255).astype(int)
@@ -147,6 +147,9 @@ class AbstractConveyor(gym.Env):
             self.idle_times_operator[i] = 0
 
         self.do_warm_start2(self.steps_by_heuristic)
+
+        len_queues = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
+        self.len_queues = np.array(len_queues).flatten()
 
     def do_warm_start2(self, y):
 
@@ -290,8 +293,8 @@ class AbstractConveyor(gym.Env):
 
         ### 3. For the observation of the items in queue ##################################################################
         # length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
-        in_queue = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
-        in_queue = np.array(in_queue).flatten()
+        len_queues = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
+        self.len_queues = np.array(len_queues).flatten()
 
         # TODO: return: in_queue
         ### 4. For the observation of the demand of the GtP Queue #########################################################
@@ -409,7 +412,7 @@ class AbstractConveyor(gym.Env):
         if 2 in self.observation_shape:
             obs = np.append(obs, output_points)
         if 3 in self.observation_shape:
-            obs = np.append(obs, in_queue)
+            obs = np.append(obs, self.len_queues)
         if 4 in self.observation_shape:
             obs = np.append(obs, init)
         if 5 in self.observation_shape:
@@ -808,8 +811,8 @@ class AbstractConveyor(gym.Env):
             color = self.pallette[0] if item[1] == 1 else self.pallette[1] if item[1] == 2 else self.pallette[2] if \
                 item[1] == 3 else self.pallette[3]
             draw.rectangle([x0, y0, x1, y1], fill=tuple(color), outline='black')
-            draw.text((x0, y0),'{}'.format(item[2]), fill='black',
-                      font=ImageFont.truetype(font='arial', size=20, index=0, encoding='unic', layout_engine=None))
+            # draw.text((x0, y0),'{}'.format(item[2]), fill='black',
+            #           font=ImageFont.truetype(font='arial', size=20, index=0, encoding='unic', layout_engine=None))
 
         # Draw demands
         for item in copy(self.diverter_locations):
