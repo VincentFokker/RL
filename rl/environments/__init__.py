@@ -31,3 +31,6 @@ from .MultiConveyor import MultiConveyor
 from .AbstractConveyor import AbstractConveyor
 from .AbstractConveyor1 import AbstractConveyor1
 from .AbstractConveyor2 import AbstractConveyor2
+from .AbstractConveyor3 import AbstractConveyor3
+from .AbstractConveyor4 import AbstractConveyor4
+from .AbstractConveyor5 import AbstractConveyor5

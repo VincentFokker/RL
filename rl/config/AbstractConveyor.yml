@@ -6,7 +6,7 @@ environment:
     gtp_demand_size: 100
     process_time_at_GTP: 6 #time to process one product in sec
     speed_improvement: 0.00 #percent
-    gtp_buffer_length:  2 #how much items fit in the buffer lane of the GTP workstation
+    gtp_buffer_length:  7 #how much items fit in the buffer lane of the GTP workstation
     pipeline_length: 10
     in_que_observed: 1
     exception_occurence: 0.0 #how often an exception occurs

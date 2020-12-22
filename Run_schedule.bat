@@ -1,6 +1,7 @@
-python train.py -e AbstractConveyor1 -s 20201217_1200 -n option1x2 	 -c config1
-python train.py -e AbstractConveyor1 -s 20201217_1300 -n option3x3 	 -c config3
-python train.py -e AbstractConveyor1 -s 20201217_1600 -n option4x3 	 -c config4
-python train.py -e AbstractConveyor1 -s 20201217_2200 -n option5x3 	 -c config5
+python train.py -e AbstractConveyor4 -s 20201221_2230 -n RewardPerEpisode
+
+python train5.py -e AbstractConveyor5 -s 20201221_2300 -n RewardPerStep -t
+python plotmaker.py -e AbstractConveyor5 -s 20201221_2300
+python train.py -e AbstractConveyor5 -s 20201221_2330 -n RewardPerStep
 
 PAUSE

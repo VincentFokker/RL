@@ -118,6 +118,7 @@ class AbstractConveyor(gym.Env):
         self.steps = 0
         self.items_processed = 0
         self.cycle_count = 0
+        self.actions_list = []
 
         #init demands
         self.queues = [[random.randint(1, self.amount_of_outputs) for _ in range(self.gtp_demand_size)] for item in range(self.amount_of_gtps)]
@@ -257,6 +258,37 @@ class AbstractConveyor(gym.Env):
                     pass
         try:
             order_type, goal = order_sequence[0]
+        except:
+            order_type, goal = 0, 0
+
+        self.step(None, order_type, goal)
+#############################################################################################################################
+### Heuristic based on processing time
+    def step_on_process_time(self, threshold=15):
+        """Function that takes steps based on remaining processing time at workstations"""
+        self.actions_list = []
+        for workstation in range(self.amount_of_gtps)[::-1]:
+            rpt_w = self.W_times[workstation + 1]
+            rpt_q = sum(
+                [6 if item == 1 else 30 if item == 2 else 60 if item == 3 else 0 for item in self.in_queue[workstation]])
+            rpt_p = sum([6 if item == 1 else 30 if item == 2 else 60 if item == 3 else 0 for item in
+                         [item[1] for item in self.items_on_conv if item[2] == workstation + 1 and item[0][1] == 7 and item[0][0] > self.diverter_locations[workstation][0]]])
+            total_rpt = rpt_w + rpt_q + rpt_p
+            total_pipe = self.pipeline_length + self.gtp_buffer_length + workstation * 4 + 2
+            #print(total_rpt - total_pipe)
+
+            if total_rpt - total_pipe < threshold:
+                try:
+                    current_demand = self.init_queues[workstation][len(self.in_pipe[workstation]):][0]
+                    self.actions_list.append((current_demand, workstation + 1))
+                except:
+                    pass
+
+        # then for this step, process the first next action in the actions_list:
+        try:
+            order_type, goal = self.actions_list[0]
+            self.actions_list = self.actions_list[1:]
+
         except:
             order_type, goal = 0, 0
 
@@ -469,6 +501,7 @@ class AbstractConveyor(gym.Env):
         self.items_processed = 0
         self.steps = 0
         self.cycle_count = 0
+        self.actions_list = []
 
         ######## Do a warm_start
         self.do_warm_start(int(0.5*self.gtp_buffer_length))

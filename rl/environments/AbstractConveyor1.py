@@ -120,7 +120,8 @@ class AbstractConveyor1(gym.Env):
             self.shape += self.amount_of_gtps * self.amount_of_outputs
         # if 13 in self.observation_shape:
         #     self.shape += self.amount_of_gtps * self.amount_of_outputs
-
+        if 14 in self.observation_shape:
+            self.shape += self.amount_of_gtps
         self.observation_space = gym.spaces.Box(shape=(self.shape,),
                                                 high=1, low=0,
                                                 dtype=np.float)
@@ -424,6 +425,15 @@ class AbstractConveyor1(gym.Env):
         # in_pipe2 = np.array(in_pipe2).flatten()
         # in_pipe2 = np.array([1 if item > (self.pipeline_length // 15) else item / (
         #             self.pipeline_length // 15) for item in in_pipe2])
+
+        ### 14. remaining processing time per queue ####################################################################
+        max_time = 60 + self.gtp_buffer_length * 60
+        queue_times = [sum([6 if item == 1 else 30 if item == 2 else 60 if item == 3 else 0 for item in queue]) for
+                       queue in self.in_queue]
+        tot_wait_time = np.array(
+            [queue_times[i] + self.W_times['{}'.format(i + 1)] for i in range(self.amount_of_gtps)])
+        tot_wait_time = tot_wait_time / max_time
+
         #TODO: return in_pipe2
         ### Combine All to one array ###################################################################################
 
@@ -454,6 +464,8 @@ class AbstractConveyor1(gym.Env):
             obs = np.append(obs, in_pipe)
         # if 13 in self.observation_shape:
         #     obs = np.append(obs, in_pipe2)
+        if 14 in self.observation_shape:
+            obs = np.append(obs, tot_wait_time)
 
         return obs
 
