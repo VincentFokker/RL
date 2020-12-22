@@ -1,0 +1,4 @@
+0_model_TestAllStates_1.zip: Mean Reward : -14377.370, Standard deviation Reward : 14662.626
+0_model_TestAllStates_2.zip: Mean Reward : -4096.650, Standard deviation Reward : 2248.570
+0_model_TestAllStates_3.zip: Mean Reward : -10572.230, Standard deviation Reward : 6224.948
+best_model.zip: Mean Reward : -5965.830, Standard deviation Reward : 5006.213

@@ -5,7 +5,7 @@ from stable_baselines.common.schedules import LinearSchedule, linear_interpolati
 from collections import deque
 import numpy as np
 import os, yaml, sys, subprocess, webbrowser, time, datetime, random, copy
-import cv2
+#import cv2
 import stable_baselines, gym, rl
 import rl.settings as settings
 import tensorflow as tf
@@ -13,9 +13,9 @@ import glob
 
 # Error suppression (numpy 1.16.2, tensorflow 1.13.1)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
-tf.logging.info('TensorFlow')
-tf.logging.set_verbosity(tf.logging.ERROR)
-tf.logging.info('TensorFlow')
+tf.compat.v1.logging.info('TensorFlow')
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+tf.compat.v1.logging.info('TensorFlow')
 
 def get_env_type(env_name):
     """
@@ -28,7 +28,7 @@ def get_env_type(env_name):
     except:
         return 'rl'
 
-def create_env(env_name, config=None, n_workers=1, image_based=True, **kwargs):
+def create_env(env_name, config=None, n_workers=8, image_based=True, **kwargs):
     """
     Parses the environment to correctly return the attributes based on the spec and type
     Creates a corresponding vectorized environment
@@ -143,15 +143,16 @@ class Trainer(object):
                 print(folder)
                 if int(folder.split('\\')[-1].split('_')[0]) == num:
                     model_path = folder
-                    if not os.path.isfile(os.path.join(model_path, 'model.pkl')):
-                        model_path = model_path[:-1] + '1'
+                    if not os.path.isfile(os.path.join(model_path, 'model.zip')):
+                        #model_path = model_path[:-1] + '1'
+                        model_path = model_path
                     print('Model path:', model_path)
                     break  
 
         self._model_path = model_path
         self.config = get_parameters(self.env_name, self._model_path, config_name=config_file)
         self.n_steps = self.config['main']['n_steps']
-        model_file = os.path.join(model_path, 'model.pkl')
+        model_file = os.path.join(model_path, 'model.zip')
         model_object = getattr(stable_baselines, self.config['main']['model'])
         self._unique_model_identifier = model_path.split('\\')[-1]
         print('Unique path: {}'.format(self._unique_model_identifier))
@@ -396,14 +397,15 @@ class Trainer(object):
                     self.test_state, reward, self.done, _ = self.model.env.step(action)
                     print('   Episode {:2}, Step {:3}, Reward: {:.2f}'.format(episode, step, reward[0]), end='\r')
                     if render:
-                        self.model.env.render()
+                        self.model.env.render(mode='human')
                     step += 1
         except KeyboardInterrupt:
             pass
 
         
 if __name__ == "__main__":
-    env = 'MountainCarContinuous-v0'
-    b = Trainer(env)
-    b.create_model()
-    b.run()
+    pass
+    # e
+    # b = Trainer(env)
+    # b.create_model()
+    # b.run()

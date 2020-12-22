@@ -1,0 +1,7 @@
+3_model_IncludedCycleCount_1.zip: Mean Reward : -110.900, Standard deviation Reward : 222.663
+3_model_IncludedCycleCount_2.zip: Mean Reward : -94.700, Standard deviation Reward : 140.155
+3_model_IncludedCycleCount_3.zip: Mean Reward : -181.800, Standard deviation Reward : 911.508
+4_model_IncludedCycleCountAdjustRewards_1.zip: Mean Reward : -951.150, Standard deviation Reward : 1278.031
+4_model_IncludedCycleCountAdjustRewards_2.zip: Mean Reward : -116.500, Standard deviation Reward : 680.408
+4_model_IncludedCycleCountAdjustRewards_3.zip: Mean Reward : -226.950, Standard deviation Reward : 812.350
+best_model.zip: Mean Reward : -233.100, Standard deviation Reward : 653.883

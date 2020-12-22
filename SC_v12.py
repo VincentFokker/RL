@@ -78,6 +78,7 @@ class simple_conveyor_2(gym.Env):
         self.amount_of_orders_processed = 0
         self.positive_reward = 0
         self.negative_reward = 0
+        self.cycle_count = 0
 
         #gym related part
         self.reward = 0
@@ -322,6 +323,7 @@ class simple_conveyor_2(gym.Env):
         self.total_travel = 0
         self.steps = 0
         self.terminate = False
+        self.cycle_count = 0
 
         #reset tracers
         self.amount_of_items_on_conv = 0
@@ -592,6 +594,7 @@ class simple_conveyor_2(gym.Env):
         if len([item for item in self.items_on_conv if item[0] ==[1,7]]) == 1:              # in case that negative reward is calculated with cycles
             self.reward += self.negative_reward_for_cycle                                   # punish if order carriers take a cycle #tag:punishment
             self.negative_reward += self.negative_reward_for_cycle
+            self.cycle_count +=1
 
         # if len([item for item in self.items_on_conv if item[0][1] < 8]) > len([item for sublist in self.init_queues for item in sublist]):
         #     self.reward += self.negative_reward_for_flooding                                                            #tag:punishment
@@ -629,7 +632,8 @@ class simple_conveyor_2(gym.Env):
         reward = self.reward
         terminate = self.terminate
         logging.debug('Reward is: {}'.format(self.reward))
-        return next_state, reward, terminate, {}
+        info = [self.cycle_count, self.episode]
+        return next_state, reward, terminate, info
 
    
 

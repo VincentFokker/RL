@@ -1,0 +1,4 @@
+0_model_DecreasedInQueObserved_1.zip: Mean Reward : -12.500, Standardized Reward : 74.831
+0_model_DecreasedInQueObserved_2.zip: Mean Reward : -52.650, Standardized Reward : 139.421
+0_model_DecreasedInQueObserved_3.zip: Mean Reward : -0.300, Standardized Reward : 111.400
+best_model.zip: Mean Reward : -12.650, Standardized Reward : 106.940

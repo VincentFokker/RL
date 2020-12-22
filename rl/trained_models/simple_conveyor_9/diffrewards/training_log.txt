@@ -1,4 +1,0 @@
-Training time for model 0: 28.233452 min, steps/s: 2951.581475522173
-Training time for model 1: 25.326765 min, steps/s: 3290.3267497098636
-Training time for model 2: 28.769840 min, steps/s: 2896.5518573792797
-Total runtime: 82.75868672132492 minutes

@@ -1,44 +1,40 @@
-import numpy as np
-from SC_v12 import simple_conveyor_2
+import gym
 import yaml
-import random
+from rl.environments.SimpleConveyor10 import simple_conveyor_10
+from stable_baselines.common import make_vec_env
+from stable_baselines.common.vec_env import DummyVecEnv
+from stable_baselines import PPO2
+from stable_baselines.common.callbacks import EvalCallback
+from copy import copy
 
-def single_point_crossover(input_list):
-    """Changes a string with one-point cross-over to a new string"""
-    i1 = random.randint(1,len(input_list))
-    i2 = random.randint(1,len(input_list))
-    t1 = input_list[i1]
-    t2 = input_list[i2]
-    input_list[i1] = t2
-    input_list[i2] = t1
-    return input_list
+config_path = 'rl/config/0. Old Files/SimpleConveyor10.yml'
 
-
-config_path = 'rl/config/simple_conveyor_2.yml'
 with open(config_path, 'r') as f:
     config = yaml.load(f)
-    
-#queues = [random.choices(np.arange(1,config['environment']['amount_gtp']+1), [config['environment']['percentage_small_carriers'], config['environment']['percentage_medium_carriers'], config['environment']['percentage_large_carriers']], k=config['environment']['gtp_buffer_size']) for item in range(config['environment']['amount_gtp'])] # generate random queues
-queues = [[2, 3, 2, 1, 3, 2, 3, 3, 3, 2], [3, 2, 3, 2, 2, 3, 1, 2, 2, 3], [2, 2, 1, 2, 2, 3, 2, 3, 2, 3]]
-print(queues)
 
-env = simple_conveyor_2(config, queues)
+model_config = config['models']['PPO2']
+n_steps = config['main']['n_steps']
+save_every = config['main']['save_every'
+]
+env = simple_conveyor_10(config)
+# multiprocess environment
+env_8 = make_vec_env(lambda: env, n_envs=8)
 
-order_list = []
-for index in range(len(queues[0])):
-    order_list.append([item[index] for item in env.queues])
 
-#flat_list = [item for sublist in l for item in sublist]
-order_list = [item for sublist in order_list for item in sublist]
-print(order_list)
-order_list = order_list + 3*len(order_list) * [0]
-print(order_list)
-
-env.reset()
-for item in order_list:
-    env.step(item)
-    env.render()
-while env.demand_queues != [[] * i for i in range(env.amount_of_gtps)]:
-    env.step(0) 
-    env.render()
-env.negative_reward
+eval_callback = EvalCallback(env, best_model_save_path='./logs/',
+                             log_path='./logs/', eval_freq=500,
+                             deterministic=True, render=False)
+try:
+    try:
+        model = PPO2('MlpPolicy', env=env_8, tensorboard_log="./logs/PPO2_tensorboard_log/", **model_config)
+        model = PPO2.load("ppo2_SC")
+        print("model loaded")
+    except:
+        model = PPO2('MlpPolicy', env=env_8, tensorboard_log="./logs/PPO2_tensorboard_log/",  **model_config)
+        print('new model created')
+    model.learn(total_timesteps=15000000)
+    model.save("ppo2_SC")
+except KeyboardInterrupt:
+    print('Saving model..')
+    model.save("ppo2_SC")
+    print('Done.')
