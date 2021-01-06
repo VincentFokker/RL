@@ -1,6 +1,7 @@
 */__pycache__
 *.pyc
 *.DESKTOP-U0A7GKI
+*/heuristic_expert.npz
 
 GUI.md
 rl/trained_models/0. Old Results
@@ -16262,3 +16263,4 @@ rl/baselines/__pycache__/CustomPolicies.cpython-36.pyc
 rl/baselines/__pycache__/__init__.cpython-36.pyc
 rl/__pycache__/settings.cpython-36.pyc
 rl/environments/__pycache__/__init__.cpython-36.pyc
+*.npz

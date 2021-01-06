@@ -1,8 +1,0 @@
-numpy==1.16.2
-tensorflow==1.14.0
-gym
-opencv-python
-stable_baselines
-pyyaml
-PyQt5
-pyqtgraph

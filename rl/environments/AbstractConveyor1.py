@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 class AbstractConveyor1(gym.Env):
 
 ######## INITIALIZATION OF VARIABLES ###############################################################################################################
-    def __init__(self, config, **kwargs):
+    def __init__(self, config):
         """initialize states of the variables, the lists used"""
         # init config
         self.config = config['environment']
@@ -49,6 +49,7 @@ class AbstractConveyor1(gym.Env):
         self.repurpose_goal = self.config['repurpose_goal']
         self.remove_cycles = self.config['remove_cycles']
         self.max_steps = self.config['max_steps']
+        self.alternative_terminate = self.config['alternative_terminate']
 
         #load set of predefined start_states generated with the heuristic
         with open(join('rl', 'helpers', 'start_states.json'), 'r') as f:
@@ -89,6 +90,9 @@ class AbstractConveyor1(gym.Env):
         self.operator_locations = [[i, self.empty_env.shape[0] - 3] for i in range(4, self.amount_of_gtps * 4 + 1, 4)][
                                   ::-1]
 
+        self.max_on_conv = 2 * (
+                    (self.amount_of_gtps * 4) + self.pipeline_length - 1 + 2 * self.amount_of_outputs) + 2 * 4
+
         # Action and observation spaces
         self.action_space = gym.spaces.Discrete(self.amount_of_outputs * self.amount_of_gtps + 1)
 
@@ -122,6 +126,14 @@ class AbstractConveyor1(gym.Env):
         #     self.shape += self.amount_of_gtps * self.amount_of_outputs
         if 14 in self.observation_shape:
             self.shape += self.amount_of_gtps
+        if 15 in self.observation_shape:
+            self.shape += self.amount_of_gtps
+        if 16 in self.observation_shape:
+            self.shape += self.amount_of_gtps
+        if 17 in self.observation_shape:
+            self.shape += self.amount_of_gtps
+        if 18 in self.observation_shape:
+            self.shape += self.amount_of_gtps
         self.observation_space = gym.spaces.Box(shape=(self.shape,),
                                                 high=1, low=0,
                                                 dtype=np.float)
@@ -132,6 +144,7 @@ class AbstractConveyor1(gym.Env):
         self.steps = 0
         self.items_processed = 0
         self.cycle_count = 0
+        self.episode_reward = 0
 
         #init demands
         self.queues = [[random.randint(1, self.amount_of_outputs) for _ in range(self.gtp_demand_size)] for item in range(self.amount_of_gtps)]
@@ -307,18 +320,18 @@ class AbstractConveyor1(gym.Env):
         logging.debug(carrier_type_map_obs)
         # TODO: return:type_map_obs
 
-        ###  2. Occupation of the The output points ########################################################################
-        output_points = carrier_type_map_obs[-2 * self.amount_of_outputs:][::2]  ## returns: array([[3.],[3.],[3.]])
-        output_points = np.array([1 if item != 0 else 0 for item in output_points])  # Returns array(1, 1, 1)
-        logging.debug(output_points)
-        # TODO: return: output_points
+        # ###  2. Occupation of the The output points ########################################################################
+        # output_points = carrier_type_map_obs[-2 * self.amount_of_outputs:][::2]  ## returns: array([[3.],[3.],[3.]])
+        # output_points = np.array([1 if item != 0 else 0 for item in output_points])  # Returns array(1, 1, 1)
+        # logging.debug(output_points)
+        # # TODO: return: output_points
 
         ### 3. For the observation of the items in queue ##################################################################
         # length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
         len_queues = [len(item) * (1 / self.gtp_buffer_length) for item in self.in_queue]
         self.len_queues = np.array(len_queues).flatten()
 
-        # TODO: return: in_queue
+        # TODO: return: len_queues
         ### 4. For the observation of the demand of the GtP Queue #########################################################
         # make the init list
         init = []
@@ -330,111 +343,132 @@ class AbstractConveyor1(gym.Env):
         init = np.array([self.encode(item) for item in init]).flatten()
         logging.debug('init lenght = {}'.format(len(init)))
 
-        # TODO: return: init
-        ### 5 . Amount of items on the conveyor ############################################################################
-        amount_on_conv = len([item[1] for item in self.items_on_conv if item[0][1] < 8])
-        treshhold = 3 * self.amount_of_gtps
-        var=0
-        if amount_on_conv > treshhold:
-            var = 1
-        elif amount_on_conv <= treshhold:
-            var = amount_on_conv * 1 / treshhold
-
-        # TODO: return: var
-        ####  6. Cycle count ###############################################################################################
-        cycle_factor = self.cycle_count / self.max_cycle_count
-        # TODO: return: cycle_factor
-
-        ### 7. usability var ############################################################################################
-        tot_in_queue = 0
-        tot_on_conv = 0
-        usability_var = 0
-        for queue in self.init_queues:
-            for i in range(self.amount_of_outputs):
-                amount_in_queue = len([item for item in self.init_queues[0] if item == i + 1])
-                tot_in_queue += amount_in_queue
-                on_conv = len([item[1] for item in self.items_on_conv if
-                               item[0][1] < 8 and item[1] == i + 1 and item[2] == self.init_queues.index(queue) + 1])
-                tot_on_conv += on_conv
-                if amount_in_queue - on_conv >= 0:
-                    indic = 1
-                    usability_var += indic
-                elif amount_in_queue - on_conv < 0:
-                    indic = amount_in_queue / on_conv
-                    usability_var += indic
-        usability = usability_var / self.amount_of_outputs
-        # TODO: return: usability
-
-        ### 8. remaining processingtime queue #########################################################################
+        # # TODO: return: init
+        # ### 5 . Amount of items on the conveyor ############################################################################
+        # amount_on_conv = len([item[1] for item in self.items_on_conv if item[0][1] < 8])
+        # treshhold = 3 * self.amount_of_gtps
+        # var=0
+        # if amount_on_conv > treshhold:
+        #     var = 1
+        # elif amount_on_conv <= treshhold:
+        #     var = amount_on_conv * 1 / treshhold
+        #
+        # # TODO: return: var
+        # ####  6. Cycle count ###############################################################################################
+        # cycle_factor = self.cycle_count / self.max_cycle_count
+        # # TODO: return: cycle_factor
+        #
+        # ### 7. usability var ############################################################################################
+        # tot_in_queue = 0
+        # tot_on_conv = 0
+        # usability_var = 0
+        # for queue in self.init_queues:
+        #     for i in range(self.amount_of_outputs):
+        #         amount_in_queue = len([item for item in self.init_queues[0] if item == i + 1])
+        #         tot_in_queue += amount_in_queue
+        #         on_conv = len([item[1] for item in self.items_on_conv if
+        #                        item[0][1] < 8 and item[1] == i + 1 and item[2] == self.init_queues.index(queue) + 1])
+        #         tot_on_conv += on_conv
+        #         if amount_in_queue - on_conv >= 0:
+        #             indic = 1
+        #             usability_var += indic
+        #         elif amount_in_queue - on_conv < 0:
+        #             indic = amount_in_queue / on_conv
+        #             usability_var += indic
+        # usability = usability_var / self.amount_of_outputs
+        # # TODO: return: usability
+        #
+        # ### 8. remaining processingtime queue #########################################################################
         remaining_processtime = [sum(item) * 1 / (self.amount_of_outputs * 7) for item in self.in_queue]
         remaining_processtime = np.array(remaining_processtime).flatten()
 
         # TODO: return: remaining_processtime
 
-        ##### 9. Var if queues can still take items ########################################################
+        # ##### 9. Var if queues can still take items ########################################################
         cantake = []
         isempty = []
         for queue in self.in_queue:
-            if len(queue) < 7:
-                cantake.append(1)
-            elif len(queue) == 7:
-                cantake.append(0)
-            # TODO: return: cantake
-
-            ##### 10. Var if queue is lower then 2 ##################################################################
-            if len(queue) < 2:
+        #     if len(queue) < 7:
+        #         cantake.append(1)
+        #     elif len(queue) == 7:
+        #         cantake.append(0)
+        #     # TODO: return: cantake
+        #
+        #     ##### 10. Var if queue is lower then 2 ##################################################################
+            if len(queue) < 1:
                 isempty.append(1)
-            elif len(queue) >= 2:
+            elif len(queue) >= 1:
                 isempty.append(0)
         # TODO: return: isempty
 
-        #### 11. amount of items in lead #########################################################################
-        bottom_conv = [item[1] for item in self.items_on_conv if item[0][1] == 7]
-        info = []
-        if 1 in bottom_conv:
-            info.append(1)
-            info.append(len([item for item in bottom_conv if item == 1]) / (
-                    (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
-        else:
-            info.append(0)
-            info.append(0)
-
-        if 2 in bottom_conv:
-            info.append(1)
-            info.append(len([item for item in bottom_conv if item == 2]) / (
-                    (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
-        else:
-            info.append(0)
-            info.append(0)
-        info = np.array(info)
-
-        # TODO: return: info
-
-        #### 12. in pipeline for each queue ###########################################################################
+        # #### 11. amount of items in lead #########################################################################
+        # bottom_conv = [item[1] for item in self.items_on_conv if item[0][1] == 7]
+        # info = []
+        # if 1 in bottom_conv:
+        #     info.append(1)
+        #     info.append(len([item for item in bottom_conv if item == 1]) / (
+        #             (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
+        # else:
+        #     info.append(0)
+        #     info.append(0)
+        #
+        # if 2 in bottom_conv:
+        #     info.append(1)
+        #     info.append(len([item for item in bottom_conv if item == 2]) / (
+        #             (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
+        # else:
+        #     info.append(0)
+        #     info.append(0)
+        # info = np.array(info)
+        #
+        # # TODO: return: info
+        #
+        # #### 12. in pipeline for each queue ###########################################################################
         in_pipe = [[len([item for item in self.items_on_conv if item[2] == i and item[1] == j]) for j in
                     range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
         in_pipe = np.array(in_pipe).flatten()
         in_pipe = np.array([1 if item > (self.gtp_buffer_length + self.pipeline_length // 15) else item / (
                     self.gtp_buffer_length + self.pipeline_length // 15) for item in in_pipe])
 
-        # TODO: return:in_pipe
-        ### 13. what is currently in pipe ##############################################################################
-        # in_pipe2 = [
-        #     [len([item for item in self.items_on_conv if item[2] == i and item[1] == j and item[0][1] < 8]) for j in
-        #      range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
-        # in_pipe2 = np.array(in_pipe2).flatten()
-        # in_pipe2 = np.array([1 if item > (self.pipeline_length // 15) else item / (
-        #             self.pipeline_length // 15) for item in in_pipe2])
+        # # TODO: return:in_pipe
+        # ### 13. what is currently in pipe ##############################################################################
+        in_pipe2 = [
+            [len([item for item in self.items_on_conv if item[2] == i and item[1] == j and item[0][1] < 8]) for j in
+             range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
+        in_pipe2 = np.array(in_pipe2).flatten()
+        # # in_pipe2 = np.array([1 if item > (self.pipeline_length // 15) else item / (
+        # #             self.pipeline_length // 15) for item in in_pipe2])
+        #
+        # ### 14. remaining processing time per queue ####################################################################
+        # max_time = 60 + self.gtp_buffer_length * 60
+        # queue_times = [sum([6 if item == 1 else 30 if item == 2 else 60 if item == 3 else 0 for item in queue]) for
+        #                queue in self.in_queue]
+        # tot_wait_time = np.array(
+        #     [queue_times[i] + self.W_times['{}'.format(i + 1)] for i in range(self.amount_of_gtps)])
+        # tot_wait_time = tot_wait_time / max_time
+        #
+        # #TODO: return in_pipe2
 
-        ### 14. remaining processing time per queue ####################################################################
-        max_time = 60 + self.gtp_buffer_length * 60
-        queue_times = [sum([6 if item == 1 else 30 if item == 2 else 60 if item == 3 else 0 for item in queue]) for
-                       queue in self.in_queue]
-        tot_wait_time = np.array(
-            [queue_times[i] + self.W_times['{}'.format(i + 1)] for i in range(self.amount_of_gtps)])
-        tot_wait_time = tot_wait_time / max_time
+        ##### 15. W_times
+        max_time_w = 6 if self.amount_of_outputs==1 else 30 if self.amount_of_outputs==2 else 60
+        rpt_w = np.array(list(self.W_times.values())) /max_time_w
 
-        #TODO: return in_pipe2
+        ### 16. rpt_q
+        max_time_q = max_time_w*self.gtp_buffer_length
+        rpt_q = [sum(
+            [6 if item == 1 else 30 if item == 2 else 60 if item == 3 else 0 for item in self.in_queue[workstation]]) for
+            workstation in range(self.amount_of_gtps)]
+        rpt_q = np.array(rpt_q)/ max_time_q
+
+        ### 17. rpt_p
+        rpt_p = [sum([6 if item == 1 else 30 if item == 2 else 60 if item == 3 else 0 for item in
+                      [item[1] for item in self.items_on_conv if
+                       item[2] == workstation + 1 and item[0][1] == 7 and item[0][0] >
+                       self.diverter_locations[workstation][0]]]) for workstation in range(self.amount_of_gtps)]
+        rpt_p = np.array(rpt_p) / self.pipeline_length
+
+        ## 18. amount of items in each pipeline
+        len_pipes = np.array([len(item) for item in self.in_pipe]) /self.pipeline_length
         ### Combine All to one array ###################################################################################
 
         obs = np.array([])
@@ -462,11 +496,18 @@ class AbstractConveyor1(gym.Env):
             obs = np.append(obs, info)
         if 12 in self.observation_shape:
             obs = np.append(obs, in_pipe)
-        # if 13 in self.observation_shape:
-        #     obs = np.append(obs, in_pipe2)
+        if 13 in self.observation_shape:
+            obs = np.append(obs, in_pipe2)
         if 14 in self.observation_shape:
             obs = np.append(obs, tot_wait_time)
-
+        if 15 in self.observation_shape:
+            obs = np.append(obs, rpt_w)
+        if 16 in self.observation_shape:
+            obs = np.append(obs, rpt_q)
+        if 17 in self.observation_shape:
+            obs = np.append(obs, rpt_p)
+        if 18 in self.observation_shape:
+            obs = np.append(obs, len_pipes)
         return obs
 
 
@@ -478,9 +519,10 @@ class AbstractConveyor1(gym.Env):
         must return the current state of the environment"""
         #init variables
         self.episode += 1
-        print('Ep: {:5}, steps: {:3}, R: {:3.3f}'.format(self.episode, self.steps, self.reward), end='\r')
+        print('Ep: {:5}, steps: {:3}, R: {:3.3f}'.format(self.episode, self.steps, self.episode_reward), end='\r')
 
         self.reward = 0
+        self.episode_reward = 0
         self.terminate = False
         self.amount_of_orders_processed = 0
         self.condition_to_transfer = False
@@ -786,13 +828,24 @@ class AbstractConveyor1(gym.Env):
             if len(item) < 1:
                 self.reward -= self.reward_empty_queue
 
-        ## terminate on high cycle count
-        if self.cycle_count > self.max_cycle_count:
-            self.terminate = True
+        if self.alternative_terminate:
+            if self.steps > self.max_steps:
+                self.terminate = True
+            if self.cycle_count > self.max_cycle_count:
+                self.terminate = True
 
-        ## when stuck in loop, terminate after x steps
-        if self.steps > self.max_steps:
+
+        ## terminate when in deadlock
+        # check if there is an item on the conveyor for each queue
+        to_check = [False if demand not in [item[1] for item in self.items_on_conv if
+                                            item[0][1] <= 7 and item[2] == idx + 1] else True for idx, demand in
+                    enumerate(self.queue_demand)
+                    ]
+        if all(item == False for item in to_check) and self.max_on_conv == len(
+                [item for item in self.items_on_conv if item[0][1] <= 7]):
+            logging.debug('Terminate for deadlock')
             self.terminate = True
+            #self.reward -= self.reward_wrong_terminate_situation
 
         ## termination conditions
         if self.termination_condition == 1:
@@ -807,6 +860,7 @@ class AbstractConveyor1(gym.Env):
 
         next_state = self.make_observation()
         reward = self.reward
+        self.episode_reward += self.reward
         terminate = self.terminate
         return next_state, reward, terminate, {}
 

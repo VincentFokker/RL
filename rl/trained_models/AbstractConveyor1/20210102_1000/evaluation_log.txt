@@ -1,0 +1,2 @@
+best_model.zip: Mean Reward : 96.300, Standard deviation Reward : 773.580
+pretrained-model.zip: Mean Reward : 398.900, Standard deviation Reward : 210.053

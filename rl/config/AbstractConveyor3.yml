@@ -67,9 +67,9 @@ environment:
     negative_reward_for_cycle:       0
 
     reward_1_delivery_ep:               1
-    reward_2_carriers_ep:               1
-    reward_3_idletime_ep:               1
-    reward_4_cycles_ep:                 1
+    reward_2_carriers_ep:               0
+    reward_3_idletime_ep:               0
+    reward_4_cycles_ep:                 0
 
 main:
     # MODELS:
@@ -91,7 +91,7 @@ main:
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
     model: PPO2
-    policy: CustomMlpPolicy
+    policy: MlpPolicy
     n_workers: 8      # Parallel environments
     n_steps:    3000000    # Steps to train
     save_every: 1000000  # Save a checkpoint of the model every n steps

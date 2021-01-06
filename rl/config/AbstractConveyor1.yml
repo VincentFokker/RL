@@ -8,15 +8,17 @@ environment:
     speed_improvement: 0.00 #percent
     gtp_buffer_length:  7 #how much items fit in the buffer lane of the GTP workstation
     pipeline_length: 10
-    in_que_observed: 1
+    in_que_observed: 5
     exception_occurence: 0.0 #how often an exception occurs
     termination_condition: 3 #1 = full demand satisfied, 2= queue demand satisfied, 3=terminate at max items processed
     max_items_processed: 150
     max_cycle_count: 400
-    max_steps: 1000
+    max_steps: 2000
     steps_by_heuristic: 20      #how many steps to start up by heuristic
     repurpose_goal: False
-    remove_cycles: True
+    remove_cycles: False
+
+    alternative_terminate: True
 
     #for render
     render_width: 1280
@@ -36,12 +38,14 @@ environment:
     # 6 - cycle factor (amount of cycles / max) normalized
     # 7 - usability of items on conveyor - factor (mean over amount of gtp)
     # 8 - remaining processing time of the queue (per queue), normalized
-    # 9 - queue can still take items, per queue (1/0)
-    # 10 - queue is empty (< 2), per queue (1/0)
+    # 9 - 2 -  queue can still take items, per queue (1/0)
+    # 10- 2 - queue is empty (< 2), per queue (1/0)
     # 11 - there is an item in the lead  for each type
+    # 12 - 4 - in pipe number
 
     #to try
-    observation_shape: [1,2,3,4,6,8,10,12]
+    # observation_shape: [1,2,3,4,6,8,10,12]
+    observation_shape: [4, 15, 16, 17, 18]
     #observation_shape: [2, 4, 9, 10, 12]
     #observation_shape: [1, 12 , 4, 9, 10]
     #observation_shape: [1, 3, 4, 9, 10, 12]
@@ -61,10 +65,10 @@ environment:
 
     positive_reward_for_divert:           10
     wrong_sup_at_goal:                   0
-    flooding_reward:                       9
-    neg_reward_ia:                       15
-    negative_reward_for_empty_queue:       15
-    negative_reward_for_cycle:           6
+    flooding_reward:                       0
+    neg_reward_ia:                       0
+    negative_reward_for_empty_queue:       1
+    negative_reward_for_cycle:           0
 
 
 main:
@@ -86,11 +90,13 @@ main:
     #         CnnPolicy - CNN as described in 2014 Atari paper
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
-    model: SAC
-    policy: MlpPolicy
+    model: PPO2
+    policy: CustomMlpPolicy
     n_workers: 8      # Parallel environments
     n_steps:    6000000    # Steps to train
-    save_every: 2000000  # Save a checkpoint of the model every n steps
+    save_every: 500000  # Save a checkpoint of the model every n steps
+    firsttrain: 2000000
+    secondtrain: 2000000
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
@@ -112,7 +118,7 @@ models:
         noptepochs: 4        # Number of iterations for SGD/Adam
         cliprange: 0.2       # Clip factor for PPO (the action probability distribution of the updated policy cannot differ from the old one by this fraction [measured by KL divergence])
         full_tensorboard_log: False
-        verbose: 0
+        verbose: 1
 
     DQN:
         gamma: 0.996

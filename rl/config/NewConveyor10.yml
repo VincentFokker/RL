@@ -22,7 +22,7 @@ environment:
 
     #reward values
     positive_reward_for_divert          :      10
-    wrong_sup_at_goal                   :     -5
+    wrong_sup_at_goal                   :     0 #-5
     negative_reward_for_invalid_action  :     -10           #when the agent tries to output when not possible. (space is occupied)
     shortage_reward                     :     0
     flooding_reward                     :     0

@@ -1,7 +1,7 @@
 from stable_baselines.common.policies import ActorCriticPolicy, register_policy, FeedForwardPolicy, LstmPolicy
 import tensorflow as tf
 from stable_baselines.deepq.policies import FeedForwardPolicy as DQNffwd
-from stable_baselines.a2c.utils import conv, linear, conv_to_fc
+#from stable_baselines.a2c.utils import conv, linear, conv_to_fc
 import numpy as np
 import copy
 
@@ -10,7 +10,7 @@ def custom_cnn(scaled_images, params, **kwargs):
     """
     Custom CNN Architecture builder for this project
 
-    Arguments to this function are passed from 
+    Arguments to this function are passed from
     rl/config/env_name.yml  -> policies: CustomCnnPolicy
     """
     try:
@@ -19,25 +19,25 @@ def custom_cnn(scaled_images, params, **kwargs):
         print(e, 'Invalid activation function.')
 
     init_scale = params['conv_init_scale']
-    
+
     # First layer
     out = activ(conv(
-        input_tensor=scaled_images, 
-        scope='c0', 
-        n_filters=params['filters'][0], 
-        filter_size=params['kernel_size'][0], 
-        stride=params['stride'][0], 
-        init_scale=init_scale, 
+        input_tensor=scaled_images,
+        scope='c0',
+        n_filters=params['filters'][0],
+        filter_size=params['kernel_size'][0],
+        stride=params['stride'][0],
+        init_scale=init_scale,
         **kwargs))
 
     # Following layers
     for i, layer in enumerate(params['filters'][1:]):
-        out = activ(conv(input_tensor=out, 
-        scope='c{}'.format(i+1), 
+        out = activ(conv(input_tensor=out,
+        scope='c{}'.format(i+1),
         n_filters=layer,
-        filter_size=params['kernel_size'][i+1], 
-        stride=params['stride'][i+1], 
-        init_scale=init_scale, 
+        filter_size=params['kernel_size'][i+1],
+        stride=params['stride'][i+1],
+        init_scale=init_scale,
         **kwargs))
 
     n_hidden = np.prod([v.value for v in out.get_shape()[1:]])
@@ -61,7 +61,7 @@ class CustomCnnPolicy(ActorCriticPolicy):
         with tf.variable_scope('model', reuse=reuse):
             extracted_features = custom_cnn(self.processed_obs, params)
             flattened = tf.layers.flatten(extracted_features)
-            
+
             # Shared layers
             shared = flattened
             for i, layer in enumerate(params['shared']):
@@ -108,14 +108,14 @@ class CustomMlpPolicy(FeedForwardPolicy):
     """
     A custom MLP policy architecture initializer
 
-    Arguments to the constructor are passed from 
+    Arguments to the constructor are passed from
     rl/config/env_name.yml  -> policies: CustomMlpPolicy
     """
-    
+
     def __init__(self, sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=False, params=None, **kwargs):
         config = copy.deepcopy(params)
         net_architecture = config['shared']
-        net_architecture.append(dict(pi=config['h_actor'], 
+        net_architecture.append(dict(pi=config['h_actor'],
                                      vf=config['h_critic']))
         print('Custom MLP architecture', net_architecture)
         super(CustomMlpPolicy, self).__init__(sess,ob_space, ac_space, n_env, n_steps, n_batch, reuse=False,
@@ -126,13 +126,13 @@ class CustomLSTMPolicy(LstmPolicy):
     """
     A custom LSTM policy architecture initializer
 
-    Arguments to the constructor are passed from 
+    Arguments to the constructor are passed from
     rl/config/env_name.yml  -> policies: CustomLSTMPolicy
     """
     def __init__(self, sess, ob_space, ac_space, n_env, n_steps, n_batch, n_lstm=64, reuse=False, params=None, **_kwargs):
         config = copy.deepcopy(params)
         net_architecture = config['shared']
-        net_architecture.append(dict(pi=config['h_actor'], 
+        net_architecture.append(dict(pi=config['h_actor'],
                                      vf=config['h_critic']))
         print('Custom Lstm architecture: ', net_architecture)
 
@@ -144,7 +144,7 @@ class CustomDQNPolicy(DQNffwd):
     """
     A custom LSTM policy architecture initializer
 
-    Arguments to the constructor are passed from 
+    Arguments to the constructor are passed from
     rl/config/env_name.yml  -> policies: CustomDQNolicy
     """
     def __init__(self, *args, **kwargs):
