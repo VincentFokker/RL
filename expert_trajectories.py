@@ -63,7 +63,8 @@ if __name__ == "__main__":
         P_rpt = obs[
                 2 * env.amount_of_gtps * env.in_que_observed + env.amount_of_gtps * 2:2 * env.amount_of_gtps * env.in_que_observed + env.amount_of_gtps * 3]
         P_rpt = P_rpt * env.pipeline_length
-        in_pipe = obs[-env.amount_of_gtps:]
+        in_pipe = obs[2 * env.amount_of_gtps * env.in_que_observed + env.amount_of_gtps * 3:2 * env.amount_of_gtps * env.in_que_observed + env.amount_of_gtps * 4]
+        #in_pipe = obs[-env.amount_of_gtps:]
         in_pipe = in_pipe * env.pipeline_length
         in_pipe = in_pipe.astype(int)
 

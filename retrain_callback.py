@@ -1,3 +1,4 @@
+
 import pathlib
 import argparse
 import rl
@@ -5,6 +6,7 @@ from os import listdir
 from os.path import join, isfile
 from rl.environments import *
 from stable_baselines.common import make_vec_env
+from rl.baselines.Wrapper import create_env
 from stable_baselines import PPO2
 from stable_baselines.common.callbacks import EvalCallback
 from stable_baselines.common.policies import FeedForwardPolicy, register_policy
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     env = env_obj(config)
 
     # multiprocess environment
-    env_8 = make_vec_env(lambda: env, n_envs=n_workers)
+    env_8 = create_env(args.environment, config=config, n_workers=n_workers)
 
     # callback for evaluation
     eval_callback = EvalCallback(env, best_model_save_path=specified_path,
@@ -107,14 +109,20 @@ if __name__ == "__main__":
     # train model
     try:
         try:
-            model_path = join(specified_path, 'pretrained-model.zip')
+            model_path = join(specified_path, 'best_model.zip')
             model = PPO2.load(model_path, env=env_8, tensorboard_log=specified_path)
             # model = PPO2('MlpPolicy', env=env_8, tensorboard_log=specified_path, **model_config).load(args.modelpath, env=env_8)
             print("pretrained-model loaded")
 
         except:
-            model = PPO2(policy, env=env_8, tensorboard_log=specified_path, **model_config)
-            print('new model created')
+            try:
+                model_path = join(specified_path, 'pretrained-model.zip')
+                model = PPO2.load(model_path, env=env_8, tensorboard_log=specified_path)
+                # model = PPO2('MlpPolicy', env=env_8, tensorboard_log=specified_path, **model_config).load(args.modelpath, env=env_8)
+                print("pretrained-model loaded")
+            except:
+                model = PPO2(policy, env=env_8, tensorboard_log=specified_path, **model_config)
+                print('new model created')
 
         # Launch the tensorboard
         if args.tensorboard:

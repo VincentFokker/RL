@@ -146,6 +146,7 @@ class ConveyorEnv(gym.Env):
         self.cycle_count = 0
         self.episode_reward = 0
 
+
         #init demands
         self.queues = [[random.randint(1, self.amount_of_outputs) for _ in range(self.gtp_demand_size)] for item in range(self.amount_of_gtps)]
         self.init_queues = copy(self.queues)
@@ -379,8 +380,8 @@ class ConveyorEnv(gym.Env):
         # TODO: return: usability
 
         ### 8. remaining processingtime queue #########################################################################
-        remaining_processtime = [sum(item) * 1 / (self.amount_of_outputs * 7) for item in self.in_queue]
-        remaining_processtime = np.array(remaining_processtime).flatten()
+        # remaining_processtime = [sum(item) * 1 / (self.amount_of_outputs * 7) for item in self.in_queue]
+        # remaining_processtime = np.array(remaining_processtime).flatten()
 
         # TODO: return: remaining_processtime
 
@@ -472,22 +473,33 @@ class ConveyorEnv(gym.Env):
         ### Combine All to one array ###################################################################################
 
         obs = np.array([])
+
+        #observation for the expert trajectories
+        if 4 in self.observation_shape:
+            obs = np.append(obs, init)
+        if 15 in self.observation_shape:
+            obs = np.append(obs, rpt_w)
+        if 16 in self.observation_shape:
+            obs = np.append(obs, rpt_q)
+        if 17 in self.observation_shape:
+            obs = np.append(obs, rpt_p)
+        if 18 in self.observation_shape:
+            obs = np.append(obs, len_pipes)
+        # additional expansion of the observation
         if 1 in self.observation_shape:
             obs = np.append(obs, type_map_obs)
         if 2 in self.observation_shape:
             obs = np.append(obs, output_points)
         if 3 in self.observation_shape:
             obs = np.append(obs, self.len_queues)
-        if 4 in self.observation_shape:
-            obs = np.append(obs, init)
         if 5 in self.observation_shape:
             obs = np.append(obs, var)
         if 6 in self.observation_shape:
             obs = np.append(obs, cycle_factor)
         if 7 in self.observation_shape:
             obs = np.append(obs, usability)
-        if 8 in self.observation_shape:
-            obs = np.append(obs, remaining_processtime)
+        # if 8 in self.observation_shape:
+        #     obs = np.append(obs, remaining_processtime)
         if 9 in self.observation_shape:
             obs = np.append(obs, cantake)
         if 10 in self.observation_shape:
@@ -500,14 +512,6 @@ class ConveyorEnv(gym.Env):
             obs = np.append(obs, in_pipe2)
         if 14 in self.observation_shape:
             obs = np.append(obs, tot_wait_time)
-        if 15 in self.observation_shape:
-            obs = np.append(obs, rpt_w)
-        if 16 in self.observation_shape:
-            obs = np.append(obs, rpt_q)
-        if 17 in self.observation_shape:
-            obs = np.append(obs, rpt_p)
-        if 18 in self.observation_shape:
-            obs = np.append(obs, len_pipes)
         return obs
 
 

@@ -363,6 +363,10 @@ class Trainer(object):
         """
         Train method
         """
+        eval_callback = EvalCallback(env_x, best_model_save_path=self._unique_model_identifier,
+                                     log_path=self._unique_model_identifier, eval_freq=100000,
+                                     n_eval_episodes=5, verbose=1,
+                                     deterministic=False, render=False)
         if not self.reloaded:
             self._create_model_dir()
         self._check_env_status()
@@ -380,7 +384,7 @@ class Trainer(object):
             print('CTRL + C to stop the training and save.\n')
             for i in range(n_checkpoints):
                 self.reloaded = True
-                self.model = self.model.learn(callback=self.callback, **config)
+                self.model = self.model.learn(callback=[self.callback, eval_callback], **config)
                 self._save()
         except KeyboardInterrupt:
             self._save()

@@ -1,3 +1,4 @@
+
 import pathlib
 import sys
 import argparse
@@ -10,6 +11,7 @@ from stable_baselines import PPO2
 from stable_baselines.common.callbacks import EvalCallback
 from stable_baselines.common.policies import FeedForwardPolicy, register_policy
 from stable_baselines.common.vec_env import DummyVecEnv
+from rl.baselines.Wrapper import create_env
 from stable_baselines.gail import ExpertDataset
 from rl.baselines import *
 from rl.helpers import launch_tensorboard
@@ -112,11 +114,11 @@ if __name__ == "__main__":
         sys.exit()
 
     # multiprocess environment
-    env_8 = make_vec_env(lambda: env, n_envs=n_workers)
-    env_x = DummyVecEnv([lambda: env])
+    env_8 = create_env(args.environment, config=config, n_workers=n_workers)
+
 
     # callback for evaluation
-    eval_callback = EvalCallback(env_x, best_model_save_path=specified_path,
+    eval_callback = EvalCallback(env, best_model_save_path=specified_path,
                                  log_path=specified_path, eval_freq=100000,
                                  n_eval_episodes=5, verbose=1,
                                  deterministic=False, render=False)
@@ -125,12 +127,12 @@ if __name__ == "__main__":
     try:
         try:
             model_path = join(specified_path, 'best_model.zip')
-            model = PPO2.load(model_path, env=env_x, tensorboard_log=specified_path)
+            model = PPO2.load(model_path, env=env_8, tensorboard_log=specified_path)
             # model = PPO2('MlpPolicy', env=env_8, tensorboard_log=specified_path, **model_config).load(args.modelpath, env=env_8)
             print("Existing model loaded from directory")
 
         except:
-            model = PPO2(policy, env=env_x, tensorboard_log=specified_path, **model_config)
+            model = PPO2(policy, env=env_8, tensorboard_log=specified_path, **model_config)
             print('New model created.')
 
         #Pretrain the model
@@ -138,6 +140,12 @@ if __name__ == "__main__":
         model.pretrain(dataset, n_epochs=100)
         model.save(join(specified_path, 'pretrained-model.zip'))
         print('Pre-training done.')
+
+        # save the config file in the path, for documentation purposes
+        print('Saving the config file in path: {}'.format(specified_path))
+        with open(join(specified_path, 'config.yml'), 'w') as f:
+            yaml.dump(config, f, indent=4, sort_keys=False, line_break=' ')
+        print('Done.')
 
         if args.retrain:
             # Launch the tensorboard
@@ -150,10 +158,10 @@ if __name__ == "__main__":
                 model_path = join(specified_path, '{}_model_{}_{}.zip'.format(max_in_dir, args.name, i + 1))
                 model.save(model_path)
 
-            # save the config file in the path, for documentation purposes
-            print('Saving the config file in path: {}'.format(specified_path))
-            with open(join(specified_path, 'config.yml'), 'w') as f:
-                yaml.dump(config, f, indent=4, sort_keys=False, line_break=' ')
+            # # save the config file in the path, for documentation purposes
+            # print('Saving the config file in path: {}'.format(specified_path))
+            # with open(join(specified_path, 'config.yml'), 'w') as f:
+            #     yaml.dump(config, f, indent=4, sort_keys=False, line_break=' ')
     except KeyboardInterrupt:
         print('Saving model . .                                    ')
         model_path = join(specified_path, '{}_model_{}_{}_interupt.zip'.format(max_in_dir, args.name, i + 1))

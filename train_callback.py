@@ -1,11 +1,12 @@
 import pathlib
 import argparse
-import rl
+import rl, sys
 from os import listdir
 from os.path import join, isfile
 from rl.environments import *
-from stable_baselines.common import make_vec_env
+from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines import PPO2
+from rl.baselines.Wrapper import create_env
 from stable_baselines.common.callbacks import EvalCallback
 from stable_baselines.common.policies import *
 from rl.baselines import *
@@ -96,7 +97,8 @@ if __name__ == "__main__":
     env = env_obj(config)
 
     # multiprocess environment
-    env_8 = make_vec_env(lambda: env, n_envs=n_workers)
+    env_8 = create_env(args.environment, config=config, n_workers=n_workers)
+
 
     # callback for evaluation
     eval_callback = EvalCallback(env, best_model_save_path=specified_path,
