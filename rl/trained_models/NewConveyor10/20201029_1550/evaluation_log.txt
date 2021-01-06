@@ -1,7 +1,0 @@
-0_model_LittleRewards_1.zip: Mean Reward : -1230.949951171875, Standardized Reward : 1666.0362548828125
-0_model_LittleRewards_2.zip: Mean Reward : -1435.449951171875, Standardized Reward : 1526.6993408203125
-0_model_LittleRewards_3.zip: Mean Reward : -1783.4000244140625, Standardized Reward : 1753.1705322265625
-1_model_AddedPunishEmptyQue_1.zip: Mean Reward : -353.79998779296875, Standardized Reward : 454.7290954589844
-1_model_AddedPunishEmptyQue_2.zip: Mean Reward : -488.1000061035156, Standardized Reward : 407.9410705566406
-1_model_AddedPunishEmptyQue_3.zip: Mean Reward : -105.5999984741211, Standardized Reward : 176.75021362304688
-best_model.zip: Mean Reward : -1391.800048828125, Standardized Reward : 911.0557861328125

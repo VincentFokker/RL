@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         print('Saving model . .                                    ')
-        model_path = join(specified_path, '{}_model_{}_{}_interupt.zip'.format(max_in_dir, args.name, i + 1))
+        model_path = join(specified_path, '{}_model_{}_{}_interupt.zip'.format(max_in_dir, args.name, 1))
         model.save(model_path)
 
         # save the config file in the path, for documentation purposes

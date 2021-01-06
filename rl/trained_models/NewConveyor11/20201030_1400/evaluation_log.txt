@@ -1,4 +1,0 @@
-0_model_PipeObsIncreasedQueueobs_1.zip: Mean Reward : -65.800, Standard deviation Reward : 247.893
-0_model_PipeObsIncreasedQueueobs_2.zip: Mean Reward : -200.000, Standard deviation Reward : 961.196
-0_model_PipeObsIncreasedQueueobs_3.zip: Mean Reward : 40.850, Standard deviation Reward : 99.772
-best_model.zip: Mean Reward : 1.800, Standard deviation Reward : 258.672

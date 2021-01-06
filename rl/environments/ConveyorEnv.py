@@ -321,10 +321,10 @@ class ConveyorEnv(gym.Env):
         # TODO: return:type_map_obs
 
         # ###  2. Occupation of the The output points ########################################################################
-        # output_points = carrier_type_map_obs[-2 * self.amount_of_outputs:][::2]  ## returns: array([[3.],[3.],[3.]])
-        # output_points = np.array([1 if item != 0 else 0 for item in output_points])  # Returns array(1, 1, 1)
-        # logging.debug(output_points)
-        # # TODO: return: output_points
+        output_points = carrier_type_map_obs[-2 * self.amount_of_outputs:][::2]  ## returns: array([[3.],[3.],[3.]])
+        output_points = np.array([1 if item != 0 else 0 for item in output_points])  # Returns array(1, 1, 1)
+        logging.debug(output_points)
+        # TODO: return: output_points
 
         ### 3. For the observation of the items in queue ##################################################################
         # length of each queue (how full)            #some indicator of how long it takes to process this full queue (consider 1- x)
@@ -388,12 +388,12 @@ class ConveyorEnv(gym.Env):
         cantake = []
         isempty = []
         for queue in self.in_queue:
-        #     if len(queue) < 7:
-        #         cantake.append(1)
-        #     elif len(queue) == 7:
-        #         cantake.append(0)
-        #     # TODO: return: cantake
-        #
+            if len(queue) < 7:
+                cantake.append(1)
+            elif len(queue) == 7:
+                cantake.append(0)
+            # TODO: return: cantake
+
         #     ##### 10. Var if queue is lower then 2 ##################################################################
             if len(queue) < 1:
                 isempty.append(1)
@@ -436,8 +436,8 @@ class ConveyorEnv(gym.Env):
             [len([item for item in self.items_on_conv if item[2] == i and item[1] == j and item[0][1] < 8]) for j in
              range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
         in_pipe2 = np.array(in_pipe2).flatten()
-        in_pipe2 = np.array([1 if item > (self.pipeline_length // 15) else item / (
-                    self.pipeline_length // 15) for item in in_pipe2])
+        in_pipe2 = np.array([1 if item > (self.pipeline_length / 15) else item / (
+                    self.pipeline_length / 15) for item in in_pipe2])
 
         ### 14. remaining processing time per queue ####################################################################
         max_time = 60 + self.gtp_buffer_length * 60

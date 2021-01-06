@@ -1,2 +1,0 @@
-{'items_processed': 14, 'cycle count': 60}
-{'items_processed': 16, 'cycle count': 40}

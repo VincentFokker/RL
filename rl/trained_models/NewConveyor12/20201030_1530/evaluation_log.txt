@@ -1,4 +1,0 @@
-0_model_AddedExtrapunishmentCycle_1.zip: Mean Reward : -1053.700, Standard deviation Reward : 1209.410
-0_model_AddedExtrapunishmentCycle_2.zip: Mean Reward : -346.900, Standard deviation Reward : 302.389
-0_model_AddedExtrapunishmentCycle_3.zip: Mean Reward : -434.200, Standard deviation Reward : 443.679
-best_model.zip: Mean Reward : -429.300, Standard deviation Reward : 739.674

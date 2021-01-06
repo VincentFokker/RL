@@ -2,6 +2,7 @@
 
 from stable_baselines.common.vec_env import SubprocVecEnv, VecFrameStack, DummyVecEnv, VecNormalize
 from stable_baselines.common.schedules import LinearSchedule, linear_interpolation
+from stable_baselines.common.policies import _policy_registry
 from collections import deque
 import numpy as np
 import os, yaml, sys, subprocess, webbrowser, time, datetime, random, copy
@@ -183,7 +184,10 @@ class Trainer(object):
         model_name    = c['main']['model']
         model_params  = c['models'][model_name]
         policy_name   = c['main']['policy']
-        policy_params = c['policies'][policy_name]
+        try:
+            policy_params = c['policies'][policy_name]
+        except:
+            pass
         print('\nCreating {} model...'.format(model_name))
 
         self.policy = self._get_policy(policy_name)

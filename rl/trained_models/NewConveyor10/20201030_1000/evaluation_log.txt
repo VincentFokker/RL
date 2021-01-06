@@ -1,4 +1,0 @@
-0_model_RewardsUpdated_1.zip: Mean Reward : -182.75, Standardized Reward : 480.87078857421875
-0_model_RewardsUpdated_2.zip: Mean Reward : -96.1500015258789, Standardized Reward : 211.4401397705078
-0_model_RewardsUpdated_3.zip: Mean Reward : -68.5999984741211, Standardized Reward : 196.78172302246094
-best_model.zip: Mean Reward : -366.6499938964844, Standardized Reward : 983.707275390625
