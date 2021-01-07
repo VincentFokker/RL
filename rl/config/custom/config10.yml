@@ -1,22 +1,26 @@
 # Arguments that get passed to the constructor of your class instance
 # as config={} keyword
 environment:
-    amount_of_gtps: 2
-    amount_of_outputs: 2
-    gtp_demand_size: 100
-    process_time_at_GTP: 6 #time to process one product in sec
-    speed_improvement: 0.00 #percent
-    gtp_buffer_length:  7 #how much items fit in the buffer lane of the GTP workstation
-    pipeline_length: 10
-    in_que_observed: 1
-    exception_occurence: 0.0 #how often an exception occurs
-    termination_condition: 3 #1 = full demand satisfied, 2= queue demand satisfied, 3=terminate at max items processed
-    max_items_processed: 150
-    max_cycle_count: 400
-    max_steps: 1000
-    steps_by_heuristic: 20      #how many steps to start up by heuristic
-    repurpose_goal: False
-    remove_cycles: False
+    amount_of_gtps:         5
+    amount_of_outputs:      3
+    gtp_demand_size:        100
+    process_time_at_GTP:    6       #time to process one product in sec
+    speed_improvement:      0.00    #percent
+    gtp_buffer_length:      7       #how much items fit in the buffer lane of the GTP workstation
+    pipeline_length:        10
+    in_que_observed:        5
+    exception_occurence:    0.0     #how often an exception occurs
+    termination_condition:  3       #1 = full demand satisfied, 2= queue demand satisfied, 3=terminate at max items processed
+    max_items_processed:    250
+    max_cycle_count:        400
+    max_steps:              20000
+    steps_by_heuristic:     20      #how many steps to start up by heuristic
+    repurpose_goal:         False
+    remove_cycles:          False
+
+    alternative_terminate: True     #alternative termination conditions are:
+                                        # (1). terminate when max steps reached,
+                                        # (2). and terminate when max_cycle_count reached
 
     #for render
     render_width: 1280
@@ -36,12 +40,20 @@ environment:
     # 6 - cycle factor (amount of cycles / max) normalized
     # 7 - usability of items on conveyor - factor (mean over amount of gtp)
     # 8 - remaining processing time of the queue (per queue), normalized
-    # 9 - queue can still take items, per queue (1/0)
-    # 10 - queue is empty (< 2), per queue (1/0)
+    # 9 - 2 -  queue can still take items, per queue (1/0)
+    # 10 - 2 - queue is empty (< 2), per queue (1/0)
     # 11 - there is an item in the lead  for each type
+    # 12 - 4 - in pipe number equal to 13
+    # 13 - What is currently in pipe (of each type) normalized
+    # 14 - Remaining processing  time of queue + workstation
+    # 15 - Remaining waiting time per workstation
+    # 16 - Remaining processing time of queue equal to 8
+    # 17 - Remaining procesing time of items in pipeline
+    # 18 - Number of items in pipeline, normalized
 
     #to try
-    observation_shape: [1,2,3,4,6,14,10,12]
+    #observation_shape: [1,2,3,4,6,8,10,12]
+    observation_shape: [4, 15, 16, 17, 18, 1, 2, 3, 6]
     #observation_shape: [2, 4, 9, 10, 12]
     #observation_shape: [1, 12 , 4, 9, 10]
     #observation_shape: [1, 3, 4, 9, 10, 12]
@@ -54,32 +66,19 @@ environment:
     # Delta idle time = Sum(idle time per gtp)
     # Delta cycle count = 1 if cycle in step else 0
     # factors are:
-    idle_time_reward_factor:         0
-    cycle_count_reward_factor:       0
-    output_priming_reward:           0.00
-    delivery_reward:                 0
+    idle_time_reward_factor:            5
+    cycle_count_reward_factor:          0
+    output_priming_reward:              0.00
+    delivery_reward:                    0
 
-    positive_reward_for_divert:      0
-    wrong_sup_at_goal:               0
-    flooding_reward:                 0
-    neg_reward_ia:                   0
-    negative_reward_for_empty_queue: 0
-    negative_reward_for_cycle:       0
+    #or for the reward shaping
+    positive_reward_for_divert:          0
+    wrong_sup_at_goal:                   0
+    flooding_reward:                     0
+    neg_reward_ia:                       0
+    negative_reward_for_empty_queue:     0
+    negative_reward_for_cycle:           5
 
-    reward_1_delivery_ep:               0
-    reward_2_carriers_ep:               0
-    reward_3_idletime_ep:               0
-    reward_4_cycles_ep:                 0
-
-    reward_1_delivery:               0
-    reward_2_carriers:               0
-    reward_3_idletime:               0
-    reward_4_cycles:                 0
-
-    reward_carriers_on_cycle:       0
-    reward_carriers_in_pipe:        1
-    reward_queue_len:               0
-    reward_too_less_time:           1
 
 main:
     # MODELS:
@@ -100,11 +99,13 @@ main:
     #         CnnPolicy - CNN as described in 2014 Atari paper
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
-    model: PPO2
-    policy: CustomMlpPolicy
-    n_workers: 8      # Parallel environments
-    n_steps:    3000000    # Steps to train
-    save_every: 1000000  # Save a checkpoint of the model every n steps
+    model:          PPO2
+    policy:         MlpPolicy
+    n_workers:      8           # Parallel environments
+    n_steps:        20000000     # Steps to train
+    save_every:      4000000      # Save a checkpoint of the model every n steps
+    firsttrain:     2000000
+    secondtrain:    2000000
 
 
     # Tensorboard logs for environment attributes e.g. self.steps
@@ -115,28 +116,28 @@ main:
 
 models:
     PPO2:
-        gamma: 0.99375      # Discount factor for future rewards
-        n_steps: 128         # Batch size (n_steps * n_workers)
-        ent_coef: 0.01       # Entropy loss coefficient (higher values encourage more exploration)
-        learning_rate: 0.00025 # LR
-        vf_coef: 0.5         # The contribution of value function loss to the total loss of the network
-        max_grad_norm: 0.5   # Max range of the gradient clipping
-        lam: 0.95            # Generalized advantage estimation, for controlling variance/bias tradeoff
-        nminibatches: 4      # Number of minibatches for SGD/Adam updates
-        noptepochs: 4        # Number of iterations for SGD/Adam
-        cliprange: 0.2       # Clip factor for PPO (the action probability distribution of the updated policy cannot differ from the old one by this fraction [measured by KL divergence])
+        gamma:          0.99375     # Discount factor for future rewards
+        n_steps:        128         # Batch size (n_steps * n_workers)
+        ent_coef:       0.01        # Entropy loss coefficient (higher values encourage more exploration)
+        learning_rate:  0.00025     # LR
+        vf_coef:        0.5         # The contribution of value function loss to the total loss of the network
+        max_grad_norm:  0.3         # Max range of the gradient clipping
+        lam:            0.95        # Generalized advantage estimation, for controlling variance/bias tradeoff
+        nminibatches:   4           # Number of minibatches for SGD/Adam updates
+        noptepochs:     4           # Number of iterations for SGD/Adam
+        cliprange:      0.2         # Clip factor for PPO (the action probability distribution of the updated policy cannot differ from the old one by this fraction [measured by KL divergence])
         full_tensorboard_log: False
-        verbose: 0
+        verbose:        0
 
     DQN:
-        gamma: 0.996
-        learning_rate: 0.001
-        buffer_size: 20000
+        gamma:          0.996
+        learning_rate:  0.001
+        buffer_size:    20000
         exploration_fraction: 0.1
         exploration_final_eps: 0.01
-        train_freq: 1
-        batch_size: 32
-        learning_starts: 1000
+        train_freq:         1
+        batch_size:         32
+        learning_starts:        1000
         target_network_update_freq: 500
         prioritized_replay: false
         prioritized_replay_alpha: 0.2
