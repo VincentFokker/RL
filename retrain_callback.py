@@ -87,6 +87,7 @@ if __name__ == "__main__":
 
     # Get the variables of the model
     model_config = config['models']['PPO2']
+    model_config['verbose'] = 0
     n_steps = config['main']['n_steps']
     save_every = config['main']['save_every']
     n_workers = config['main']['n_workers']

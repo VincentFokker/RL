@@ -18,14 +18,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--environment', type=str, help='Name of the environment.')
     parser.add_argument('-s', '--subdir', type=str, help='Subdir to combine and analyze.')
+    parser.add_argument('-c', '--config', type=str, help='Name of config file in config/name')
     parser.add_argument('-n', '--numepisodes', type=int, help='Number of episodes to generate.')
+
     args = parser.parse_args()
     path = pathlib.Path().absolute()
     specified_path = join(path, 'rl', 'trained_models', args.environment, args.subdir)
 
-    config_path = 'rl/config/{}.yml'.format(args.environment)
-    with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)
+    # check if a config file is defined, and if this is available, otherwise load config from config folder.
+    try:
+        config_path = join(path, 'rl', 'config', 'custom', '{}.yml'.format(args.config))
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+        print('\nLoaded config file from: {}\n'.format(config_path))
+
+    except:
+        config_path = 'rl/config/{}.yml'.format(args.environment)
+        with open(config_path, 'r') as f:
+            config = yaml.safe_load(f)
 
     env_obj = getattr(rl.environments, args.environment)
     env = env_obj(config)
