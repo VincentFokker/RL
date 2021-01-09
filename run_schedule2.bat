@@ -15,3 +15,13 @@ python train_callback.py -e ConveyorEnv11 -s 20210110_0600 -n buffer7_wp -c buff
 python train_callback.py -e ConveyorEnv11 -s 20210110_0700 -n buffer8_wp -c buffer8
 python train_callback.py -e ConveyorEnv11 -s 20210110_0800 -n buffer9_wp -c buffer9
 python train_callback.py -e ConveyorEnv11 -s 20210110_0900 -n buffer10_wp -c buffer10
+
+python train_callback.py -e ConveyorEnv11 -s 20210110_1000 -n pipe10_wp -c pipe10
+python train_callback.py -e ConveyorEnv11 -s 20210110_1000 -n pipe15_wp -c pipe15
+python train_callback.py -e ConveyorEnv11 -s 20210110_1000 -n pipe20_wp -c pipe20
+python train_callback.py -e ConveyorEnv11 -s 20210110_1000 -n pipe25_wp -c pipe25
+python train_callback.py -e ConveyorEnv11 -s 20210110_1000 -n pipe30_wp -c pipe30
+python train_callback.py -e ConveyorEnv11 -s 20210110_1000 -n pipe35_wp -c pipe35
+python train_callback.py -e ConveyorEnv11 -s 20210110_1000 -n pipe40_wp -c pipe40
+python train_callback.py -e ConveyorEnv11 -s 20210110_1000 -n pipe45_wp -c pipe45
+python train_callback.py -e ConveyorEnv11 -s 20210110_1000 -n pipe50_wp -c pipe50
