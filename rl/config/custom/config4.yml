@@ -1,7 +1,7 @@
 # Arguments that get passed to the constructor of your class instance
 # as config={} keyword
 environment:
-    amount_of_gtps:         4
+    amount_of_gtps:         3
     amount_of_outputs:      3
     gtp_demand_size:        100
     process_time_at_GTP:    6       #time to process one product in sec
@@ -11,10 +11,11 @@ environment:
     in_que_observed:        5
     exception_occurence:    0.0     #how often an exception occurs
     termination_condition:  3       #1 = full demand satisfied, 2= queue demand satisfied, 3=terminate at max items processed
-    max_items_processed:    250
+    max_items_processed:    150
     max_cycle_count:        400
     max_steps:              10000
     steps_by_heuristic:     20      #how many steps to start up by heuristic
+    stochastic_demand:      True    #if set to false processing time of carriers is known upfront
     repurpose_goal:         False
     remove_cycles:          False
 
@@ -66,7 +67,7 @@ environment:
     # Delta idle time = Sum(idle time per gtp)
     # Delta cycle count = 1 if cycle in step else 0
     # factors are:
-    idle_time_reward_factor:            5
+    idle_time_reward_factor:            1
     cycle_count_reward_factor:          0
     output_priming_reward:              0.00
     delivery_reward:                    0
@@ -77,7 +78,7 @@ environment:
     flooding_reward:                     0
     neg_reward_ia:                       0
     negative_reward_for_empty_queue:     0
-    negative_reward_for_cycle:           5
+    negative_reward_for_cycle:           1
 
 
 main:
@@ -102,8 +103,8 @@ main:
     model:          PPO2
     policy:         MlpPolicy
     n_workers:      8           # Parallel environments
-    n_steps:        15000000     # Steps to train
-    save_every:     2000000      # Save a checkpoint of the model every n steps
+    n_steps:        6000000     # Steps to train
+    save_every:     500000      # Save a checkpoint of the model every n steps
     firsttrain:     2000000
     secondtrain:    2000000
 
@@ -116,7 +117,7 @@ main:
 
 models:
     PPO2:
-        gamma:          0.99375     # Discount factor for future rewards
+        gamma:          0.99     # Discount factor for future rewards
         n_steps:        128         # Batch size (n_steps * n_workers)
         ent_coef:       0.01        # Entropy loss coefficient (higher values encourage more exploration)
         learning_rate:  0.00025     # LR

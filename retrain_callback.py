@@ -130,7 +130,7 @@ if __name__ == "__main__":
             launch_tensorboard(specified_path)
 
         for i in range(n_checkpoints):
-            model.learn(total_timesteps=save_every, tb_log_name='{}_{}'.format(max_in_dir, args.name),
+            model.learn(total_timesteps=save_every, tb_log_name='{}_{}_{}'.format(max_in_dir, i, args.name),
                         callback=eval_callback)
             model_path = join(specified_path, '{}_model_{}_{}.zip'.format(max_in_dir, args.name, i + 1))
             model.save(model_path)

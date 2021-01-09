@@ -37,4 +37,6 @@ from .AbstractConveyor1 import AbstractConveyor1
 # from .AbstractConveyor6 import AbstractConveyor6
 # from .AbstractConveyor7 import AbstractConveyor7
 from .ConveyorEnv import ConveyorEnv
+from .ConveyorEnv1 import ConveyorEnv1
+from .ConveyorEnv11 import ConveyorEnv11
 #from .TestEnv import TestEnv
