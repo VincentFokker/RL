@@ -1,10 +1,9 @@
-;idle_time;cycle_count;steps
-Pipeline 10;1.26;78.51;1440.38
-Pipeline 15;49.09;116.69;1463.99
-Pipeline 20;2.25;151.72;1442.59
-Pipeline 25;11.27;155.22;1441.35
-Pipeline 30;15.72;172.91;1436.1
-Pipeline 35;8402.37;3954.64;4388.23
-Pipeline 40;19700.08;742.82;10001
-Pipeline 45;13142.14;4001;6720.08
-Pipeline 50;9340.33;4001;4810.24
+,idle_time,cycle_count,steps,items_processed
+buffersize_01,0.0,0.68,766.16,81.03
+buffersize_02,0.05,0.22,770.98,81.06
+buffersize_03,0.79,4.64,770.07,81.02
+buffersize_04,57.05,31.59,785.07,80.88
+buffersize_05,111.17,86.12,816.52,81.01
+buffersize_06,829.18,86.84,1179.78,81.01
+buffersize_07,7840.25,372.02,4328.61,44.75
+buffersize_08,9130.67,392.62,4920.12,37.36
