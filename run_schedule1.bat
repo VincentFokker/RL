@@ -1,18 +1,11 @@
-python expert_trajectories.py   -e ConveyorEnv1 -s 20210110_1000 -n 500 -c config1
-python pretrain.py              -e ConveyorEnv1 -s 20210110_1000 -c config1
-python retrain_callback.py      -e ConveyorEnv1 -s 20210110_1000 -n 1x2design
-python expert_trajectories.py   -e ConveyorEnv1 -s 20210110_1100 -n 500 -c config2
-python pretrain.py              -e ConveyorEnv1 -s 20210110_1100 -c config2
-python retrain_callback.py      -e ConveyorEnv1 -s 20210110_1100 -n 2x2design
-python expert_trajectories.py   -e ConveyorEnv1 -s 20210110_1200 -n 500 -c config3
-python pretrain.py              -e ConveyorEnv1 -s 20210110_1200 -c config3
-python retrain_callback.py      -e ConveyorEnv1 -s 20210110_1200 -n 2x3design
-python expert_trajectories.py   -e ConveyorEnv1 -s 20210110_1300 -n 500 -c config4
-python pretrain.py              -e ConveyorEnv1 -s 20210110_1300 -c config4
-python retrain_callback.py      -e ConveyorEnv1 -s 20210110_1300 -n 3x3design
-python expert_trajectories.py   -e ConveyorEnv1 -s 20210110_1400 -n 500 -c config5
-python pretrain.py              -e ConveyorEnv1 -s 20210110_1400 -c config5
-python retrain_callback.py      -e ConveyorEnv1 -s 20210110_1400 -n 4x3design
-python expert_trajectories.py   -e ConveyorEnv1 -s 20210110_1500 -n 500 -c config6
-python pretrain.py              -e ConveyorEnv1 -s 20210110_1500 -c config6
-python retrain_callback.py      -e ConveyorEnv1 -s 20210110_1500 -n 5x3design
+python train_callback.py -e ConveyorEnv12 -s 20210112_0000 -n 2x2design -t -c term1
+python train_callback.py -e ConveyorEnv12 -s 20210112_0100 -n 2x3design -t -c term2
+python train_callback.py -e ConveyorEnv12 -s 20210112_0200 -n 3x3design -t -c term3
+python train_callback.py -e ConveyorEnv12 -s 20210112_0300 -n 4x3design -t -c term4
+python train_callback.py -e ConveyorEnv12 -s 20210112_0400 -n 5x3design -t -c term5
+python train_callback.py -e ConveyorEnv12 -s 20210112_0500 -n 2x2design -t -c term6
+python train_callback.py -e ConveyorEnv12 -s 20210112_0600 -n 2x3design -t -c term7
+python train_callback.py -e ConveyorEnv12 -s 20210112_0700 -n 3x3design -t -c term8
+python train_callback.py -e ConveyorEnv12 -s 20210112_0800 -n 4x3design -t -c term9
+python train_callback.py -e ConveyorEnv12 -s 20210112_0900 -n 5x3design -t -c term10
+

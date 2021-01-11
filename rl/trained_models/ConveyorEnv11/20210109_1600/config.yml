@@ -9,7 +9,7 @@ environment:
     in_que_observed: 5
     exception_occurence: 0.0
     termination_condition: 3
-    max_items_processed: 80
+    max_items_processed: 150
     max_cycle_count: 400
     max_steps: 10000
     steps_by_heuristic: 20

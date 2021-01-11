@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
     # callback for evaluation
     eval_callback = EvalCallback(env, best_model_save_path=specified_path,
-                                 log_path=specified_path, eval_freq=100000,
+                                 log_path=specified_path, eval_freq=10000,
                                  n_eval_episodes=5, verbose=1,
                                  deterministic=False, render=False)
 

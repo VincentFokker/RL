@@ -1,0 +1,169 @@
+environment:
+    amount_of_gtps: 2
+    amount_of_outputs: 3
+    gtp_demand_size: 100
+    process_time_at_GTP: 6
+    speed_improvement: 0.0
+    gtp_buffer_length: 7
+    pipeline_length: 10
+    in_que_observed: 5
+    exception_occurence: 0.0
+    termination_condition: 3
+    max_items_processed: 80
+    max_cycle_count: 400
+    max_steps: 10000
+    steps_by_heuristic: 20
+    stochastic_demand: true
+    repurpose_goal: false
+    remove_cycles: false
+    alternative_terminate: true
+    render_width: 1280
+    percentage_small_carriers: 0.33
+    percentage_medium_carriers: 0.34
+    percentage_large_carriers: 0.33
+    observation_shape:
+    - 4
+    - 15
+    - 16
+    - 17
+    - 18
+    - 1
+    - 2
+    - 3
+    - 6
+    idle_time_reward_factor: 3
+    cycle_count_reward_factor: 0
+    output_priming_reward: 0.0
+    delivery_reward: 0
+    positive_reward_for_divert: 1
+    wrong_sup_at_goal: 0
+    flooding_reward: 0.5
+    neg_reward_ia: 0
+    negative_reward_for_empty_queue: 0
+    negative_reward_for_cycle: 3
+main:
+    model: PPO2
+    policy: MlpPolicy
+    n_workers: 8
+    n_steps: 6000000
+    save_every: 600000
+    firsttrain: 2000000
+    secondtrain: 2000000
+    logs:
+    - steps
+    - cycle_count
+    - episode
+models:
+    PPO2:
+        gamma: 0.99375
+        n_steps: 128
+        ent_coef: 0.01
+        learning_rate: 0.00025
+        vf_coef: 0.5
+        max_grad_norm: 0.3
+        lam: 0.95
+        nminibatches: 4
+        noptepochs: 4
+        cliprange: 0.2
+        full_tensorboard_log: false
+        verbose: 0
+    DQN:
+        gamma: 0.996
+        learning_rate: 0.001
+        buffer_size: 20000
+        exploration_fraction: 0.1
+        exploration_final_eps: 0.01
+        train_freq: 1
+        batch_size: 32
+        learning_starts: 1000
+        target_network_update_freq: 500
+        prioritized_replay: false
+        prioritized_replay_alpha: 0.2
+        prioritized_replay_beta0: 0.4
+        prioritized_replay_beta_iters: None
+        prioritized_replay_eps: 1.0e-06
+        param_noise: false
+        verbose: 1
+        full_tensorboard_log: false
+        _init_setup_model: true
+    A2C:
+        gamma: 0.99
+        learning_rate: 0.0007
+        n_steps: 5
+        vf_coef: 0.25
+        ent_coef: 0.01
+        max_grad_norm: 0.5
+        alpha: 0.99
+        epsilon: 0.0001
+        lr_schedule: constant
+        verbose: 0
+        full_tensorboard_log: false
+    ACER:
+        gamma: 0.99
+        n_steps: 20
+        num_procs: 1
+        q_coef: 0.5
+        ent_coef: 0.01
+        max_grad_norm: 10
+        learning_rate: 0.0007
+        lr_schedule: linear
+        rprop_alpha: 0.99
+        rprop_epsilon: 0.0001
+        buffer_size: 5000
+        replay_ratio: 4
+        replay_start: 1000
+        correction_term: 10.0
+        trust_region: true
+        alpha: 0.99
+        delta: 1
+        verbose: 0
+    ACKTR:
+        gamma: 0.99
+        nprocs: 1
+        n_steps: 20
+        ent_coef: 0.01
+        vf_coef: 0.25
+        vf_fisher_coef: 1.0
+        learning_rate: 0.25
+        max_grad_norm: 0.5
+        kfac_clip: 0.001
+        lr_schedule: linear
+        verbose: 0
+        async_eigen_decomp: false
+        full_tensorboard_log: false
+policies:
+    CustomMlpPolicy:
+        shared:
+        - 64
+        - 64
+        h_actor: []
+        h_critic: []
+    CustomDQNPolicy:
+        layers:
+        - 64
+        - 64
+    CustomLSTMPolicy:
+        n_lstm: 64
+        shared:
+        - 64
+        - 64
+        - lstm
+        h_actor: []
+        h_critic: []
+    CustomCnnPolicy:
+        filters:
+        - 1
+        kernel_size:
+        - 3
+        stride:
+        - 1
+        shared:
+        - 128
+        - 128
+        h_actor: []
+        h_critic: []
+        activ: relu
+        pd_init_scale: 0.05
+        conv_init_scale: 1.4
+        kernel_initializer: glorot_normal_initializer
+        init_bias: 0.5
