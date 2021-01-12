@@ -60,7 +60,7 @@ main:
     - episode
 models:
     PPO2:
-        gamma: 0.99375
+        gamma: 0.99
         n_steps: 128
         ent_coef: 0.01
         learning_rate: 0.00025

@@ -14,6 +14,8 @@ from rl.baselines import *
 from rl.helpers import launch_tensorboard
 import logging
 import yaml
+from datetime import datetime
+import os
 
 """
 Usage of this trainer:
@@ -83,7 +85,7 @@ if __name__ == "__main__":
         max_in_dir = max([int(var[0]) for var in files]) + 1
     except:
         max_in_dir = 0
-        print('max dir is {}'.format(max_in_dir))
+        print('Max dir is {}.'.format(max_in_dir))
 
     # Get the variables of the model
     model_config = config['models']['PPO2']
@@ -109,39 +111,43 @@ if __name__ == "__main__":
                                  n_eval_episodes=5, verbose=1,
                                  deterministic=True, render=False)
 
+    try:
+        os.mkdir(specified_path)
+    except:
+        pass
+
+    # save the config file in the path, for documentation purposes
+    print('Saving the config file in path: {}'.format(specified_path))
+    with open(join(specified_path, 'config.yml'), 'w') as f:
+        yaml.dump(config, f, indent=4, sort_keys=False, line_break=' ')
+
     # train model
     try:
         try:
             model_path = join(specified_path, 'best_model.zip')
             model = PPO2.load(model_path, env=env_8, tensorboard_log=specified_path)
-            # model = PPO2('MlpPolicy', env=env_8, tensorboard_log=specified_path, **model_config).load(args.modelpath, env=env_8)
-            print("model loaded")
+            print("Existing model loaded...")
 
         except:
             model = PPO2(policy, env=env_8, tensorboard_log=specified_path, **model_config)
-            print('new model created')
+            print('New model created..')
 
         # Launch the tensorboard
         if args.tensorboard:
             launch_tensorboard(specified_path)
 
-        for i in range(n_checkpoints):
-            model.learn(total_timesteps=save_every, tb_log_name='{}_{}'.format(max_in_dir, args.name),
-                        callback=eval_callback)
-            model_path = join(specified_path, '{}_model_{}_{}.zip'.format(max_in_dir, args.name, i + 1))
-            model.save(model_path)
+        start = datetime.now()
+        print('Start time training: {}'.format(start))
+        model.learn(total_timesteps=n_steps, tb_log_name='{}_{}'.format(max_in_dir, args.name),
+                    callback=eval_callback)
+        model_path = join(specified_path, '{}_final_model.zip'.format(max_in_dir))
+        model.save(model_path)
+        stop = datetime.now() - start
+        print('Total Training time: {}'.format(stop))
 
-        # save the config file in the path, for documentation purposes
-        print('Saving the config file in path: {}'.format(specified_path))
-        with open(join(specified_path, 'config.yml'), 'w') as f:
-            yaml.dump(config, f, indent=4, sort_keys=False, line_break=' ')
     except KeyboardInterrupt:
         print('Saving model . .                                    ')
-        model_path = join(specified_path, '{}_model_{}_{}_interupt.zip'.format(max_in_dir, args.name, i + 1))
+        model_path = join(specified_path, '{}_model_interupt.zip'.format(max_in_dir))
         model.save(model_path)
-
-        # save the config file in the path, for documentation purposes
-        print('Saving the config file in path: {}'.format(specified_path))
-        with open(join(specified_path, 'config.yml'), 'w') as f:
-            yaml.dump(config, f, indent=4, sort_keys=False, line_break=' ')
-        print('Done.')
+        stop = datetime.now() - start
+        print('Total Training time: {}'.format(stop))

@@ -1,6 +1,6 @@
 environment:
     amount_of_gtps: 2
-    amount_of_outputs: 2
+    amount_of_outputs: 3
     gtp_demand_size: 100
     process_time_at_GTP: 6
     speed_improvement: 0.0
@@ -50,7 +50,7 @@ main:
     model: PPO2
     policy: MlpPolicy
     n_workers: 8
-    n_steps: 4000000
+    n_steps: 40000000
     save_every: 1000000
     firsttrain: 2000000
     secondtrain: 2000000
@@ -60,7 +60,7 @@ main:
     - episode
 models:
     PPO2:
-        gamma: 0.99375
+        gamma: 0.99
         n_steps: 128
         ent_coef: 0.01
         learning_rate: 0.00025

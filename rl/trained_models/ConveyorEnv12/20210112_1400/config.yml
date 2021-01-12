@@ -18,8 +18,8 @@ environment:
     remove_cycles: false
     warmstart_with_startstate: true
     terminate_on_cycle: false
-    terminate_on_idle: false
-    alternative_terminate: true
+    terminate_on_idle: true
+    alternative_terminate: false
     render_width: 1280
     percentage_small_carriers: 0.33
     percentage_medium_carriers: 0.34
