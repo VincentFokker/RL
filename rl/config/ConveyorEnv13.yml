@@ -105,7 +105,7 @@ main:
     #         CnnPolicy - CNN as described in 2014 Atari paper
     #         MlpPolicy - simple MLP with two hidden layers of size 64
 
-    model:          PPO2
+    model:          SAC
     policy:         MlpPolicy
     n_workers:      8           # Parallel environments
     n_steps:        6000000     # Steps to train
