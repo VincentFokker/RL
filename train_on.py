@@ -93,9 +93,10 @@ if __name__ == "__main__":
     save_every = config['main']['save_every']
     n_workers = config['main']['n_workers']
     policy = config['main']['policy']
-    max_reward= config['environment']['max_items_processed']*(config['environment']['delivery_reward']+ config['environment']['positive_reward_for_divert']) - 5
+    max_reward= config['environment']['max_items_processed']*(config['environment']['delivery_reward']+ config['environment']['positive_reward_for_divert']) *0.95
     n_checkpoints = n_steps // save_every
 
+    print('Training is stopped 5% from Max Reward at Mean Reward: {}'.format(max_reward))
     # load environment with config variables
     env_obj = getattr(rl.environments, args.environment)
     env = env_obj(config)
