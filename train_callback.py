@@ -8,6 +8,7 @@ from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines import PPO2
 from rl.baselines.Wrapper import create_env
 from stable_baselines.common.callbacks import EvalCallback
+from stable_baselines.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines.common.policies import *
 from rl.baselines import *
 from rl.helpers import launch_tensorboard
@@ -90,6 +91,7 @@ if __name__ == "__main__":
     save_every = config['main']['save_every']
     n_workers = config['main']['n_workers']
     policy = config['main']['policy']
+    max_reward= config['environment']['max_items_processed']*(config['environment']['delivery_reward']+ config['environment']['positive_reward_for_divert']) - 5
     n_checkpoints = n_steps // save_every
 
     # load environment with config variables
@@ -101,6 +103,9 @@ if __name__ == "__main__":
 
 
     # callback for evaluation
+    callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=max_reward, verbose=1)
+    eval_callback1 = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
+
     eval_callback = EvalCallback(env, best_model_save_path=specified_path,
                                  log_path=specified_path, eval_freq=10000,
                                  n_eval_episodes=5, verbose=1,
@@ -124,7 +129,7 @@ if __name__ == "__main__":
 
         for i in range(n_checkpoints):
             model.learn(total_timesteps=save_every, tb_log_name='{}_{}'.format(max_in_dir, args.name),
-                        callback=eval_callback)
+                        callback=[eval_callback, eval_callback1])
             model_path = join(specified_path, '{}_model_{}_{}.zip'.format(max_in_dir, args.name, i + 1))
             model.save(model_path)
 

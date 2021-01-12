@@ -402,108 +402,108 @@ class ConveyorEnv12(gym.Env):
         logging.debug('init lenght = {}'.format(len(init)))
 
         # TODO: return: init
-        ### 5 . Amount of items on the conveyor ############################################################################
-        amount_on_conv = len([item[1] for item in self.items_on_conv if item[0][1] < 8])
-        treshhold = 3 * self.amount_of_gtps
-        var=0
-        if amount_on_conv > treshhold:
-            var = 1
-        elif amount_on_conv <= treshhold:
-            var = amount_on_conv * 1 / treshhold
+        # ### 5 . Amount of items on the conveyor ############################################################################
+        # amount_on_conv = len([item[1] for item in self.items_on_conv if item[0][1] < 8])
+        # treshhold = 3 * self.amount_of_gtps
+        # var=0
+        # if amount_on_conv > treshhold:
+        #     var = 1
+        # elif amount_on_conv <= treshhold:
+        #     var = amount_on_conv * 1 / treshhold
 
         # TODO: return: var
         ####  6. Cycle count ###############################################################################################
         cycle_factor = self.cycle_count / self.max_cycle_count
         # TODO: return: cycle_factor
 
-        ### 7. usability var ############################################################################################
-        tot_in_queue = 0
-        tot_on_conv = 0
-        usability_var = 0
-        for queue in self.init_queues:
-            for i in range(self.amount_of_outputs):
-                amount_in_queue = len([item for item in self.init_queues[0] if item == i + 1])
-                tot_in_queue += amount_in_queue
-                on_conv = len([item[1] for item in self.items_on_conv if
-                               item[0][1] < 8 and item[1] == i + 1 and item[2] == self.init_queues.index(queue) + 1])
-                tot_on_conv += on_conv
-                if amount_in_queue - on_conv >= 0:
-                    indic = 1
-                    usability_var += indic
-                elif amount_in_queue - on_conv < 0:
-                    indic = amount_in_queue / on_conv
-                    usability_var += indic
-        usability = usability_var / self.amount_of_outputs
-        # TODO: return: usability
-
-        ### 8. remaining processingtime queue #########################################################################
-        # remaining_processtime = [sum(item) * 1 / (self.amount_of_outputs * 7) for item in self.in_queue]
-        # remaining_processtime = np.array(remaining_processtime).flatten()
-
-        # TODO: return: remaining_processtime
-
-        # ##### 9. Var if queues can still take items ########################################################
-        cantake = []
-        isempty = []
-        for queue in self.in_queue:
-            if len(queue) < 7:
-                cantake.append(1)
-            elif len(queue) == 7:
-                cantake.append(0)
-            # TODO: return: cantake
-
-        #     ##### 10. Var if queue is lower then 2 ##################################################################
-            if len(queue) < 1:
-                isempty.append(1)
-            elif len(queue) >= 1:
-                isempty.append(0)
-        # TODO: return: isempty
-
-        #### 11. amount of items in lead #########################################################################
-        bottom_conv = [item[1] for item in self.items_on_conv if item[0][1] == 7]
-        info = []
-        if 1 in bottom_conv:
-            info.append(1)
-            info.append(len([item for item in bottom_conv if item == 1]) / (
-                    (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
-        else:
-            info.append(0)
-            info.append(0)
-
-        if 2 in bottom_conv:
-            info.append(1)
-            info.append(len([item for item in bottom_conv if item == 2]) / (
-                    (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
-        else:
-            info.append(0)
-            info.append(0)
-        info = np.array(info)
-
-        # TODO: return: info
-
-        # #### 12. in pipeline for each queue ###########################################################################
-        in_pipe = [[len([item for item in self.items_on_conv if item[2] == i and item[1] == j]) for j in
-                    range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
-        in_pipe = np.array(in_pipe).flatten()
-        in_pipe = np.array([1 if item > (self.gtp_buffer_length + self.pipeline_length // 15) else item / (
-                    self.gtp_buffer_length + self.pipeline_length // 15) for item in in_pipe])
-
-        # # TODO: return:in_pipe
-        # ### 13. what is currently in pipe ##############################################################################
-        in_pipe2 = [
-            [len([item for item in self.items_on_conv if item[2] == i and item[1] == j and item[0][1] < 8]) for j in
-             range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
-        in_pipe2 = np.array(in_pipe2).flatten()
-        in_pipe2 = np.array([1 if item > (self.pipeline_length / 15) else item / (
-                    self.pipeline_length / 15) for item in in_pipe2])
-
-        ### 14. remaining processing time per queue ####################################################################
-        max_time = 60 + self.gtp_buffer_length * 60
-        queue_times = [sum([6 if item == 1 else 30 if item == 2 else 60 if item == 3 else 0 for item in queue]) for
-                       queue in self.in_queue]
-        tot_wait_time = np.array(
-            [queue_times[i] + self.W_times['{}'.format(i + 1)] for i in range(self.amount_of_gtps)])
-        tot_wait_time = tot_wait_time / max_time
+        # ### 7. usability var ############################################################################################
+        # tot_in_queue = 0
+        # tot_on_conv = 0
+        # usability_var = 0
+        # for queue in self.init_queues:
+        #     for i in range(self.amount_of_outputs):
+        #         amount_in_queue = len([item for item in self.init_queues[0] if item == i + 1])
+        #         tot_in_queue += amount_in_queue
+        #         on_conv = len([item[1] for item in self.items_on_conv if
+        #                        item[0][1] < 8 and item[1] == i + 1 and item[2] == self.init_queues.index(queue) + 1])
+        #         tot_on_conv += on_conv
+        #         if amount_in_queue - on_conv >= 0:
+        #             indic = 1
+        #             usability_var += indic
+        #         elif amount_in_queue - on_conv < 0:
+        #             indic = amount_in_queue / on_conv
+        #             usability_var += indic
+        # usability = usability_var / self.amount_of_outputs
+        # # TODO: return: usability
+        #
+        # ### 8. remaining processingtime queue #########################################################################
+        # # remaining_processtime = [sum(item) * 1 / (self.amount_of_outputs * 7) for item in self.in_queue]
+        # # remaining_processtime = np.array(remaining_processtime).flatten()
+        #
+        # # TODO: return: remaining_processtime
+        #
+        # # ##### 9. Var if queues can still take items ########################################################
+        # cantake = []
+        # isempty = []
+        # for queue in self.in_queue:
+        #     if len(queue) < 7:
+        #         cantake.append(1)
+        #     elif len(queue) == 7:
+        #         cantake.append(0)
+        #     # TODO: return: cantake
+        #
+        # #     ##### 10. Var if queue is lower then 2 ##################################################################
+        #     if len(queue) < 1:
+        #         isempty.append(1)
+        #     elif len(queue) >= 1:
+        #         isempty.append(0)
+        # # TODO: return: isempty
+        #
+        # #### 11. amount of items in lead #########################################################################
+        # bottom_conv = [item[1] for item in self.items_on_conv if item[0][1] == 7]
+        # info = []
+        # if 1 in bottom_conv:
+        #     info.append(1)
+        #     info.append(len([item for item in bottom_conv if item == 1]) / (
+        #             (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
+        # else:
+        #     info.append(0)
+        #     info.append(0)
+        #
+        # if 2 in bottom_conv:
+        #     info.append(1)
+        #     info.append(len([item for item in bottom_conv if item == 2]) / (
+        #             (self.amount_of_gtps * 4) + self.pipeline_length + 2 * self.amount_of_outputs))
+        # else:
+        #     info.append(0)
+        #     info.append(0)
+        # info = np.array(info)
+        #
+        # # TODO: return: info
+        #
+        # # #### 12. in pipeline for each queue ###########################################################################
+        # in_pipe = [[len([item for item in self.items_on_conv if item[2] == i and item[1] == j]) for j in
+        #             range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
+        # in_pipe = np.array(in_pipe).flatten()
+        # in_pipe = np.array([1 if item > (self.gtp_buffer_length + self.pipeline_length // 15) else item / (
+        #             self.gtp_buffer_length + self.pipeline_length // 15) for item in in_pipe])
+        #
+        # # # TODO: return:in_pipe
+        # # ### 13. what is currently in pipe ##############################################################################
+        # in_pipe2 = [
+        #     [len([item for item in self.items_on_conv if item[2] == i and item[1] == j and item[0][1] < 8]) for j in
+        #      range(1, self.amount_of_outputs + 1)] for i in range(1, self.amount_of_gtps + 1)]
+        # in_pipe2 = np.array(in_pipe2).flatten()
+        # in_pipe2 = np.array([1 if item > (self.pipeline_length / 15) else item / (
+        #             self.pipeline_length / 15) for item in in_pipe2])
+        #
+        # ### 14. remaining processing time per queue ####################################################################
+        # max_time = 60 + self.gtp_buffer_length * 60
+        # queue_times = [sum([6 if item == 1 else 30 if item == 2 else 60 if item == 3 else 0 for item in queue]) for
+        #                queue in self.in_queue]
+        # tot_wait_time = np.array(
+        #     [queue_times[i] + self.W_times['{}'.format(i + 1)] for i in range(self.amount_of_gtps)])
+        # tot_wait_time = tot_wait_time / max_time
 
         #TODO: return in_pipe2
 
@@ -549,26 +549,26 @@ class ConveyorEnv12(gym.Env):
             obs = np.append(obs, output_points)
         if 3 in self.observation_shape:
             obs = np.append(obs, self.len_queues)
-        if 5 in self.observation_shape:
-            obs = np.append(obs, var)
+        # if 5 in self.observation_shape:
+        #     obs = np.append(obs, var)
         if 6 in self.observation_shape:
             obs = np.append(obs, cycle_factor)
-        if 7 in self.observation_shape:
-            obs = np.append(obs, usability)
+        # if 7 in self.observation_shape:
+        #     obs = np.append(obs, usability)
         # if 8 in self.observation_shape:
         #     obs = np.append(obs, remaining_processtime)
-        if 9 in self.observation_shape:
-            obs = np.append(obs, cantake)
-        if 10 in self.observation_shape:
-            obs = np.append(obs, isempty)
-        if 11 in self.observation_shape:
-            obs = np.append(obs, info)
-        if 12 in self.observation_shape:
-            obs = np.append(obs, in_pipe)
-        if 13 in self.observation_shape:
-            obs = np.append(obs, in_pipe2)
-        if 14 in self.observation_shape:
-            obs = np.append(obs, tot_wait_time)
+        # if 9 in self.observation_shape:
+        #     obs = np.append(obs, cantake)
+        # if 10 in self.observation_shape:
+        #     obs = np.append(obs, isempty)
+        # if 11 in self.observation_shape:
+        #     obs = np.append(obs, info)
+        # if 12 in self.observation_shape:
+        #     obs = np.append(obs, in_pipe)
+        # if 13 in self.observation_shape:
+        #     obs = np.append(obs, in_pipe2)
+        # if 14 in self.observation_shape:
+        #     obs = np.append(obs, tot_wait_time)
         return obs
 
 

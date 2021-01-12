@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--environment', type=str, help='Name of the environment')
     parser.add_argument('-s', '--subdir', type=str, help='Subdir to combine and analyze')
-    parser.add_argument('-n', '--num_episode', type=int, help='NUmber of episodes')
+    parser.add_argument('-n', '--num_episodes', type=int, help='NUmber of episodes')
     parser.add_argument('-d','--deterministic', action='store_true', help='Deterministic or not')
     args = parser.parse_args()
     path = pathlib.Path().absolute()
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         config = yaml.load(c)
         print('\nLoaded config file from: {}\n'.format(specified_path))
     model_config = config['models']['PPO2']
-
+    config['environment']['terminate_on_idle'] = False
     logs = []
 
 
@@ -53,17 +53,18 @@ if __name__ == "__main__":
     model = PPO2.load(path, env=DummyVecEnv([lambda: env]))
 
     #evaluate
-    result = {}
+    results = {}
     results['idle_time'] = 0
     results['cycle_count'] = 0
     results['steps'] = 0
     results['items_processed'] = 0
+    episodes = args.num_episodes
     for episode in range(args.num_episodes):
         # Run an episode
         state = env.reset()
         done = False
         while not done:
-            action, _ = model.predict(state, deterministic=True)
+            action, _ = model.predict(state, deterministic=args.deterministic)
             state, reward, done, tc = env.step(action)
         results['idle_time'] += sum(env.idle_times_operator.values())
         results['cycle_count'] += env.cycle_count

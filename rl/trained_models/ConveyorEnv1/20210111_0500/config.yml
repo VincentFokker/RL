@@ -37,7 +37,7 @@ environment:
     delivery_reward: 0
     positive_reward_for_divert: 1
     wrong_sup_at_goal: 0
-    flooding_reward: 0.5
+    flooding_reward: 0
     neg_reward_ia: 0
     negative_reward_for_empty_queue: 0
     negative_reward_for_cycle: 3
