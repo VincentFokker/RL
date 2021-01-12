@@ -15,15 +15,15 @@ scalars = ['episode_reward', 'loss/loss']
 timevar = 'step'  # wall_time or step
 
 to_combine=[
-    ['ConveyorEnv12', '20210113_0500'],  # pipe10
-    ['ConveyorEnv12', '20210113_0530'],  # pipe15
-    ['ConveyorEnv12', '20210113_0600'],  # pipe20
-    ['ConveyorEnv12', '20210113_0630'],  # pipe25
-    ['ConveyorEnv12', '20210113_0700'],  # pipe30
-    ['ConveyorEnv12', '20210113_0730'],  # pipe35
-    ['ConveyorEnv12', '20210113_0800'],  # pipe40
-    ['ConveyorEnv12', '20210113_0830'],  # pipe45
-    ['ConveyorEnv12', '20210113_0900']   # pipe50
+    ['ConveyorEnv121', '20210113_0500'],  # pipe10
+    ['ConveyorEnv121', '20210113_0530'],  # pipe15
+    ['ConveyorEnv121', '20210113_0600'],  # pipe20
+    ['ConveyorEnv121', '20210113_0630'],  # pipe25
+    ['ConveyorEnv121', '20210113_0700'],  # pipe30
+    ['ConveyorEnv121', '20210113_0730'],  # pipe35
+    ['ConveyorEnv121', '20210113_0800'],  # pipe40
+    ['ConveyorEnv121', '20210113_0830'],  # pipe45
+    ['ConveyorEnv121', '20210113_0900']   # pipe50
 ]
 
 if __name__ == "__main__":

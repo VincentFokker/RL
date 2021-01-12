@@ -9,16 +9,16 @@ scalars = ['episode_reward', 'loss/loss']
 timevar = 'step'  # wall_time or step
 
 to_combine=[
-    ['ConveyorEnv12', '20210113_0000'],  # 1
-    ['ConveyorEnv12', '20210113_0030'],  # 2
-    ['ConveyorEnv12', '20210113_0100'],  # 3
-    ['ConveyorEnv12', '20210113_0130'],  # 4
-    ['ConveyorEnv12', '20210113_0200'],  # 5
-    ['ConveyorEnv12', '20210113_0230'],  # 6
-    ['ConveyorEnv12', '20210113_0300'],  # 7
-    ['ConveyorEnv12', '20210113_0330'],  # 8
-    ['ConveyorEnv12', '20210113_0400'],  # 9
-    ['ConveyorEnv12', '20210113_0430']  # 10
+    ['ConveyorEnv121', '20210113_0000'],  # 1
+    ['ConveyorEnv121', '20210113_0030'],  # 2
+    ['ConveyorEnv121', '20210113_0100'],  # 3
+    ['ConveyorEnv121', '20210113_0130'],  # 4
+    ['ConveyorEnv121', '20210113_0200'],  # 5
+    ['ConveyorEnv121', '20210113_0230'],  # 6
+    ['ConveyorEnv121', '20210113_0300'],  # 7
+    ['ConveyorEnv121', '20210113_0330'],  # 8
+    ['ConveyorEnv121', '20210113_0400'],  # 9
+    ['ConveyorEnv121', '20210113_0430']  # 10
 ]
 
 if __name__ == "__main__":
