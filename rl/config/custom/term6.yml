@@ -107,7 +107,7 @@ main:
     model:          PPO2
     policy:         MlpPolicy
     n_workers:      8           # Parallel environments
-    n_steps:        40000000     # Steps to train
+    n_steps:        15000000     # Steps to train
     save_every:     1000000      # Save a checkpoint of the model every n steps
     firsttrain:     2000000
     secondtrain:    2000000

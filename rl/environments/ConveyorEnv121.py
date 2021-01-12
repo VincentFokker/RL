@@ -200,9 +200,7 @@ class ConveyorEnv121(gym.Env):
             self.W_times = {}
             for i in range(1, len(self.init_queues) + 1):
                 try:
-                    self.W_times['{}'.format(i)] = int(self.process_time_at_GTP *(1-self.speed_improvement)) if self.in_queue[i - 1][0] == 1 else int(self.process_time_at_GTP * 3 *(1-self.speed_improvement)) if \
-                    self.in_queue[i - 1][0] == 2 else int(self.process_time_at_GTP * 6 *(1-self.speed_improvement)) if self.in_queue[i - 1][
-                                                                                          0] == 1 else int(self.process_time_at_GTP * 9 *(1-self.speed_improvement))
+                    self.W_times['{}'.format(i)] = random_distribution_gen(60)
                 except:
                     self.W_times['{}'.format(i)] = random_distribution_gen(60)
         self.idle_times_operator = {}
@@ -632,10 +630,7 @@ class ConveyorEnv121(gym.Env):
             self.W_times = {}
             for i in range(1, len(self.init_queues) + 1):
                 try:
-                    self.W_times['{}'.format(i)] = int(self.process_time_at_GTP*(1-self.speed_improvement)) if self.in_queue[i - 1][
-                                                                  0] == 1 else int(self.process_time_at_GTP * 3*(1-self.speed_improvement)) if \
-                    self.in_queue[i - 1][0] == 2 else int(self.process_time_at_GTP * 6*(1-self.speed_improvement)) if self.in_queue[i - 1][
-                                                                                          0] == 1 else int(self.process_time_at_GTP * 9*(1-self.speed_improvement))
+                    self.W_times['{}'.format(i)] = random_distribution_gen(60)
                 except:
                     self.W_times['{}'.format(i)] = random_distribution_gen(60)
         self.idle_times_operator = {}

@@ -111,7 +111,7 @@ if __name__ == "__main__":
         print('loaded pretrained dataset from: {}'.format(join(specified_path, 'heuristic_expert.npz')))
     except:
         print('Error: No pretrained dataset file: heuristic_expert.npz not in directory! \n'
-              'Consider running: \t python PretrainHeuristic.py -e {} -s{}'.format(args.environment, args.subdir))
+              'Consider running: \t python expert_trajectories.py -e {} -s{}'.format(args.environment, args.subdir))
         sys.exit()
 
     # multiprocess environment
