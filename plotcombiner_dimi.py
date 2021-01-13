@@ -13,8 +13,8 @@ to_combine=[
     ['ConveyorEnv12','20210113_0100'], #2x3
     ['ConveyorEnv12','20210113_0200'], #2x3
     ['ConveyorEnv12','20210113_0300'], #3x3
-    ['ConveyorEnv12','20210113_0400'] #4x3
-    ['ConveyorEnv12','20210113_0500'], #5x3
+    ['ConveyorEnv12','20210113_0400'], #4x3
+    ['ConveyorEnv12','20210113_0500'] #5x3
 ]
 
 if __name__ == "__main__":
