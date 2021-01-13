@@ -40,5 +40,6 @@ from .ConveyorEnv import ConveyorEnv
 from .ConveyorEnv1 import ConveyorEnv1
 from .ConveyorEnv11 import ConveyorEnv11
 from .ConveyorEnv12 import ConveyorEnv12
+from .ConveyorEnv13 import ConveyorEnv13
 from .ConveyorEnv121 import ConveyorEnv121
 #from .TestEnv import TestEnv

@@ -1,7 +1,7 @@
 # Arguments that get passed to the constructor of your class instance
 # as config={} keyword
 environment:
-    amount_of_gtps:         2
+    amount_of_gtps:         4
     amount_of_outputs:      3
     gtp_demand_size:        100
     process_time_at_GTP:    6       #time to process one product in sec
@@ -21,7 +21,7 @@ environment:
     remove_cycles:          False
     warmstart_with_startstate: True    #True For DRL / heuristic, False when: testing different buffer size
     terminate_on_cycle:     False
-    terminate_on_idle:      False
+    terminate_on_idle:      True
     alternative_terminate: False     #alternative termination conditions are:
                                         # (1). terminate when max steps reached,
                                         # (2). and terminate when max_cycle_count reached

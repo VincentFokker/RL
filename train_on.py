@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # train model
     try:
         try:
-            model_path = join(specified_path, 'best_model.zip')
+            model_path = join(specified_path, 'pretrained-model.zip')
             model = PPO2.load(model_path, env=env_8, tensorboard_log=specified_path)
             print("Existing model loaded...")
 
