@@ -16264,3 +16264,11 @@ rl/baselines/__pycache__/__init__.cpython-36.pyc
 rl/__pycache__/settings.cpython-36.pyc
 rl/environments/__pycache__/__init__.cpython-36.pyc
 *.npz
+rl/trained_models/ConveyorEnv121/20210113_0630/0_pipe25_1/events.out.tfevents.1610515383.VI210713
+rl/trained_models/ConveyorEnv121/20210113_0000/0_buffer1_1/events.out.tfevents.1610481265.VI210713
+rl/trained_models/ConveyorEnv121/20210113_0600/0_pipe20_1/events.out.tfevents.1610507318.VI210713
+rl/trained_models/ConveyorEnv121/20210113_0700/0_pipe30_1/events.out.tfevents.1610523277.VI210713
+rl/trained_models/ConveyorEnv121/20210113_0730/0_pipe35_1/events.out.tfevents.1610531355.VI210713
+rl/trained_models/ConveyorEnv121/20210113_0800/0_pipe40_1/events.out.tfevents.1610539213.VI210713
+rl/trained_models/ConveyorEnv121/20210113_0830/0_pipe45_1/events.out.tfevents.1610547149.VI210713
+rl/trained_models/ConveyorEnv121/20210113_0900/0_pipe50_1/events.out.tfevents.1610555457.VI210713
